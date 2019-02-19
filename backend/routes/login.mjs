@@ -17,4 +17,8 @@ router.post('/', async ctx => {
   return ctx.body = { token };
 });
 
+router.get('/', async ctx => {
+  ctx.body = ctx.user;
+});
+
 export default router;
