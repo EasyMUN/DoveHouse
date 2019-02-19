@@ -1,22 +1,33 @@
 import Koa from 'koa';
+import KoaBodyparser from 'koa-bodyparser';
+import KoaJWT from 'koa-jwt';
 
-import DBConnect from './db/conn'; // For side effect
+import { connect as DBConnect } from './db'; // For side effect
+
+import Config from './config';
 
 const app = new Koa();
+app.use(KoaBodyparser());
+app.use(KoaJWT({
+  secret: Config.secret,
+}).unless({
+  custom(ctx) {
+    if(ctx.path === '/login') return true;
+    if(ctx.path === '/user' && ctx.method === 'POST') return true;
+    return false;
+  }
+}));
 
 import { routes } from './routes';
 
 const router = routes();
 app.use(router.routes(), router.allowedMethods());
 
-const PORT = process.env.PORT || 46350
-const HOST = process.env.HOST || '127.0.0.1';
-
 async function bootstrap() {
   await DBConnect();
 
-  app.listen(PORT, HOST, () => {
-    console.log(`Server up at ${HOST}:${PORT}`);
+  app.listen(Config.port, Config.host, () => {
+    console.log(`Server up at ${Config.host}:${Config.port}`);
   });
 }
 

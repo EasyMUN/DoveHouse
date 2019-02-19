@@ -22,6 +22,11 @@ cd backend
 yarn --frozen-lockfile
 # Start mongodb
 systemctl start mongodb
+
+# Set config
+cp config.example.mjs config.mjs
+editor config.mjs
+
 yarn start
 ```
 
