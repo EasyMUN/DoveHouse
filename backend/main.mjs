@@ -22,9 +22,21 @@ app.use(KoaJWT({
 app.use(async (ctx, next) => {
   if(ctx.state.user) {
     // TODO: verify jti
-    const user = await User.findById(ctx.state.user.user);
+    const user = await User.findById(ctx.state.user.user, {
+      status: 1,
+      isAdmin: 1,
+      _id: 1,
+      email: 1,
+      idNumber: 1,
+      profile: 1,
+    });
+
+    // Hide sensitive stuff
+    user.idNumber = !!user.idNumber;
+
     ctx.jwt = ctx.state.user;
     ctx.user = user;
+    ctx.uid = user._id.toString();
   }
 
   await next();

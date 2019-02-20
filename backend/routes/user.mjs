@@ -1,16 +1,19 @@
 import KoaRouter from '@circuitcoder/koa-router';
 
+import request from '../request';
+
 import User from '../db/user';
 
 import { generateJWT } from '../util';
+import Config from '../config';
 
 const router = new KoaRouter();
 
 // Register
 router.post('/', async ctx => {
-  const { email, pass } = ctx.request.body;
+  const { email, pass, realname } = ctx.request.body;
 
-  const user = new User({ email });
+  const user = new User({ email, realname });
   await user.setPass(pass);
 
   try {
@@ -28,9 +31,77 @@ router.post('/', async ctx => {
 
   const token = await generateJWT(user._id.toString());
 
-  // TODO: directly login?
-
+  ctx.status = 201;
   return ctx.body = { token };
+});
+
+// Match id and self
+const matcher = async (ctx, next) => {
+  if(ctx.params.id)
+    if(ctx.uid !== ctx.params.id && !ctx.user.isAdmin)
+      return ctx.status = 403;
+
+  await next();
+};
+
+router.post('/:id/verify/:token', matcher, async ctx => {
+  const result = await User.findOneAndUpdate({
+    _id: ctx.params.id,
+    token: ctx.params.token,
+  }, {
+    $set: {
+      token: null,
+      status: 'verified',
+    },
+  });
+
+  if(!result) return ctx.status = 404;
+  return ctx.status = 204;
+});
+
+router.post('/:id/profile', matcher, async ctx => {
+  const { profile } = ctx.request.body;
+
+  const reuslt = await User.findOneAndUpdate({
+    _id: ctx.params.id,
+  }, {
+    $set: {
+      profile,
+    }
+  });
+
+  if(!result) return ctx.status = 404;
+  return ctx.status = 204;
+});
+
+// TODO: update realname
+
+router.post('/:id/idNumber', matcher, async ctx => {
+  const { idNumber } = ctx.request.body;
+
+  const user = await User.findById(ctx.params.id);
+  if(!user) return ctx.status = 404;
+
+  const resp = await request.post('https://api.yonyoucloud.com/apis/dst/matchIdentity/matchIdentity', {
+    json: true,
+    headers: {
+      apicode: Config.apikeys.idverify,
+    },
+    body: {
+      idNumber,
+      userName: user.realname,
+    },
+  });
+
+  if(!resp.success) {
+    ctx.status = 400;
+    return ctx.body = { err: resp.message };
+  }
+
+  user.idNumber = idNumber;
+  await user.save(); // Optimistic lock
+
+  return ctx.status = 204;
 });
 
 export default router;

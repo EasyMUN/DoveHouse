@@ -7,4 +7,8 @@ export default {
   secret: [
     'dovehouse',
   ],
+
+  apikeys: {
+    idverify: 'YONYOU APIKEY HERE',
+  },
 }

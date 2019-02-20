@@ -17,6 +17,11 @@ const schema = new mongoose.Schema({
   pass: { type: String, required: true },
   salt: { type: String, required: true },
 
+  realname: { type: String, required: true },
+  idNumber: { type: String, },
+
+  profile: { type: Object, },
+
   status: {
     type: String,
     required: true,
@@ -27,7 +32,15 @@ const schema = new mongoose.Schema({
     ],
   },
 
+  token: String,
+
   phone: String,
+
+  isAdmin: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
 });
 
 schema.methods.setPass = async function(pass) {
