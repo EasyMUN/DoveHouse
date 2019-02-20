@@ -2,8 +2,8 @@ import React from 'react';
 
 import Login from './Login';
 
-import { Route } from 'react-router-dom';
+import { Route } from '../Router';
 
 export default () => <>
-  <Route path="/login" component={Login} />
+  <Route path="/:action(login|register)" component={Login} exact />
 </>;

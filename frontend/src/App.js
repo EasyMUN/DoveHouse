@@ -31,7 +31,7 @@ const styles = makeStyles(theme => ({
   },
 }));
 
-const App = React.memo(() => {
+const App = ({ location }) => {
   const cls = styles();
 
   return <>
@@ -49,9 +49,9 @@ const App = React.memo(() => {
     <main className={cls.bottom}>
       <div className={cls.toolbarSpacer} />
 
-      <Routes />
+      <Routes location={location} />
     </main>
   </>;
-});
+};
 
 export default App;

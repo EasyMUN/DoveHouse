@@ -7,8 +7,7 @@ import * as serviceWorker from './serviceWorker';
 import store from './store/index.js';
 import { Provider } from 'react-redux';
 
-import { BrowserRouter } from 'react-router-dom';
-
+import { Router, Route } from './Router';
 
 import blueGrey from '@material-ui/core/colors/blueGrey';
 import blue from '@material-ui/core/colors/blue';
@@ -32,9 +31,9 @@ async function render(Comp) {
   return ReactDOM.render(
     <Provider store={store}>
       <ThemeProvider theme={theme}>
-        <BrowserRouter>
-          <Comp />
-        </BrowserRouter>
+        <Router>
+          <Route component={Comp} />
+        </Router>
       </ThemeProvider>
     </Provider>,
     root
