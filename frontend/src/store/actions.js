@@ -31,3 +31,8 @@ export const login = token => async dispatch => {
   dispatch(setUser(self));
   dispatch(setToken(token));
 }
+
+export const logout = () => dispatch => {
+  dispatch(setUser(null));
+  dispatch(setToken(null));
+}

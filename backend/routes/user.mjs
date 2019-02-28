@@ -7,13 +7,20 @@ import User from '../db/user';
 import { generateJWT } from '../util';
 import Config from '../config';
 
+import { promisify } from 'util';
+import crypto from 'crypto';
+import mailer from '../mailer';
+
+const randomBytes = promisify(crypto.randomBytes);
+
 const router = new KoaRouter();
 
 // Register
 router.post('/', async ctx => {
   const { email, pass, realname } = ctx.request.body;
 
-  const user = new User({ email, realname });
+  const token = (await randomBytes(24)).toString('hex');
+  const user = new User({ email, realname, token });
   await user.setPass(pass);
 
   try {
@@ -29,10 +36,14 @@ router.post('/', async ctx => {
     throw e;
   }
 
-  const token = await generateJWT(user._id.toString());
+  await mailer.send(email, '[DoveHouse] 请验证您的注册', 'reg', {
+    name: realname,
+    link: `${Config.base}/user/verify/${token}`,
+  });
+  const jwt = await generateJWT(user._id.toString());
 
   ctx.status = 201;
-  return ctx.body = { token };
+  return ctx.body = { token: jwt };
 });
 
 // Match id and self
@@ -44,9 +55,8 @@ const matcher = async (ctx, next) => {
   await next();
 };
 
-router.post('/:id/verify/:token', matcher, async ctx => {
+router.get('/verify/:token', matcher, async ctx => {
   const result = await User.findOneAndUpdate({
-    _id: ctx.params.id,
     token: ctx.params.token,
   }, {
     $set: {
@@ -56,7 +66,7 @@ router.post('/:id/verify/:token', matcher, async ctx => {
   });
 
   if(!result) return ctx.status = 404;
-  return ctx.status = 204;
+  return ctx.body = '验证成功，您可以关闭此页面了';
 });
 
 router.post('/:id/profile', matcher, async ctx => {

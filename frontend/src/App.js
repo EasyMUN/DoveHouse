@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 
 import { makeStyles } from '@material-ui/styles';
 
@@ -9,13 +9,18 @@ import Icon from '@material-ui/core/Icon';
 import Typography from '@material-ui/core/Typography';
 import InputBase from '@material-ui/core/InputBase';
 import Avatar from '@material-ui/core/Avatar';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
 
-import { useMappedState } from 'redux-react-hook';
+import { useDispatch, useMappedState } from 'redux-react-hook';
+import { logout } from './store/actions';
 
 import Routes from './routes';
 import { NavLink } from 'react-router-dom';
 
 import { SnackbarProvider } from './Snackbar';
+
+import { useRouter } from './Router';
 
 const styles = makeStyles(theme => ({
   container: {
@@ -26,7 +31,7 @@ const styles = makeStyles(theme => ({
 
   nav: {
     position: 'absolute',
-    zIndex: 10000,
+    zIndex: 1000,
     width: '100%',
 
     height: 60,
@@ -113,8 +118,28 @@ const styles = makeStyles(theme => ({
 const App = ({ location }) => {
   const cls = styles();
 
-  const mapS2P = useCallback(({ token })=> ({ login: !!token }));
-  const { login } = useMappedState(mapS2P);
+  const mapS2P = useCallback(({ token, user })=> ({ login: !!token, user }));
+  const { user, login } = useMappedState(mapS2P);
+
+  const { match, history } = useRouter();
+
+  const [accountMenu, setAccountMenu] = useState(null);
+  const closeAccountMenu = useCallback(() => setAccountMenu(null), [setAccountMenu]);
+  const openAccountMenu = useCallback(ev => setAccountMenu(ev.target), [setAccountMenu]);
+
+  const dispatch = useDispatch();
+  const logoutCB = useCallback(() => {
+    closeAccountMenu();
+    dispatch(logout());
+  }, [dispatch])
+
+  const pn = history.location.pathname;
+
+  if(pn !== '/login' && pn !== '/register')
+    if(!user && match.path) {
+      setTimeout(() => history.replace('/login'));
+      return <div />;
+    }
 
   return <div className={cls.container}>
     <nav className={clsx(cls.nav, { [cls.navHidden]: !login })}>
@@ -141,9 +166,18 @@ const App = ({ location }) => {
         </div>
       </div>
 
-      <IconButton className={cls.avatarBtn}>
-        <Avatar>U</Avatar>
+      <IconButton className={cls.avatarBtn} onClick={openAccountMenu} aria-owns="account-menu">
+        <Avatar>{ user && user.realname.slice(0, 1) }</Avatar>
       </IconButton>
+
+      <Menu
+        id="account-menu"
+        anchorEl={accountMenu}
+        open={accountMenu !== null}
+        onClose={closeAccountMenu}
+      >
+        <MenuItem onClick={logoutCB}>登出</MenuItem>
+      </Menu>
     </nav>
     <main className={cls.bottom}>
       <SnackbarProvider>

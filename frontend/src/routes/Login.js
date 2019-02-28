@@ -82,7 +82,7 @@ const Login = React.memo(() => {
         realname,
       }));
 
-      dispatch(login(token));
+      await dispatch(login(token));
 
       enqueueSnackbar('注册成功! 我们已把确认邮件发至您的邮箱', {
         variant: 'success',
@@ -108,7 +108,7 @@ const Login = React.memo(() => {
         pass,
       }));
 
-      dispatch(login(token));
+      await dispatch(login(token));
 
       history.push('/');
     } catch(e) {

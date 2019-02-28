@@ -17,6 +17,7 @@ app.use(KoaJWT({
   custom(ctx) {
     if(ctx.path === '/login' && ctx.method === 'POST') return true;
     if(ctx.path === '/user' && ctx.method === 'POST') return true;
+    if(ctx.path.match(/^\/user\/verify\/[0-9a-f]+$/) && ctx.method === 'GET') return true;
     return false;
   }
 }));

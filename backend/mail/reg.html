@@ -1,0 +1,49 @@
+<div class="wrapper">
+  <div class="hint">DoveHouse</div>
+  <div class="title">注册验证</div>
+
+  <p class="body">尊敬的{{ name }}:</p>
+  <p class="body">感谢您注册 DoveHouse 平台。请打开下面的链接验证您的账号。在您的账号验证之前，您将无法报名会议。</p>
+
+  <a href="{{ link }}" class="link">{{ link }}</a>
+
+  <p class="body">如果您近期未在 DoveHouse 平台进行注册，请忽略掉此封邮件。在邮箱被验证前，我们不会对您发送任何通知邮件。</p>
+
+  <p class="signing">DoveHouse 团队 | EasyMUN</p>
+</div>
+
+<style>
+.wrapper {
+  max-width: 400px;
+  margin: 0 auto;
+  border: #DDD 1px solid;
+  padding: 20px;
+}
+.hint {
+  font-size: 14px;
+  color: rgba(0,0,0,.38);
+  line-height: 16px;
+}
+
+.title{
+  font-size: 28px;
+  color: rgba(0,0,0,.87);
+  line-height: 32px;
+}
+
+.body {
+  color: rgba(0,0,0,.7);
+}
+
+.signing {
+  color: rgba(0,0,0,.38);
+  font-size: 14px;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.link {
+  color: rgba(0,0,0,.7);
+  word-break: break-work;
+}
+</style>

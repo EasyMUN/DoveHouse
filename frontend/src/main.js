@@ -33,7 +33,7 @@ async function render(Comp) {
     <StoreContext.Provider value={store}>
       <ThemeProvider theme={theme}>
         <Router>
-          <Comp />
+          <Route component={Comp} />
         </Router>
       </ThemeProvider>
     </StoreContext.Provider>,
