@@ -28,7 +28,7 @@ export async function post(endpoint, payload, token = null, method = 'POST') {
   const resp = await fetch(BACKEND + endpoint, {
     method,
     body: JSON.stringify(payload),
-    headers: buildHeaders(),
+    headers: buildHeaders(token),
   });
 
   return parseResp(resp);
@@ -37,7 +37,7 @@ export async function post(endpoint, payload, token = null, method = 'POST') {
 export async function get(endpoint, token = null, method = 'GET') {
   const resp = await fetch(BACKEND + endpoint, {
     method,
-    headers: buildHeaders(),
+    headers: buildHeaders(token),
   });
 
   return parseResp(resp);

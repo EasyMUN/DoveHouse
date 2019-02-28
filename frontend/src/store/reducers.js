@@ -7,6 +7,14 @@ function token(state = null, action) {
   return state;
 }
 
+function user(state = null, action) {
+  if(action.type === 'SET_USER')
+    return action.user;
+
+  return state;
+}
+
 export default combineReducers({
   token,
+  user,
 });

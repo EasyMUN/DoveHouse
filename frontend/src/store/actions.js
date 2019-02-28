@@ -9,19 +9,25 @@ export const setToken = token => ({
   token,
 });
 
+export const setUser = user => ({
+  type: 'SET_USER',
+  user,
+});
+
 /* Basic networking */
-export const get = (endpoint, method = 'GET') => async (dispatch, getStore) => {
+export const get = (endpoint, method = 'GET', override = null) => async (dispatch, getStore) => {
   const { token } = getStore();
-  return await rawGet(endpoint, token, method);
+  return await rawGet(endpoint, override || token, method);
 }
 
-export const post = (endpoint, payload, method = 'POST') => async (dispatch, getStore) => {
+export const post = (endpoint, payload, method = 'POST', override = null) => async (dispatch, getStore) => {
   const { token } = getStore();
-  return await rawPost(endpoint, payload, token, method);
+  return await rawPost(endpoint, payload, override || token, method);
 }
 
 /* Composed */
 export const login = token => async dispatch => {
-  // TODO: fetch user detail
+  const self = await dispatch(get('/login', 'GET', token));
+  dispatch(setUser(self));
   dispatch(setToken(token));
 }
