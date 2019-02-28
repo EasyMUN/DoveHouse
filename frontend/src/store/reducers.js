@@ -1,12 +1,12 @@
 import { combineReducers } from 'redux';
 
-function user(state = null, action) {
-  if(action.type === 'LOGIN')
-    return action.user;
+function token(state = null, action) {
+  if(action.type === 'SET_TOKEN')
+    return action.token;
 
   return state;
 }
 
 export default combineReducers({
-  user,
+  token,
 });
