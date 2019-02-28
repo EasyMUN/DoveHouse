@@ -22,6 +22,8 @@ import { SnackbarProvider } from './Snackbar';
 
 import { useRouter } from './Router';
 
+import { gravatar } from './util';
+
 const styles = makeStyles(theme => ({
   container: {
     height: '100vh',
@@ -167,7 +169,7 @@ const App = ({ location }) => {
       </div>
 
       <IconButton className={cls.avatarBtn} onClick={openAccountMenu} aria-owns="account-menu">
-        <Avatar>{ user && user.realname.slice(0, 1) }</Avatar>
+        <Avatar src={user && gravatar(user.email)}>{ user && user.realname.slice(0, 1) }</Avatar>
       </IconButton>
 
       <Menu

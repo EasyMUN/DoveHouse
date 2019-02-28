@@ -1,4 +1,5 @@
 import { BACKEND } from './config';
+import md5 from 'blueimp-md5';
 
 async function parseResp(resp) {
   if(resp.status === 204) return null;
@@ -41,4 +42,9 @@ export async function get(endpoint, token = null, method = 'GET') {
   });
 
   return parseResp(resp);
+}
+
+export function gravatar(email) {
+  const hash = md5(email.trim().toLowerCase());
+  return `https://www.gravatar.com/avatar/${hash}`;
 }
