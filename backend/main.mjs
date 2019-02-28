@@ -1,6 +1,7 @@
 import Koa from 'koa';
 import KoaBodyparser from 'koa-bodyparser';
 import KoaJWT from 'koa-jwt';
+import KoaCors from '@koa/cors';
 
 import { connect as DBConnect } from './db'; // For side effect
 import User from './db/user';
@@ -8,6 +9,7 @@ import User from './db/user';
 import Config from './config';
 
 const app = new Koa();
+app.use(KoaCors());
 app.use(KoaBodyparser());
 app.use(KoaJWT({
   secret: Config.secret,

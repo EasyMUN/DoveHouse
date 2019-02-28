@@ -2306,7 +2306,7 @@ class-utils@^0.3.5:
     isobject "^3.0.0"
     static-extend "^0.1.1"
 
-classnames@^2.2.5:
+classnames@^2.2.5, classnames@^2.2.6:
   version "2.2.6"
   resolved "http://registry.npm.taobao.org/classnames/download/classnames-2.2.6.tgz#43935bffdd291f326dad0a205309b38d00f650ce"
   integrity sha1-Q5Nb/90pHzJtrQogUwmzjQD2UM4=
@@ -6733,6 +6733,14 @@ normalize-url@^3.0.0:
   resolved "http://registry.npm.taobao.org/normalize-url/download/normalize-url-3.3.0.tgz#b2e1c4dc4f7c6d57743df733a4f5978d18650559"
   integrity sha1-suHE3E98bVd0PfczpPWXjRhlBVk=
 
+notistack@^0.4.3:
+  version "0.4.3"
+  resolved "http://registry.npm.taobao.org/notistack/download/notistack-0.4.3.tgz#0387f2d2b399474339c7de8552e4090e432baa99"
+  integrity sha1-A4fy0rOZR0M5x96FUuQJDkMrqpk=
+  dependencies:
+    classnames "^2.2.6"
+    prop-types "^15.6.2"
+
 npm-bundled@^1.0.1:
   version "1.0.6"
   resolved "http://registry.npm.taobao.org/npm-bundled/download/npm-bundled-1.0.6.tgz#e7ba9aadcef962bb61248f91721cd932b3fe6bdd"
@@ -8482,6 +8490,11 @@ redux-logger@^3.0.6:
   integrity sha1-91VZZvMJjzyIYExEnPC69XeCdL8=
   dependencies:
     deep-diff "^0.3.5"
+
+redux-react-hook@^3.2.0:
+  version "3.2.0"
+  resolved "http://registry.npm.taobao.org/redux-react-hook/download/redux-react-hook-3.2.0.tgz#a0793054aa6554007094cd6dc6f47082c089b0b9"
+  integrity sha1-oHkwVKplVABwlM1txvRwgsCJsLk=
 
 redux-thunk@^2.3.0:
   version "2.3.0"

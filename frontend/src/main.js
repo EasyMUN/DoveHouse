@@ -5,7 +5,7 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 
 import store from './store/index.js';
-import { Provider } from 'react-redux';
+import { StoreContext } from 'redux-react-hook';
 
 import { Router, Route } from './Router';
 
@@ -29,13 +29,13 @@ const theme = createMuiTheme({
 
 async function render(Comp) {
   return ReactDOM.render(
-    <Provider store={store}>
+    <StoreContext.Provider value={store}>
       <ThemeProvider theme={theme}>
         <Router>
-          <Route component={Comp} />
+          <Comp />
         </Router>
       </ThemeProvider>
-    </Provider>,
+    </StoreContext.Provider>,
     root
   );
 }
