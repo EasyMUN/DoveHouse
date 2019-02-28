@@ -120,6 +120,11 @@ const Login = React.memo(() => {
 
   const submit = reg ? registerCB : loginCB;
 
+  const keydownCheck = useCallback(ev => {
+    if(ev.key === 'Enter')
+      submit();
+  });
+
   let toggle = <Button onClick={() => history.push('/register')}>俺没号</Button>;
   if(reg)
     toggle = <Button onClick={() => history.push('/login')}>俺有号</Button>;
@@ -144,6 +149,7 @@ const Login = React.memo(() => {
             label="秘密暗码"
             value={pass}
             onChange={setPassCB}
+            onKeyDown={keydownCheck}
             type="password"
             margin="dense"
             fullWidth
