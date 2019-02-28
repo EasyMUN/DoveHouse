@@ -31,6 +31,7 @@ app.use(async (ctx, next) => {
       email: 1,
       idNumber: 1,
       profile: 1,
+      realname: 1,
     });
 
     // Hide sensitive stuff

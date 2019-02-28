@@ -3,16 +3,16 @@ import React, { useState, useCallback, useContext } from 'react';
 import { makeStyles } from '@material-ui/styles';
 
 import Card from '@material-ui/core/Card';
-import CardActions from '@material-ui/core/CardActions';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 
 import CardContent from '../overrides/CardContent';
+import CardActions from '../overrides/CardActions';
 
 import { useRouter } from '../Router';
 
-import { StoreContext, useDispatch, useMappedState } from 'redux-react-hook';
+import { useDispatch, useMappedState } from 'redux-react-hook';
 import { post, login } from '../store/actions';
 
 import { useSnackbar } from '../Snackbar';
@@ -73,7 +73,6 @@ const Login = React.memo(() => {
   const { enqueueSnackbar } = useSnackbar();
 
   // Networking
-  const ctx = useContext(StoreContext);
   const dispatch = useDispatch();
   const registerCB = useCallback(async () => {
     try {

@@ -13,6 +13,7 @@ import Avatar from '@material-ui/core/Avatar';
 import { useMappedState } from 'redux-react-hook';
 
 import Routes from './routes';
+import { NavLink } from 'react-router-dom';
 
 import { SnackbarProvider } from './Snackbar';
 
@@ -123,10 +124,10 @@ const App = ({ location }) => {
         </Icon>
       </IconButton>
 
-      <div className={cls.brand}>
+      <NavLink className={cls.brand} to="/">
         <Typography className={cls.brandFirst} variant="h2">Dove</Typography>
         <Typography className={cls.brandSecond} variant="h2">House</Typography>
-      </div>
+      </NavLink>
 
       <div className={cls.searchRegion}>
         <div className={cls.search}>
