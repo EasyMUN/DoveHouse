@@ -4,7 +4,8 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
-import store from './store/index.js';
+import store from './store';
+import { login } from './store/actions';
 import { StoreContext } from 'redux-react-hook';
 
 import { Router, Route } from './Router';
@@ -40,8 +41,6 @@ async function render(Comp) {
   );
 }
 
-render(App);
-
 if(module.hot) {
   module.hot.accept('./App', () => {
     const NextApp = require('./App').default;
@@ -49,6 +48,22 @@ if(module.hot) {
     render(NextApp);
   });
 }
+
+// Initial render
+async function initRender() {
+  const token = window.localStorage.getItem('token');
+  try {
+    if(token)
+      await store.dispatch(login(token));
+  } catch(e) {
+    // Expires
+    window.localStorage.removeItem('token');
+  }
+
+  render(App);
+}
+
+initRender();
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

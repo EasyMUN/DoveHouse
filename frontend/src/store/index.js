@@ -13,6 +13,12 @@ const store = createStore(
   mws,
 );
 
+store.subscribe(() => {
+  const { token } = store.getState();
+  // Save to localstorage
+  window.localStorage.setItem('token', token);
+});
+
 if(process.env.NODE_ENV !== 'production' && module.hot) {
   module.hot.accept('./reducers', () => store.replaceReducer(reducers));
 }
