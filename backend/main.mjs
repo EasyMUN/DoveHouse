@@ -33,9 +33,10 @@ app.use(async (ctx, next) => {
       idNumber: 1,
       profile: 1,
       realname: 1,
-    });
+    }).lean();
 
     // Hide sensitive stuff
+    const hasID = 
     user.idNumber = !!user.idNumber;
 
     ctx.jwt = ctx.state.user;

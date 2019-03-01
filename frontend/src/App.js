@@ -203,13 +203,13 @@ const App = () => {
 
     <Drawer open={drawer} onClose={closeDrawer}>
       <List className={cls.sidebar}>
-        <ListItem button>
+        <ListItem button component={NavLink} to="/" onClick={closeDrawer}>
           <ListItemIcon>
             <Icon>home</Icon>
           </ListItemIcon>
           <ListItemText primary="主页" />
         </ListItem>
-        <ListItem button>
+        <ListItem button component={NavLink} to="/profile" onClick={closeDrawer}>
           <ListItemIcon>
             <Icon>person</Icon>
           </ListItemIcon>

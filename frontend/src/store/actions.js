@@ -32,6 +32,12 @@ export const login = token => async dispatch => {
   dispatch(setToken(token));
 }
 
+export const refresh = () => async (dispatch, getStore) => {
+  const { token } = getStore();
+  const self = await dispatch(get('/login', 'GET', token));
+  dispatch(setUser(self));
+}
+
 export const logout = () => dispatch => {
   dispatch(setUser(null));
   dispatch(setToken(null));

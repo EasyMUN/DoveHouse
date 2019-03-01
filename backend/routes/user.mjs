@@ -84,22 +84,24 @@ router.post('/:id/profile', matcher, async ctx => {
   return ctx.status = 204;
 });
 
-// TODO: update realname
-
-router.post('/:id/idNumber', matcher, async ctx => {
-  const { idNumber } = ctx.request.body;
+router.post('/:id/idVerify', matcher, async ctx => {
+  const { idNumber, realname } = ctx.request.body;
 
   const user = await User.findById(ctx.params.id);
   if(!user) return ctx.status = 404;
+  if(user.idNumber) return ctx.status = 400;
+
+  console.log(realname);
 
   const resp = await request.post('https://api.yonyoucloud.com/apis/dst/matchIdentity/matchIdentity', {
     json: true,
     headers: {
+      authorization: 'apicode',
       apicode: Config.apikeys.idverify,
     },
     body: {
       idNumber,
-      userName: user.realname,
+      userName: realname,
     },
   });
 
@@ -109,6 +111,7 @@ router.post('/:id/idNumber', matcher, async ctx => {
   }
 
   user.idNumber = idNumber;
+  user.realname = realname;
   await user.save(); // Optimistic lock
 
   return ctx.status = 204;
