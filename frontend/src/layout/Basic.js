@@ -31,9 +31,12 @@ const styles = makeStyles(theme => ({
 
   toolbar: {
     height: 60,
-    position: 'absolute',
+    position: 'fixed',
     width: '100%',
     top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 900,
 
     transition: 'box-shadow .2s ease, background .2s ease',
   },

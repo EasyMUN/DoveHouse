@@ -63,7 +63,7 @@ const styles = makeStyles(theme => ({
   },
 
   hint: {
-    marginBottom: 2 * theme.spacing.unit,
+    marginBottom: theme.spacing.unit,
     color: 'rgba(0,0,0,.38)',
   },
 }));
@@ -104,6 +104,33 @@ export default React.memo(() => {
     }
   }, [realname, id, user]);
 
+  const [profile, setProfile] = useState(user.profile || {
+    school: null,
+    grade: null,
+    phone: null,
+    qq: null,
+    wechat: null,
+  });
+
+  const doUpdate = useCallback(async () => {
+    await dispatch(post(`/user/${user._id}/profile`, { profile }));
+
+    await dispatch(refresh());
+
+    enqueueSnackbar('更新成功!', {
+      variant: 'success',
+    });
+  }, [profile]);
+
+  const setSchool = useCallback(ev => setProfile({ ...profile, school: ev.target.value }));
+  const setGrade = useCallback(ev => setProfile({ ...profile, grade: ev.target.value }));
+  const setPhone = useCallback(ev => setProfile({ ...profile, phone: ev.target.value }));
+  const setQQ = useCallback(ev => setProfile({ ...profile, qq: ev.target.value }));
+  const setWechat = useCallback(ev => setProfile({ ...profile, wechat : ev.target.value }));
+
+  const updateDisabled = !profile.school || !profile.grade || !profile.phone || !profile.qq;
+  const verifyDisabled = !id || !(realname === null ? user.realname : realname);
+
   return <BasicLayout>
     <div className={cls.header}>
       <Avatar src={gravatar(user.email, 160)} className={cls.avatar} />
@@ -140,45 +167,50 @@ export default React.memo(() => {
 
         <TextField
           label="学校"
-          margin="dense"
+          margin="normal"
+          value={profile.school}
+          onChange={setSchool}
           fullWidth
           required
         />
 
         <TextField
           label="所在年级"
-          margin="dense"
-          fullWidth
-          required
-        />
-
-        <TextField
-          label="性别"
-          margin="dense"
+          margin="normal"
+          value={profile.grade}
+          onChange={setGrade}
           fullWidth
           required
         />
 
         <TextField
           label="手机号"
-          margin="dense"
+          margin="normal"
+          value={profile.phone}
+          onChange={setPhone}
           fullWidth
+          required
         />
 
         <TextField
           label="QQ"
-          margin="dense"
+          margin="normal"
+          value={profile.qq}
+          onChange={setQQ}
           fullWidth
+          required
         />
 
         <TextField
           label="微信"
-          margin="dense"
+          margin="normal"
+          value={profile.wechat}
+          onChange={setWechat}
           fullWidth
         />
       </CardContent>
       <CardActions>
-        <Button color="secondary">
+        <Button color="secondary" onClick={doUpdate} disabled={updateDisabled}>
           更新
         </Button>
       </CardActions>
@@ -191,6 +223,10 @@ export default React.memo(() => {
 
             <Typography className={cls.hint}>
               请注意，实名认证无法撤销，并且在实名认证之后，您将无法修改真实姓名。
+            </Typography>
+
+            <Typography className={cls.hint}>
+              我们将会从您的身份证中获取您的<strong>生日</strong>以及<strong>性别</strong>。如果您使用的身份证件不是身份证，或者存在身份证无法准确体现您的生日、性别等情况，请联系我们。
             </Typography>
 
             <TextField
@@ -210,7 +246,7 @@ export default React.memo(() => {
             />
           </CardContent>
           <CardActions>
-            <Button color="secondary" onClick={doVerify}>
+            <Button color="secondary" onClick={doVerify} disabled={verifyDisabled}>
               提交
             </Button>
           </CardActions>

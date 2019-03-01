@@ -72,7 +72,7 @@ router.get('/verify/:token', matcher, async ctx => {
 router.post('/:id/profile', matcher, async ctx => {
   const { profile } = ctx.request.body;
 
-  const reuslt = await User.findOneAndUpdate({
+  const result = await User.findOneAndUpdate({
     _id: ctx.params.id,
   }, {
     $set: {
@@ -90,8 +90,6 @@ router.post('/:id/idVerify', matcher, async ctx => {
   const user = await User.findById(ctx.params.id);
   if(!user) return ctx.status = 404;
   if(user.idNumber) return ctx.status = 400;
-
-  console.log(realname);
 
   const resp = await request.post('https://api.yonyoucloud.com/apis/dst/matchIdentity/matchIdentity', {
     json: true,
