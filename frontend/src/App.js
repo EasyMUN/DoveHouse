@@ -11,6 +11,11 @@ import InputBase from '@material-ui/core/InputBase';
 import Avatar from '@material-ui/core/Avatar';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
+import Drawer from '@material-ui/core/Drawer';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
 
 import { useDispatch, useMappedState } from 'redux-react-hook';
 import { logout } from './store/actions';
@@ -115,6 +120,10 @@ const styles = makeStyles(theme => ({
   avatarBtn: {
     padding: 4,
   },
+
+  sidebar: {
+    width: 200,
+  },
 }));
 
 const App = () => {
@@ -140,6 +149,10 @@ const App = () => {
     });
   }, [dispatch])
 
+  const [drawer, setDrawer] = useState(false);
+  const closeDrawer = useCallback(() => setDrawer(false), [setDrawer]);
+  const openDrawer = useCallback(() => setDrawer(true), [setDrawer]);
+
   const pn = history.location.pathname;
 
   if(pn !== '/login' && pn !== '/register')
@@ -150,7 +163,7 @@ const App = () => {
 
   return <div className={cls.container}>
     <nav className={clsx(cls.nav, { [cls.navHidden]: !login })}>
-      <IconButton>
+      <IconButton onClick={openDrawer}>
         <Icon>
           menu
         </Icon>
@@ -186,6 +199,24 @@ const App = () => {
         <MenuItem onClick={logoutCB}>登出</MenuItem>
       </Menu>
     </nav>
+
+    <Drawer open={drawer} onClose={closeDrawer}>
+      <List className={cls.sidebar}>
+        <ListItem button>
+          <ListItemIcon>
+            <Icon>home</Icon>
+          </ListItemIcon>
+          <ListItemText primary="主页" />
+        </ListItem>
+        <ListItem button>
+          <ListItemIcon>
+            <Icon>person</Icon>
+          </ListItemIcon>
+          <ListItemText primary="个人资料" />
+        </ListItem>
+      </List>
+    </Drawer>
+
     <main className={cls.bottom}>
       <SnackbarProvider>
         <Routes location={location} />

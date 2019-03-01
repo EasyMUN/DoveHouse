@@ -23,7 +23,7 @@ const styles = makeStyles(theme => ({
   },
 
   inner: {
-    marginTop: 40,
+    marginTop: 80,
     maxWidth: 700,
     margin: '0 auto',
     padding: '0 20px',
