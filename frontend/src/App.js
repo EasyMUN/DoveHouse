@@ -28,6 +28,7 @@ import { SnackbarProvider } from './Snackbar';
 import { useRouter } from './Router';
 
 import { gravatar } from './util';
+import { BRAND_PRIMARY, BRAND_SECONDARY } from './config';
 
 const styles = makeStyles(theme => ({
   container: {
@@ -170,8 +171,8 @@ const App = () => {
       </IconButton>
 
       <NavLink className={cls.brand} to="/">
-        <Typography className={cls.brandFirst} variant="h2">Dove</Typography>
-        <Typography className={cls.brandSecond} variant="h2">House</Typography>
+        <Typography className={cls.brandFirst} variant="h2">{ BRAND_PRIMARY }</Typography>
+        <Typography className={cls.brandSecond} variant="h2">{ BRAND_SECONDARY }</Typography>
       </NavLink>
 
       <div className={cls.searchRegion}>

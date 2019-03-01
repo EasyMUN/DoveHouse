@@ -3,6 +3,7 @@ export default {
   host: 'localhost',
 
   base: 'https://YOUR_FQDN',
+  brand: 'DoveHouse',
 
   dburi: 'mongodb://localhost/dovehouse',
 

@@ -18,6 +18,8 @@ const transport = nodemailer.createTransport(Config.mailer, {
   from: Config.mailer.from,
 });
 
+const BRAND = Config.brand;
+
 export async function send(rcpt, title, tmpl, data) {
   let tmplFunc = cache.get(tmpl);
   if(!tmplFunc) {
@@ -27,11 +29,13 @@ export async function send(rcpt, title, tmpl, data) {
     cache.set(tmpl, tmplFunc);
   }
 
-  const injected = tmplFunc(data);
+  const allData = { BRAND, ...data };
+
+  const injected = tmplFunc(allData);
 
   const mail = {
     to: rcpt,
-    subject: title,
+    subject: `[${BRAND}] title`,
     html: injected,
     text: injected,
   };

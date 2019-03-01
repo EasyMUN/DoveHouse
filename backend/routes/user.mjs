@@ -36,7 +36,7 @@ router.post('/', async ctx => {
     throw e;
   }
 
-  await mailer.send(email, '[DoveHouse] 请验证您的注册', 'reg', {
+  await mailer.send(email, '请验证您的注册', 'reg', {
     name: realname,
     link: `${Config.base}/user/verify/${token}`,
   });
