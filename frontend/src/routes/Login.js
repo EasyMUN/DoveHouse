@@ -126,9 +126,9 @@ const Login = React.memo(() => {
       submit();
   });
 
-  let toggle = <Button onClick={() => history.push('/register')}>俺没号</Button>;
+  let toggle = <Button onClick={() => history.push('/register')}>注册</Button>;
   if(reg)
-    toggle = <Button onClick={() => history.push('/login')}>俺有号</Button>;
+    toggle = <Button onClick={() => history.push('/login')}>登陆</Button>;
 
   return <div className={cls.wrapper}>
     <div className={cls.background}/>
@@ -136,10 +136,10 @@ const Login = React.memo(() => {
       <Card className={cls.card}>
         <CardContent>
           <Typography gutterBottom variant="h5" component="h2">
-            { reg ? '给俺整个号' : '请您登陆' }
+            { reg ? '创建新账号' : '登陆' }
           </Typography>
           <TextField
-            label="电子信箱"
+            label="邮箱"
             value={email}
             onChange={setEmailCB}
             margin="dense"
@@ -147,7 +147,7 @@ const Login = React.memo(() => {
           />
 
           <TextField
-            label="秘密暗码"
+            label="密码"
             value={pass}
             onChange={setPassCB}
             onKeyDown={keydownCheck}
@@ -157,7 +157,7 @@ const Login = React.memo(() => {
           />
 
           { reg ?  <TextField
-            label="高姓大名"
+            label="您的姓名"
             value={realname}
             onChange={setRealnameCB}
             margin="dense"
@@ -165,7 +165,7 @@ const Login = React.memo(() => {
           /> : null }
         </CardContent>
         <CardActions>
-          <Button color="secondary" onClick={submit}>得嘞</Button>
+          <Button color="secondary" onClick={submit}>提交</Button>
           { toggle }
         </CardActions>
       </Card>
