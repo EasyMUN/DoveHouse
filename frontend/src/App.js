@@ -117,13 +117,13 @@ const styles = makeStyles(theme => ({
   },
 }));
 
-const App = ({ location }) => {
+const App = () => {
   const cls = styles();
 
   const mapS2P = useCallback(({ token, user })=> ({ login: !!token, user }));
   const { user, login } = useMappedState(mapS2P);
 
-  const { match, history } = useRouter();
+  const { match, history, location } = useRouter();
 
   const [accountMenu, setAccountMenu] = useState(null);
   const closeAccountMenu = useCallback(() => setAccountMenu(null), [setAccountMenu]);
@@ -132,7 +132,12 @@ const App = ({ location }) => {
   const dispatch = useDispatch();
   const logoutCB = useCallback(() => {
     closeAccountMenu();
-    dispatch(logout());
+    setTimeout(() => {
+      history.push('/login');
+      setTimeout(() => {
+        dispatch(logout());
+      }, 600);
+    });
   }, [dispatch])
 
   const pn = history.location.pathname;

@@ -28,7 +28,8 @@ const styles = makeStyles(theme => ({
   wrapper: {
     width: '100vw',
     height: '100vh',
-    position: 'relative',
+    position: 'absolute',
+    top: 0,
     overflow: 'hidden',
   },
 

@@ -18,6 +18,8 @@ const styles = makeStyles(theme => ({
     height: '100vh',
     width: '100vw',
     overflow: 'auto',
+    position: 'absolute',
+    top: 0,
   },
 
   inner: {
