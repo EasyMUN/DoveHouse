@@ -94,7 +94,7 @@ export default React.memo(() => {
 
       <Card className={cls.card}>
         <CardContent>
-          <Typography gutterBottom variant="body2" className={cls.type}>欢迎</Typography>
+          <Typography gutterBottom variant="body2" className={cls.type}>指南</Typography>
           <Typography gutterBottom variant="h5" component="h2" className={cls.title}>完善个人信息</Typography>
 
           <Typography gutterBottom variant="body1" className={cls.desc}>请先前往设置页面完善您的个人信息。在此之前，您只能查看会议的介绍，无法报名会议。我们不会把您的个人信息分享给除您报名会议主办人员以外的任何人。</Typography>
@@ -107,10 +107,10 @@ export default React.memo(() => {
       { user.status === 'waiting' ?
           <Card className={cls.card}>
             <CardContent>
-              <Typography gutterBottom variant="body2" className={cls.type}>欢迎</Typography>
+              <Typography gutterBottom variant="body2" className={cls.type}>指南</Typography>
               <Typography gutterBottom variant="h5" component="h2" className={cls.title}>验证账号</Typography>
 
-              <Typography gutterBottom variant="body1" className={cls.desc}>请前往您的邮箱验证账号。在此之前，您只能查看会议的介绍，无法报名会议。我们不会把您的个人信息分享给除您报名会议主办人员以外的任何人。</Typography>
+              <Typography gutterBottom variant="body1" className={cls.desc}>请前往您的邮箱验证账号。在此之前，您只能查看会议的介绍，无法报名会议，并且不会收到任何邮件通知。</Typography>
             </CardContent>
             <CardActions>
               <Button>重发邮件</Button>

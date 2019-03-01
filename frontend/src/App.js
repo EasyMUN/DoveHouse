@@ -181,7 +181,7 @@ const App = () => {
           </Icon>
           <InputBase
             className={cls.searchInner}
-            placeholder="搜索"
+            placeholder="会议/公告/文件"
           />
         </div>
       </div>
