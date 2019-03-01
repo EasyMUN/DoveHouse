@@ -49,9 +49,18 @@ export default React.memo(() => {
   }));
   const { user } = useMappedState(mapS2P);
 
+  const hour = new Date().getHours();
+  let greeting = '早上';
+  if(hour <= 4 || hour >= 16) greeting = '晚上'
+  else if(hour >= 10) greeting = '中午';
+
   return <BasicLayout>
-    <Typography variant="h2" className={cls.greet}>晚上好，{user.realname}!</Typography>
-    <Typography variant="h4" className={cls.hint}>以下是您收到的通知</Typography>
+    <Typography variant="h2" className={cls.greet}>{ greeting }好，{user.realname}!</Typography>
+    { user.profile && user.idNumber ?
+        <Typography variant="h4" className={cls.hint}>你目前没有待办的通知!</Typography>
+        :
+        <Typography variant="h4" className={cls.hint}>以下是您收到的通知</Typography>
+    }
 
     { user.profile ? null :
         <Card className={cls.card}>
