@@ -123,7 +123,7 @@ const styles = makeStyles(theme => ({
   },
 
   sidebar: {
-    width: 200,
+    width: 250,
   },
 }));
 

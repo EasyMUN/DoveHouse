@@ -33,8 +33,8 @@ code {
 }
 
 .fade-enter-active {
-  transition: opacity .5s ease-out;
-  transition-delay: .5s;
+  transition: opacity .2s ease-out;
+  transition-delay: .2s;
   opacity: 1;
 }
 
@@ -43,6 +43,6 @@ code {
 }
 
 .fade-exit-active {
-  transition: opacity .5s ease-in;
+  transition: opacity .2s ease-in;
   opacity: 0;
 }
