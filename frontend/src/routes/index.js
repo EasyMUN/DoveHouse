@@ -4,6 +4,7 @@ import Login from './Login';
 import Home from './Home';
 import Profile from './Profile';
 import About from './About';
+import Conference from './Conference';
 
 import { Route } from '../Router';
 import { Switch } from 'react-router-dom';
@@ -35,6 +36,7 @@ export default ({ location }) => <TransitionGroup>
       <Route path="/profile" component={Profile} exact />
       <Route path="/" component={Home} exact />
       <Route path="/about" component={About} exact />
+      <Route path="/conference/:id" component={Conference} exact />
     </Switch>
   </CSSTransition>
 </TransitionGroup>;

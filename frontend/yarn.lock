@@ -2195,6 +2195,13 @@ caniuse-lite@^1.0.0, caniuse-lite@^1.0.30000918, caniuse-lite@^1.0.30000929, can
   resolved "http://registry.npm.taobao.org/caniuse-lite/download/caniuse-lite-1.0.30000938.tgz#b64bf1427438df40183fce910fe24e34feda7a3f"
   integrity sha1-tkvxQnQ430AYP86RD+JONP7aej8=
 
+canvas@~1.6.11:
+  version "1.6.13"
+  resolved "http://registry.npm.taobao.org/canvas/download/canvas-1.6.13.tgz#8cb4e9abbea9e615a377890ffac50277a1167c73"
+  integrity sha1-jLTpq76p5hWjd4kP+sUCd6EWfHM=
+  dependencies:
+    nan "^2.10.0"
+
 capture-exit@^1.2.0:
   version "1.2.0"
   resolved "http://registry.npm.taobao.org/capture-exit/download/capture-exit-1.2.0.tgz#1c5fcc489fd0ab00d4f1ac7ae1072e3173fbab6f"
@@ -2275,6 +2282,11 @@ chownr@^1.1.1:
   version "1.1.1"
   resolved "http://registry.npm.taobao.org/chownr/download/chownr-1.1.1.tgz#54726b8b8fff4df053c42187e801fb4412df1494"
   integrity sha1-VHJri4//TfBTxCGH6AH7RBLfFJQ=
+
+chroma-js@^2.0.3:
+  version "2.0.3"
+  resolved "http://registry.npm.taobao.org/chroma-js/download/chroma-js-2.0.3.tgz#2521d4f80c4e786e00064c4a62824e38ff6557c4"
+  integrity sha1-JSHU+AxOeG4ABkxKYoJOOP9lV8Q=
 
 chrome-trace-event@^1.0.0:
   version "1.0.0"
@@ -2421,6 +2433,13 @@ color-string@^1.5.2:
   dependencies:
     color-name "^1.0.0"
     simple-swizzle "^0.2.2"
+
+color-thief@^2.2.3:
+  version "2.2.3"
+  resolved "http://registry.npm.taobao.org/color-thief/download/color-thief-2.2.3.tgz#7d8e3c1ff6c9e773b00ebbec589e4e086232337d"
+  integrity sha1-fY48H/bJ53OwDrvsWJ5OCGIyM30=
+  dependencies:
+    canvas "~1.6.11"
 
 color@^3.0.0:
   version "3.1.0"
@@ -6559,7 +6578,7 @@ mute-stream@0.0.7:
   resolved "http://registry.npm.taobao.org/mute-stream/download/mute-stream-0.0.7.tgz#3075ce93bc21b8fab43e1bc4da7e8115ed1e7bab"
   integrity sha1-MHXOk7whuPq0PhvE2n6BFe0ee6s=
 
-nan@^2.9.2:
+nan@^2.10.0, nan@^2.9.2:
   version "2.12.1"
   resolved "http://registry.npm.taobao.org/nan/download/nan-2.12.1.tgz#7b1aa193e9aa86057e3c7bbd0ac448e770925552"
   integrity sha1-exqhk+mqhgV+PHu9CsRI53CSVVI=
