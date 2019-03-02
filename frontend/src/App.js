@@ -16,6 +16,7 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
+import Divider from '@material-ui/core/Divider';
 
 import { useDispatch, useMappedState } from 'redux-react-hook';
 import { logout } from './store/actions';
@@ -214,6 +215,13 @@ const App = () => {
             <Icon>person</Icon>
           </ListItemIcon>
           <ListItemText primary="个人资料" />
+        </ListItem>
+        <Divider />
+        <ListItem button component={NavLink} to="/about" onClick={closeDrawer}>
+          <ListItemIcon>
+            <Icon>feedback</Icon>
+          </ListItemIcon>
+          <ListItemText primary="关于" />
         </ListItem>
       </List>
     </Drawer>
