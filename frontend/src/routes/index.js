@@ -15,9 +15,16 @@ function filter(node, done) {
   }, false);
 }
 
+function deriveKey(location) {
+  if(location.pathname === '/login') return '@login';
+  else if(location.pathname === '/register') return '@login';
+
+  return location.key
+}
+
 export default ({ location }) => <TransitionGroup>
   <CSSTransition
-    key={location.key}
+    key={deriveKey(location)}
     classNames="fade"
     timeout={1000}
     addEndListener={filter}
