@@ -12,6 +12,10 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
+import Card from '@material-ui/core/Card';
+import CardMedia from '@material-ui/core/CardMedia';
+import CardContent from '@material-ui/core/CardContent';
+import CardActionArea from '@material-ui/core/CardActionArea';
 
 import { CONTACT, BRAND_PRIMARY, BRAND_SECONDARY } from '../config';
 
@@ -73,6 +77,10 @@ const styles = makeStyles(theme => ({
     color: 'rgba(255,255,255,.54)',
   },
 
+  subtitle: {
+    marginTop: 4*theme.spacing.unit,
+  },
+
   join: {
     marginLeft: theme.spacing.unit * 2,
   },
@@ -82,6 +90,55 @@ const styles = makeStyles(theme => ({
     position: 'absolute',
     top: '-100%',
   },
+
+  commCard: {
+    marginTop: theme.spacing.unit,
+  },
+
+  commBG: {
+    paddingBottom: '20%',
+    position: 'relative',
+    minHeight: 120,
+  },
+
+  commInfo: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+
+    padding: '10px 16px',
+
+    '&:last-child': {
+      paddingBottom: 10,
+    },
+
+    display: 'flex',
+    justifyContent: 'flex-end',
+    flexDirection: 'column',
+  },
+
+  commTitle: {
+    color: 'rgba(255,255,255,.87)',
+    fontWeight: 600,
+  },
+
+  commAbbr: {
+    color: 'rgba(255,255,255,.54)',
+    lineHeight: '20px',
+    fontSize: 18,
+    fontWeight: 200,
+  },
+
+  backdrop: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    top: 0,
+    background: 'linear-gradient(0deg, rgba(0,0,0,.5) 0%, rgba(0,0,0,0) 70%)',
+  },
 }));
 
 export default React.memo(() => {
@@ -90,17 +147,24 @@ export default React.memo(() => {
   const { match } = useRouter();
 
   const [conf, setConf] = useState(null);
+  const [comms, setComms] = useState(null);
   const [color, setColor] = useState(null);
 
   const dispatch = useDispatch();
 
-  async function fetchData() {
+  async function fetchConf() {
     const conf = await dispatch(get(`/conference/${match.params.id}`));
     setConf(conf);
-  }
+  };
+
+  async function fetchComms() {
+    const comms = await dispatch(get(`/conference/${match.params.id}/committee`));
+    setComms(comms);
+  };
 
   useEffect(() => {
-    fetchData();
+    fetchConf();
+    fetchComms();
   }, [match.params.id, dispatch]);
 
   function loadColor() {
@@ -141,9 +205,32 @@ export default React.memo(() => {
     >报名</Button>
   </div>;
 
+  const commsRegion = comms ?
+    <>
+      { comms.map(comm => <Card className={cls.commCard} key={comm._id}>
+        <CardActionArea>
+          <CardMedia
+            className={cls.commBG}
+            image={comm.background}
+          >
+            <div className={cls.backdrop} />
+            <CardContent className={cls.commInfo}>
+              <Typography variant="h6" className={cls.commAbbr}>{comm.abbr}</Typography>
+              <Typography variant="h5" className={cls.commTitle}>{comm.title}</Typography>
+            </CardContent>
+          </CardMedia>
+          <CardContent>
+            <Typography variant="h5" className={cls.commSub}>{comm.subject}</Typography>
+          </CardContent>
+        </CardActionArea>
+      </Card>) }
+    </> : null;
+
   const inner = conf ?
     <>
-      <Typography variant="h4">近期公告</Typography>
+      <Typography variant="h4" className={cls.subtitle}>近期公告</Typography>
+      <Typography variant="h4" className={cls.subtitle}>委员会</Typography>
+      { commsRegion }
     </> : null;
 
   return <HeaderLayout img={conf ? conf.background : ''} header={header}>

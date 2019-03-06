@@ -1,16 +1,37 @@
 import mongoose from 'mongoose';
 
 const schema = new mongoose.Schema({
-  _id: String,
+  slug: String,
   conference: String,
 
   title: String,
   abbr: String,
 
   subject: String,
-  desc: String,
+  background: String,
+
+  special: {
+    type: String,
+    enum: ['cirsis'],
+  },
+
+  questions: [{
+    tag: String,
+
+    kind: {
+      type: String,
+      enum: ['text', 'radio', 'checkbox'],
+    },
+
+    title: String,
+    desc: String,
+    
+    options: [String],
+  }],
+
+  targets: [String],
 });
 
-const Conference = mongoose.model('Conference', schema);
+const Committee = mongoose.model('Committee', schema);
 
-export default Conference;
+export default Committee;

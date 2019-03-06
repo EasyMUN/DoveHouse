@@ -92,7 +92,7 @@ const styles = makeStyles(theme => ({
     padding: '0 10px',
 
     transition: 'background .2s ease, box-shadow .2s ease, color .2s ease',
-    color: 'rgba(0,0,0,.38)',
+    color: 'rgba(0,0,0,.54)',
 
     boxShadow: 'rgba(0,0,0,.12) 0 1px 3px',
 
@@ -125,6 +125,13 @@ const styles = makeStyles(theme => ({
 
   sidebar: {
     width: 250,
+  },
+
+  drawerHeader: {
+    height: 60,
+    padding: '0 16px',
+    display: 'flex',
+    alignItems: 'center',
   },
 }));
 
@@ -203,6 +210,13 @@ const App = () => {
     </nav>
 
     <Drawer open={drawer} onClose={closeDrawer}>
+      <div className={cls.drawerHeader}>
+        <NavLink className={cls.brand} to="/" onClick={closeDrawer}>
+          <Typography className={cls.brandFirst} variant="h2">{ BRAND_PRIMARY }</Typography>
+          <Typography className={cls.brandSecond} variant="h2">{ BRAND_SECONDARY }</Typography>
+        </NavLink>
+      </div>
+
       <List className={cls.sidebar}>
         <ListItem button component={NavLink} to="/" onClick={closeDrawer}>
           <ListItemIcon>
