@@ -29,7 +29,10 @@ const schema = new mongoose.Schema({
     options: [String],
   }],
 
-  targets: [String],
+  targets: [{
+    tag: String,
+    meta: Object,
+  }],
 });
 
 const Committee = mongoose.model('Committee', schema);

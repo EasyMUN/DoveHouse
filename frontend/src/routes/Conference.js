@@ -1,8 +1,10 @@
-import React, { useEffect, useState, useCallback, useContext } from 'react';
+import React, { useMemo, useEffect, useState, useCallback, useContext } from 'react';
 
 import clsx from 'clsx';
 
 import { makeStyles } from '@material-ui/styles';
+
+import { Map } from 'immutable';
 
 import { useDispatch, useMappedState } from 'redux-react-hook';
 
@@ -18,6 +20,15 @@ import Card from '@material-ui/core/Card';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
 import CardActionArea from '@material-ui/core/CardActionArea';
+import Dialog from '@material-ui/core/Dialog';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogActions from '@material-ui/core/DialogActions';
+import Step from '@material-ui/core/Step';
+import StepLabel from '@material-ui/core/StepLabel';
+import Stepper from '@material-ui/core/Stepper';
+import Badge from '@material-ui/core/Badge';
 
 import { CONTACT, BRAND_PRIMARY, BRAND_SECONDARY } from '../config';
 
@@ -183,6 +194,10 @@ export default React.memo(() => {
   const [conf, setConf] = useState(null);
   const [comms, setComms] = useState(null);
   const [color, setColor] = useState(null);
+  const [reg, setReg] = useState(false);
+
+  const closeReg = useCallback(() => setReg(false), [setReg]);
+  const openReg = useCallback(() => setReg(true), [setReg]);
 
   const dispatch = useDispatch();
 
@@ -240,9 +255,10 @@ export default React.memo(() => {
         size="large"
         className={cls.join}
         color="secondary"
+        onClick={openReg}
       >报名</Button>
     </div>;
-  }, [conf, color]);
+  }, [conf, color, openReg]);
 
   const commsRegion = comms ?
     <>
@@ -274,5 +290,135 @@ export default React.memo(() => {
 
   return <HeaderLayout img={conf ? conf.background : ''} floating={header} pad={70 + 16 * 2 - 4 - 28} height={240}>
     { inner }
+
+    <RegDialog
+      comms={comms}
+
+      open={reg}
+      onClose={closeReg}
+      fullWidth
+    />
   </HeaderLayout>;
 });
+
+const regStyles = makeStyles(theme => ({
+  badge: {
+    position: 'absolute',
+    left: 26,
+  },
+
+  badgeAnchor: {
+    width: 0,
+    position: 'relative',
+  },
+
+  commInfo: {
+    transition: 'transform .2s ease',
+  },
+
+  selected: {
+    '& $commInfo': {
+      transform: 'translate(32px)',
+    },
+  },
+
+  item: {
+    overflow: 'hidden',
+  },
+}));
+
+// Reg dialog
+const RegDialog = ({ comms: _comms, ...rest }) => {
+  const cls = regStyles();
+
+  const [step, setStep] = useState(0);
+  const [first, setFirst] = useState(new Map());
+
+  const gotoNext = useCallback(() => setStep(step+1), [step]);
+  const gotoPrev = useCallback(() => step === 0 || setStep(step-1), [step]);
+
+  const comms = _comms || [];
+
+  function generateStep() {
+    console.log('generate');
+    console.log(first.toJS());
+    if(step === 0) {
+      const toggle = id => () => {
+        const cur = first.get(id);
+        if(!cur) setFirst(first.set(id, first.size + 1));
+        else {
+          let modified = first;
+          const keys = first.keySeq();
+          keys.forEach(k => {
+            const kcur = modified.get(k);
+            if(kcur > cur)
+              modified = modified.set(k, kcur - 1);
+          });
+
+          setFirst(modified.delete(id));
+        }
+      };
+
+      return <>
+        <DialogContent>
+          <DialogContentText>感谢您对本会议的支持！</DialogContentText>
+          <DialogContentText>请您按顺序依次点选您的志愿委员会</DialogContentText>
+        </DialogContent>
+        <List>
+          { comms.map(({ title, abbr, _id }) => <ListItem
+            button
+            key={_id}
+            onClick={toggle(_id)}
+            className={clsx(cls.item, { [cls.selected]: first.has(_id) })}
+          >
+            <div className={cls.badgeAnchor}>
+              <Badge
+                className={cls.badge}
+                badgeContent={first.get(_id)}
+                invisible={!first.has(_id)}
+                color="secondary"
+              >
+                <div className={cls.badgeInner}/>
+              </Badge>
+            </div>
+            <ListItemText
+              primary={title}
+              secondary={abbr}
+              className={cls.commInfo}
+            />
+          </ListItem>) }
+        </List>
+      </>;
+    } else if(step === 1) {
+      const keys = first.keySeq().toJS().sort((a, b) => first.get(a) - first.get(b));
+
+      return <>
+        <DialogContent>
+          <DialogContentText>请您填写各个委员会中的志愿方向</DialogContentText>
+        </DialogContent>
+      </>;
+    }
+  }
+
+  const content = useMemo(generateStep, [comms, step, first]);
+
+  const canNext = useMemo(() => {
+    if(step === 0)
+      return first.size !== 0;
+  }, [step, first]);
+
+  return <Dialog {...rest}>
+    <Stepper activeStep={step} color="secondary">
+      <Step color="inherit"><StepLabel>选择委员会志愿</StepLabel></Step>
+      <Step color="inherit"><StepLabel>选择方向</StepLabel></Step>
+    </Stepper>
+
+    { content }
+
+    <DialogActions>
+      { step !== 0 ? <Button onClick={gotoPrev}>上一步</Button> : null }
+      { step !== 1 ? <Button variant="contained" color="secondary" onClick={gotoNext} disabled={!canNext}>下一步</Button> : null }
+      { step === 1 ? <Button variant="contained" color="secondary" onClick={gotoNext} disabled={!canNext}>提交</Button> : null }
+    </DialogActions>
+  </Dialog>;
+};
