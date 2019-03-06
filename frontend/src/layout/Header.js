@@ -30,10 +30,8 @@ const styles = makeStyles(theme => ({
   },
 
   toolbar: {
-    height: 400,
     position: 'sticky',
     width: '100%',
-    top: -340,
     left: 0,
     right: 0,
     zIndex: 900,
@@ -75,12 +73,6 @@ const styles = makeStyles(theme => ({
     right: 0,
   },
 
-  headerInner: {
-    maxWidth: 700,
-    margin: '0 auto',
-    padding: '0 20px',
-  },
-
   backdrop: {
     position: 'absolute',
     bottom: 0,
@@ -91,38 +83,39 @@ const styles = makeStyles(theme => ({
   },
 }));
 
-export default React.memo(({ img, children, header }) => {
+export default React.memo(({ img, children, header, floating, pad = 0, height = 400 }) => {
   const cls = styles();
 
-  const [onTop, setOnTop] = useState(true);
-  const [percentage, setPercentage] = useState(0);
+  const [scroll, setScroll] = useState(0);
+
+  const onTop = scroll < height - 60;
+  const percentage = Math.min(scroll / (height - 60), 1);
 
   const scrollCB = useCallback(ev => {
-    const scrollTop = ev.target.scrollTop;
-
-    const totalScroll = 400-60;
-    const percentage = scrollTop / totalScroll;
-
-    if(percentage > 1) setPercentage(1);
-    else setPercentage(percentage);
-
-    setOnTop(percentage < 1);
+    setScroll(ev.target.scrollTop);
   });
 
   return <div className={cls.wrapper} onScroll={scrollCB}>
-    <div className={clsx(cls.toolbar, { [cls.toolbarFloating]: !onTop })}>
+    <div className={clsx(cls.toolbar, { [cls.toolbarFloating]: !onTop })} style={{
+      height: height + pad,
+      top: -height + 60,
+    }}>
       <div className={cls.image} style={{
         backgroundImage: `url(${img})`,
       }}></div>
       <div className={cls.backdrop} />
-      <div className={cls.header}>
-        <div className={cls.headerInner}>
-          { header }
-        </div>
-      </div>
+      { header ?
+          <div className={cls.header}>
+            { header({ onTop, percentage, scroll }) }
+          </div> : null }
       <div className={cls.color} style={{
         opacity: percentage,
       }}></div>
+      { floating ? 
+          <div className={cls.header}>
+            { floating({ onTop, percentage, scroll }) }
+          </div>
+          : null }
     </div>
     <div className={cls.inner}>
       { children }

@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useCallback, useContext } from 'react';
 
+import clsx from 'clsx';
+
 import { makeStyles } from '@material-ui/styles';
 
 import { useDispatch, useMappedState } from 'redux-react-hook';
@@ -37,11 +39,43 @@ const styles = makeStyles(theme => ({
     paddingBottom: theme.spacing.unit * 4,
     display: 'flex',
     alignItems: 'center',
+
+    maxWidth: 700,
+    margin: '0 auto',
+    padding: '0 20px',
+
+    transition: 'padding-bottom .2s ease, max-width .1s ease .1s'
+  },
+
+  headerExt: {
+    paddingBottom: theme.spacing.unit * 2,
+    maxWidth: 'calc(100vw)',
+
+    height: 60,
+
+    '& $title': {
+      color: 'black',
+      fontWeight: 200,
+    },
+
+    '& $abbr': {
+      display: 'none',
+    },
+
+    '& $logo': {
+      height: 50,
+      width: 50,
+
+      '& img': {
+        width: 40,
+        height: 40,
+      },
+    },
   },
 
   headerLeft: {
     display: 'flex',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     flex: 1,
   },
 
@@ -184,26 +218,31 @@ export default React.memo(() => {
 
   useEffect(loadColor, [conf]);
 
-  const header = <div className={cls.header}>
-    <div className={cls.headerLeft}>
-      <div className={cls.logo}>
-        <img src={ conf ? conf.logo : '' } />
+  const header = useCallback(({ scroll }) => {
+    const threshold = 240 - 50 - 60 + 4;
+    const ext = scroll > threshold;
+
+    return <div className={clsx(cls.header, { [cls.headerExt]: ext })}>
+      <div className={cls.headerLeft}>
+        <div className={cls.logo}>
+          <img src={ conf ? conf.logo : '' } />
+        </div>
+        <div className={cls.names}>
+          <Typography variant="h3" className={cls.abbr}>{ conf ? conf.abbr : '' }</Typography>
+          <Typography variant="h2" className={cls.title}>{ conf ? conf.title : '' }</Typography>
+        </div>
       </div>
-      <div className={cls.names}>
-        <Typography variant="h3" className={cls.abbr}>{ conf ? conf.abbr : '' }</Typography>
-        <Typography variant="h2" className={cls.title}>{ conf ? conf.title : '' }</Typography>
-      </div>
-    </div>
-    <Button
-      variant="contained"
-      style={{
-        background: color
-      }}
-      size="large"
-      className={cls.join}
-      color="secondary"
-    >报名</Button>
-  </div>;
+      <Button
+        variant="contained"
+        style={{
+          background: color
+        }}
+        size="large"
+        className={cls.join}
+        color="secondary"
+      >报名</Button>
+    </div>;
+  }, [conf, color]);
 
   const commsRegion = comms ?
     <>
@@ -233,7 +272,7 @@ export default React.memo(() => {
       { commsRegion }
     </> : null;
 
-  return <HeaderLayout img={conf ? conf.background : ''} header={header}>
+  return <HeaderLayout img={conf ? conf.background : ''} floating={header} pad={70 + 16 * 2 - 4 - 28} height={240}>
     { inner }
   </HeaderLayout>;
 });
