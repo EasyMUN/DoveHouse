@@ -3,6 +3,7 @@ import KoaRouter from '@circuitcoder/koa-router';
 import request from '../request';
 
 import Conference from '../db/conference';
+import User from '../db/user';
 import Committee from '../db/committee';
 
 import Config from '../config';
@@ -19,6 +20,8 @@ router.get('/:id', async ctx => {
     background: 1,
     desc: 1,
     logo: 1,
+
+    requiresRealname: 1,
   });
 });
 
@@ -56,6 +59,15 @@ router.get('/:id/committee/:cid', async ctx => {
 router.put('/:id/registrant/:user', async ctx => {
   const allowed = ctx.user.isAdmin || ctx.params.user === ctx.user._id.toString();
   if(!allowed) return ctx.status = 403;
+
+  const conf = await Conference.findById(ctx.params.id, { requiresRealname: 1 });
+  const user = await User.findById(ctx.params.user);
+  if(!user) return ctx.status = 400;
+  let flag = true;
+
+  if(!user.profile) flag = false;
+  if(conf.requiresRealname && !user.idNumber) flag = false;
+  if(!flag) return ctx.status = 400;
 
   const result = await Conference.findOneAndUpdate({
     _id: ctx.params.id,

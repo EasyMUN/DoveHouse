@@ -37,6 +37,7 @@ import { get, post } from '../store/actions';
 import { gravatar } from '../util';
 
 import { useRouter } from '../Router';
+import { NavLink } from 'react-router-dom';
 
 import { useSnackbar } from '../Snackbar';
 
@@ -184,6 +185,13 @@ const styles = makeStyles(theme => ({
     top: 0,
     background: 'linear-gradient(0deg, rgba(0,0,0,.5) 0%, rgba(0,0,0,0) 70%)',
   },
+
+  empty: {
+    marginTop: theme.spacing.unit * 2,
+    marginBottom: theme.spacing.unit * 2,
+    textAlign: 'center',
+    color: 'rgba(0,0,0,.38)',
+  },
 }));
 
 export default React.memo(() => {
@@ -198,8 +206,26 @@ export default React.memo(() => {
   const [regOpen, setRegOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  const { enqueueSnackbar } = useSnackbar();
+
   const closeReg = useCallback(() => setRegOpen(false), [setRegOpen]);
-  const openReg = useCallback(() => setRegOpen(true), [setRegOpen]);
+  const openReg = useCallback(() => {
+    if(!user || !user.profile) {
+      enqueueSnackbar('您还没有填写个人信息，不能报名！', {
+        variant: 'warning',
+        action: <NavLink to="/profile"><Button size="small">立即填写</Button></NavLink>,
+      });
+      return;
+    } else if(conf && conf.requiresRealname && !user.idNumber) {
+      enqueueSnackbar('此会议需要您进行实名认证', {
+        variant: 'warning',
+        action: <NavLink to="/profile"><Button size="small">前往认证</Button></NavLink>,
+      });
+      return;
+    }
+
+    setRegOpen(true);
+  }, [setRegOpen, conf]);
 
   const dispatch = useDispatch();
   const { user } = useMappedState(({ user }) => ({ user }));
@@ -277,6 +303,10 @@ export default React.memo(() => {
     </div>;
   }, [conf, color, openReg, reg]);
 
+  const notiRegion = <>
+    <Typography variant="body1" className={cls.empty}>什么都还没有</Typography>
+  </>;
+
   const commsRegion = comms ?
     <>
       { comms.map(comm => <Card className={cls.commCard} key={comm._id}>
@@ -301,11 +331,10 @@ export default React.memo(() => {
   const inner = conf ?
     <>
       <Typography variant="h4" className={cls.subtitle}>近期公告</Typography>
+      { notiRegion }
       <Typography variant="h4" className={cls.subtitle}>委员会</Typography>
       { commsRegion }
     </> : null;
-
-  const { enqueueSnackbar } = useSnackbar();
 
   const submitReg = useCallback(async submission => {
     if(submitting) return;
@@ -315,6 +344,10 @@ export default React.memo(() => {
     try {
       await dispatch(post(`/conference/${match.params.id}/registrant/${user._id}`, submission, 'PUT'));
       await fetchReg();
+
+      enqueueSnackbar('报名成功！', {
+        variant: 'success',
+      });
     } catch(e) {
       console.error(e);
       enqueueSnackbar('提交失败，请稍后再试', {

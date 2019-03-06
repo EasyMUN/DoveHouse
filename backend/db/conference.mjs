@@ -10,6 +10,11 @@ const schema = new mongoose.Schema({
   background: String,
   desc: String,
 
+  requiresRealname: {
+    type: Boolean,
+    default: false,
+  },
+
   registrants: [{
     user: mongoose.Schema.Types.ObjectId,
 
