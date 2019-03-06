@@ -31,7 +31,10 @@ const schema = new mongoose.Schema({
 
   targets: [{
     tag: String,
-    meta: Object,
+    meta: {
+      type: Object,
+      default: {},
+    },
   }],
 });
 

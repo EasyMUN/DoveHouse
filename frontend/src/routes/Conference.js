@@ -325,7 +325,57 @@ const regStyles = makeStyles(theme => ({
   item: {
     overflow: 'hidden',
   },
+
+  directionHint: {
+    fontSize: 16,
+    lineHeight: '20px',
+    color: 'rgba(0,0,0,.54)',
+  },
 }));
+
+function getSelectedComms(first, comms) {
+  const keys = first.keySeq().toJS().sort((a, b) => first.get(a) - first.get(b));
+
+  const allComms = {};
+  for(const comm of comms) allComms[comm._id] = comm;
+  return keys.map(k => allComms[k]);
+}
+
+function generateDefaultSecond(first, comms) {
+  const selected = getSelectedComms(first, comms);
+  let result = new Map();
+
+  selected.forEach(({ special }, index) => {
+    if(special === 'crisis') {
+      const submap = new Map()
+        .set(1, new Map())
+        .set(2, new Map())
+        .set(3, new Map());
+
+      result = result.set(index, submap);
+    } else {
+      result = result.set(index, new Map());
+    }
+  });
+
+  return result;
+}
+
+function toggleMap(map, id) {
+  const cur = map.get(id);
+  if(!cur) return map.set(id, map.size + 1);
+  else {
+    let modified = map;
+    const keys = map.keySeq();
+    keys.forEach(k => {
+      const kcur = modified.get(k);
+      if(kcur > cur)
+        modified = modified.set(k, kcur - 1);
+    });
+
+    return modified.delete(id);
+  }
+}
 
 // Reg dialog
 const RegDialog = ({ comms: _comms, ...rest }) => {
@@ -333,31 +383,20 @@ const RegDialog = ({ comms: _comms, ...rest }) => {
 
   const [step, setStep] = useState(0);
   const [first, setFirst] = useState(new Map());
+  const [second, setSecond] = useState(null);
 
-  const gotoNext = useCallback(() => setStep(step+1), [step]);
+  const gotoNext = useCallback(() => {
+    if(step === 0) setSecond(generateDefaultSecond(first, comms));
+
+    setStep(step+1)
+  }, [step, first, comms]);
   const gotoPrev = useCallback(() => step === 0 || setStep(step-1), [step]);
 
   const comms = _comms || [];
 
   function generateStep() {
-    console.log('generate');
-    console.log(first.toJS());
     if(step === 0) {
-      const toggle = id => () => {
-        const cur = first.get(id);
-        if(!cur) setFirst(first.set(id, first.size + 1));
-        else {
-          let modified = first;
-          const keys = first.keySeq();
-          keys.forEach(k => {
-            const kcur = modified.get(k);
-            if(kcur > cur)
-              modified = modified.set(k, kcur - 1);
-          });
-
-          setFirst(modified.delete(id));
-        }
-      };
+      const toggle = id => () => setFirst(toggleMap(first, id));
 
       return <>
         <DialogContent>
@@ -390,35 +429,108 @@ const RegDialog = ({ comms: _comms, ...rest }) => {
         </List>
       </>;
     } else if(step === 1) {
-      const keys = first.keySeq().toJS().sort((a, b) => first.get(a) - first.get(b));
+      function commRender(comm, index, value, setValue) {
+        if(comm.special === 'crisis') {
+          const buckets = {};
+          for(const { tag, meta } of comm.targets) {
+            const level = meta.level || 1;
+            if(!buckets[level]) buckets[level] = [];
+            buckets[level].push(tag);
+          }
+
+          const toggle = (level, id) => () => setValue(value.set(level, toggleMap(value.get(level), id)));
+
+          return <>
+            <DialogContent>
+              <Typography variant="h6" className={cls.directionHint}>第 { index + 1 } 志愿</Typography>
+              <Typography variant="h6">{ comm.title }</Typography>
+
+              <DialogContentText>请依次在下方三个级别的方向中 <strong>按志愿顺序</strong> 各做出 <strong>两个</strong> 选择</DialogContentText>
+            </DialogContent>
+
+            <DialogContent>
+              { [1,2,3].map(level => <>
+                <DialogContentText>第 { level } 级方向</DialogContentText>
+                <List>
+                  { (buckets[level] || []).map(tag => <ListItem
+                    button
+                    key={tag}
+                    onClick={toggle(level, tag)}
+                    className={clsx(cls.item, { [cls.selected]: value.get(level).has(tag) })}
+                  >
+                    <div className={cls.badgeAnchor}>
+                      <Badge
+                        className={cls.badge}
+                        badgeContent={value.get(level).get(tag)}
+                        invisible={!value.get(level).has(tag)}
+                        color="secondary"
+                      >
+                        <div className={cls.badgeInner}/>
+                      </Badge>
+                    </div>
+                    <ListItemText
+                      primary={tag}
+                      className={cls.commInfo}
+                    />
+                  </ListItem>) }
+                </List>
+              </>) }
+            </DialogContent>
+          </>;
+        } else {
+          // TODO: implement
+        }
+      }
+
+      const selected = getSelectedComms(first, comms);
+
+      const inner = selected.map((comm, index) =>
+        commRender(comm, index, second.get(index), newValue =>  setSecond(second.set(index, newValue))));
 
       return <>
         <DialogContent>
           <DialogContentText>请您填写各个委员会中的志愿方向</DialogContentText>
         </DialogContent>
+
+        { inner }
       </>;
     }
   }
 
-  const content = useMemo(generateStep, [comms, step, first]);
+  const content = useMemo(generateStep, [comms, step, first, second]);
 
   const canNext = useMemo(() => {
     if(step === 0)
       return first.size !== 0;
-  }, [step, first]);
+    else if(step === 1) {
+      const selected = getSelectedComms(first, comms);
+      let flag = true;
+      selected.forEach(({ special }, index) => {
+        if(special === 'crisis')
+          flag = flag && second.get(index).get(1).size === 2
+            && second.get(index).get(2).size === 2
+            && second.get(index).get(3).size === 2;
 
-  return <Dialog {...rest}>
+        // TODO: implement other types
+      });
+
+      return flag;
+    }
+  }, [step, first, second]);
+
+  return <Dialog {...rest} scroll="body">
     <Stepper activeStep={step} color="secondary">
       <Step color="inherit"><StepLabel>选择委员会志愿</StepLabel></Step>
       <Step color="inherit"><StepLabel>选择方向</StepLabel></Step>
+      <Step color="inherit"><StepLabel>确认</StepLabel></Step>
     </Stepper>
 
     { content }
 
     <DialogActions>
       { step !== 0 ? <Button onClick={gotoPrev}>上一步</Button> : null }
-      { step !== 1 ? <Button variant="contained" color="secondary" onClick={gotoNext} disabled={!canNext}>下一步</Button> : null }
-      { step === 1 ? <Button variant="contained" color="secondary" onClick={gotoNext} disabled={!canNext}>提交</Button> : null }
+      { step !== 2 ? <Button variant="contained" color="secondary" onClick={gotoNext} disabled={!canNext}>下一步</Button> : null }
+      { step === 2 ? <Button variant="contained" color="secondary" onClick={gotoNext} disabled={!canNext}>确认提交</Button> : null }
     </DialogActions>
   </Dialog>;
 };
