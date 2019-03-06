@@ -53,4 +53,38 @@ router.get('/:id/committee/:cid', async ctx => {
   });
 });
 
+router.put('/:id/registrant/:user', async ctx => {
+  const allowed = ctx.user.isAdmin || ctx.params.user === ctx.user._id.toString();
+  if(!allowed) return ctx.status = 403;
+
+  const result = await Conference.findOneAndUpdate({
+    _id: ctx.params.id,
+    registrants: { $not: { $elemMatch: { user: ctx.params.user }}},
+  }, {
+    $push: { registrants: {
+      user: ctx.params.user,
+      stage: 'reg',
+      reg: ctx.request.body
+    }},
+  });
+
+  if(!result) return ctx.status = 404;
+  return ctx.status = 201;
+});
+
+router.get('/:id/registrant/:user', async ctx => {
+  const allowed = ctx.user.isAdmin || ctx.params.user === ctx.user._id.toString();
+  if(!allowed) return ctx.status = 403;
+
+  const conf = await Conference.findOne({
+    _id: ctx.params.id,
+    'registrants.user': ctx.params.user,
+  }, {
+    'registrants.$': 1
+  });
+
+  if(!conf) return ctx.status = 404;
+  return ctx.body = { stage: conf.registrants[0].stage, reg: conf.registrants[0].reg };
+});
+
 export default router;

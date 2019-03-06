@@ -9,6 +9,20 @@ const schema = new mongoose.Schema({
   logo: String,
   background: String,
   desc: String,
+
+  registrants: [{
+    user: mongoose.Schema.Types.ObjectId,
+
+    stage: {
+      type: String,
+      enum: [
+        'reg',
+      ],
+      default: 'reg',
+    },
+
+    reg: Object,
+  }],
 });
 
 const Conference = mongoose.model('Conference', schema);

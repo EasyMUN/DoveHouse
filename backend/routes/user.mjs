@@ -49,7 +49,7 @@ router.post('/', async ctx => {
 // Match id and self
 const matcher = async (ctx, next) => {
   if(ctx.params.id)
-    if(ctx.uid !== ctx.params.id && !ctx.user.isAdmin)
+    if(ctx.uid !== ctx.params.id.toString() && !ctx.user.isAdmin)
       return ctx.status = 403;
 
   await next();

@@ -32,7 +32,7 @@ import Badge from '@material-ui/core/Badge';
 
 import { CONTACT, BRAND_PRIMARY, BRAND_SECONDARY } from '../config';
 
-import { get } from '../store/actions';
+import { get, post } from '../store/actions';
 
 import { gravatar } from '../util';
 
@@ -193,14 +193,16 @@ export default React.memo(() => {
 
   const [conf, setConf] = useState(null);
   const [comms, setComms] = useState(null);
+  const [reg, setReg] = useState(null);
   const [color, setColor] = useState(null);
-  const [reg, setReg] = useState(false);
+  const [regOpen, setRegOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const closeReg = useCallback(() => setReg(false), [setReg]);
-  const openReg = useCallback(() => setReg(true), [setReg]);
+  const closeReg = useCallback(() => setRegOpen(false), [setRegOpen]);
+  const openReg = useCallback(() => setRegOpen(true), [setRegOpen]);
 
   const dispatch = useDispatch();
+  const { user } = useMappedState(({ user }) => ({ user }));
 
   async function fetchConf() {
     const conf = await dispatch(get(`/conference/${match.params.id}`));
@@ -212,10 +214,21 @@ export default React.memo(() => {
     setComms(comms);
   };
 
+  async function fetchReg() {
+    if(!user) return setReg(null);
+    try {
+      setReg(await dispatch(get(`/conference/${match.params.id}/registrant/${user._id}`)));
+    } catch(e) {
+      if(e.code === 404) return;
+      throw e;
+    }
+  };
+
   useEffect(() => {
     fetchConf();
     fetchComms();
-  }, [match.params.id, dispatch]);
+    fetchReg();
+  }, [match.params.id, dispatch, user]);
 
   function loadColor() {
     if(!conf) return;
@@ -227,8 +240,9 @@ export default React.memo(() => {
       const thief = new ColorThief();
       const dominant = thief.getColor(image);
       const chroma = Chroma(dominant);
-      const css = chroma.saturate().luminance(0.2).css();
-      setColor(css);
+      const primary = chroma.saturate().luminance(0.2);
+      const dark = primary.darken(1);
+      setColor({ main: primary.css(), disabled: dark.alpha(.5).css() });
     };
   }
 
@@ -251,15 +265,17 @@ export default React.memo(() => {
       <Button
         variant="contained"
         style={{
-          background: color
+          background: color && (reg !== null ? color.disabled : color.main),
         }}
         size="large"
         className={cls.join}
         color="secondary"
         onClick={openReg}
-      >报名</Button>
+
+        disabled={reg !== null}
+      >{reg !== null ? '已' : ''}报名</Button>
     </div>;
-  }, [conf, color, openReg]);
+  }, [conf, color, openReg, reg]);
 
   const commsRegion = comms ?
     <>
@@ -289,13 +305,25 @@ export default React.memo(() => {
       { commsRegion }
     </> : null;
 
-  const submitReg = useCallback(submission => {
+  const { enqueueSnackbar } = useSnackbar();
+
+  const submitReg = useCallback(async submission => {
     if(submitting) return;
     setSubmitting(true);
 
     console.log(submission);
-    // closeReg();
-  }, [closeReg]);
+    try {
+      await dispatch(post(`/conference/${match.params.id}/registrant/${user._id}`, submission, 'PUT'));
+      await fetchReg();
+    } catch(e) {
+      console.error(e);
+      enqueueSnackbar('提交失败，请稍后再试', {
+        variant: 'error',
+      });
+    }
+    setSubmitting(false);
+    closeReg();
+  }, [closeReg, user, enqueueSnackbar]);
 
   return <HeaderLayout img={conf ? conf.background : ''} floating={header} pad={70 + 16 * 2 - 4 - 28} height={240}>
     { inner }
@@ -303,7 +331,7 @@ export default React.memo(() => {
     <RegDialog
       comms={comms}
 
-      open={reg}
+      open={regOpen}
       onClose={closeReg}
       fullWidth
 
