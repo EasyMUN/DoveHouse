@@ -195,6 +195,7 @@ export default React.memo(() => {
   const [comms, setComms] = useState(null);
   const [color, setColor] = useState(null);
   const [reg, setReg] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const closeReg = useCallback(() => setReg(false), [setReg]);
   const openReg = useCallback(() => setReg(true), [setReg]);
@@ -288,6 +289,14 @@ export default React.memo(() => {
       { commsRegion }
     </> : null;
 
+  const submitReg = useCallback(submission => {
+    if(submitting) return;
+    setSubmitting(true);
+
+    console.log(submission);
+    // closeReg();
+  }, [closeReg]);
+
   return <HeaderLayout img={conf ? conf.background : ''} floating={header} pad={70 + 16 * 2 - 4 - 28} height={240}>
     { inner }
 
@@ -297,6 +306,9 @@ export default React.memo(() => {
       open={reg}
       onClose={closeReg}
       fullWidth
+
+      onSubmit={submitReg}
+      disabled={submitting}
     />
   </HeaderLayout>;
 });
@@ -326,6 +338,10 @@ const regStyles = makeStyles(theme => ({
     overflow: 'hidden',
   },
 
+  directionComm: {
+    marginBottom: theme.spacing.unit,
+  },
+
   directionHint: {
     fontSize: 16,
     lineHeight: '20px',
@@ -341,20 +357,22 @@ function getSelectedComms(first, comms) {
   return keys.map(k => allComms[k]);
 }
 
-function generateDefaultSecond(first, comms) {
+function generateDefaultSecond(first, comms, original = new Map()) {
   const selected = getSelectedComms(first, comms);
-  let result = new Map();
+  let result = original; 
 
-  selected.forEach(({ special }, index) => {
+  selected.forEach(({ _id, special }) => {
+    if(result.has(_id)) return; // Don't touch existing values
+
     if(special === 'crisis') {
       const submap = new Map()
         .set(1, new Map())
         .set(2, new Map())
         .set(3, new Map());
 
-      result = result.set(index, submap);
+      result = result.set(_id, submap);
     } else {
-      result = result.set(index, new Map());
+      result = result.set(_id, new Map());
     }
   });
 
@@ -378,18 +396,18 @@ function toggleMap(map, id) {
 }
 
 // Reg dialog
-const RegDialog = ({ comms: _comms, ...rest }) => {
+const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
   const cls = regStyles();
 
   const [step, setStep] = useState(0);
   const [first, setFirst] = useState(new Map());
-  const [second, setSecond] = useState(null);
+  const [second, setSecond] = useState(new Map());
 
   const gotoNext = useCallback(() => {
-    if(step === 0) setSecond(generateDefaultSecond(first, comms));
+    if(step === 0) setSecond(generateDefaultSecond(first, comms, second));
 
     setStep(step+1)
-  }, [step, first, comms]);
+  }, [step, first, comms, second]);
   const gotoPrev = useCallback(() => step === 0 || setStep(step-1), [step]);
 
   const comms = _comms || [];
@@ -443,7 +461,7 @@ const RegDialog = ({ comms: _comms, ...rest }) => {
           return <>
             <DialogContent>
               <Typography variant="h6" className={cls.directionHint}>第 { index + 1 } 志愿</Typography>
-              <Typography variant="h6">{ comm.title }</Typography>
+              <Typography variant="h6" className={cls.directionComm}>{ comm.title }</Typography>
 
               <DialogContentText>请依次在下方三个级别的方向中 <strong>按志愿顺序</strong> 各做出 <strong>两个</strong> 选择</DialogContentText>
             </DialogContent>
@@ -485,11 +503,57 @@ const RegDialog = ({ comms: _comms, ...rest }) => {
       const selected = getSelectedComms(first, comms);
 
       const inner = selected.map((comm, index) =>
-        commRender(comm, index, second.get(index), newValue =>  setSecond(second.set(index, newValue))));
+        commRender(comm, index, second.get(comm._id), newValue =>  setSecond(second.set(comm._id, newValue))));
 
       return <>
         <DialogContent>
           <DialogContentText>请您填写各个委员会中的志愿方向</DialogContentText>
+        </DialogContent>
+
+        { inner }
+      </>;
+    } else {
+      // Last step
+      function commRender(comm, index, value) {
+        if(comm.special === 'crisis') {
+          const buckets = value.toJS();
+          for(const key in buckets)
+            buckets[key] = Object.keys(buckets[key]).sort((a, b) => buckets[key][a] - buckets[key][b]);
+
+          return <>
+            <DialogContent>
+              <Typography variant="h6" className={cls.directionHint}>第 { index + 1 } 志愿</Typography>
+              <Typography variant="h6" className={cls.directionComm}>{ comm.title }</Typography>
+
+              { [1,2,3].map(level => <>
+                <DialogContentText>第 { level } 级方向</DialogContentText>
+                <List>
+                  { (buckets[level] || []).map((tag, index) => <ListItem
+                    key={tag}
+                  >
+                    <ListItemText
+                      primary={tag}
+                      secondary={`第 ${index + 1} 志愿方向`}
+                    />
+                  </ListItem>) }
+                </List>
+              </>) }
+            </DialogContent>
+          </>;
+        } else {
+          // TODO: implement
+        }
+      }
+
+      const selected = getSelectedComms(first, comms);
+
+      const inner = selected.map((comm, index) =>
+        commRender(comm, index, second.get(comm._id)));
+
+      return <>
+        <DialogContent>
+          <DialogContentText>请检查您的报名志愿信息是否正确。提交后您将 <strong>无法</strong> 修改这些信息。</DialogContentText>
+          <DialogContentText>我们会尽快根据您的志愿信息为您分配学测。届时，您的邮箱将会收到通知邮件，请保持关注。</DialogContentText>
         </DialogContent>
 
         { inner }
@@ -505,18 +569,28 @@ const RegDialog = ({ comms: _comms, ...rest }) => {
     else if(step === 1) {
       const selected = getSelectedComms(first, comms);
       let flag = true;
-      selected.forEach(({ special }, index) => {
+      selected.forEach(({ _id, special }) => {
         if(special === 'crisis')
-          flag = flag && second.get(index).get(1).size === 2
-            && second.get(index).get(2).size === 2
-            && second.get(index).get(3).size === 2;
+          flag = flag && second.get(_id).get(1).size === 2
+            && second.get(_id).get(2).size === 2
+            && second.get(_id).get(3).size === 2;
 
         // TODO: implement other types
       });
 
       return flag;
-    }
+    } else return true;
   }, [step, first, second]);
+
+  const submit = useCallback(() => {
+    const result = getSelectedComms(first, comms).map(({ _id }) => ({
+      committee: _id,
+      payload: second.get(_id).toJS(),
+    }));
+
+    if(onSubmit)
+      onSubmit(result);
+  }, [first, second, comms]);
 
   return <Dialog {...rest} scroll="body">
     <Stepper activeStep={step} color="secondary">
@@ -530,7 +604,7 @@ const RegDialog = ({ comms: _comms, ...rest }) => {
     <DialogActions>
       { step !== 0 ? <Button onClick={gotoPrev}>上一步</Button> : null }
       { step !== 2 ? <Button variant="contained" color="secondary" onClick={gotoNext} disabled={!canNext}>下一步</Button> : null }
-      { step === 2 ? <Button variant="contained" color="secondary" onClick={gotoNext} disabled={!canNext}>确认提交</Button> : null }
+      { step === 2 ? <Button variant="contained" color="secondary" onClick={submit} disabled={disabled || !canNext}>确认提交</Button> : null }
     </DialogActions>
   </Dialog>;
 };
