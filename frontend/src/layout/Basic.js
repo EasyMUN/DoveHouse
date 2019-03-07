@@ -18,6 +18,7 @@ const styles = makeStyles(theme => ({
     maxWidth: 700,
     margin: '0 auto',
     padding: '0 20px',
+    paddingBottom: 60,
   },
 
   toolbar: {
