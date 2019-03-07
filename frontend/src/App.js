@@ -220,9 +220,15 @@ const App = () => {
       <List className={cls.sidebar}>
         <ListItem button component={NavLink} to="/" onClick={closeDrawer}>
           <ListItemIcon>
-            <Icon>home</Icon>
+            <Icon>dashboard</Icon>
           </ListItemIcon>
           <ListItemText primary="主页" />
+        </ListItem>
+        <ListItem button component={NavLink} to="/conference" onClick={closeDrawer}>
+          <ListItemIcon>
+            <Icon>list_alt</Icon>
+          </ListItemIcon>
+          <ListItemText primary="所有会议" />
         </ListItem>
         <ListItem button component={NavLink} to="/profile" onClick={closeDrawer}>
           <ListItemIcon>

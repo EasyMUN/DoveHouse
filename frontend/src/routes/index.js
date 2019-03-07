@@ -5,6 +5,7 @@ import Home from './Home';
 import Profile from './Profile';
 import About from './About';
 import Conference from './Conference';
+import List from './List';
 
 import { Route } from '../Router';
 import { Switch } from 'react-router-dom';
@@ -37,6 +38,7 @@ export default ({ location }) => <TransitionGroup>
       <Route path="/" component={Home} exact />
       <Route path="/about" component={About} exact />
       <Route path="/conference/:id" component={Conference} exact />
+      <Route path="/conference" component={List} exact />
     </Switch>
   </CSSTransition>
 </TransitionGroup>;

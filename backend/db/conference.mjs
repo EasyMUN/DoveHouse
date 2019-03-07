@@ -10,6 +10,14 @@ const schema = new mongoose.Schema({
   background: String,
   desc: String,
 
+  closed: {
+    type: 'String',
+    enum: [
+      'register',
+      'archived',
+    ],
+  },
+
   requiresRealname: {
     type: Boolean,
     default: false,

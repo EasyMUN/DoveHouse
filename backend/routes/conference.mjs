@@ -12,6 +12,19 @@ import mailer from '../mailer';
 
 const router = new KoaRouter();
 
+router.get('/', async ctx => {
+  // List all open conferences
+  return ctx.body = await Conference.find({
+    closed: { $exists: false },
+  }, {
+    _id: 1,
+    abbr: 1,
+    title: 1,
+    background: 1,
+    logo: 1,
+  }).lean();
+});
+
 router.get('/:id', async ctx => {
   return ctx.body = await Conference.findById(ctx.params.id, {
     _id: 1,
