@@ -74,6 +74,11 @@ export default React.memo(() => {
         <ListItemIcon><Icon>code</Icon></ListItemIcon>
         <ListItemText primary="查看开源代码" secondary="EasyMUN/dovehouse" />
       </ListItem>
+
+      <ListItem button component="a" href="https://easymun.com" target="_blank">
+        <ListItemIcon><Icon>home</Icon></ListItemIcon>
+        <ListItemText primary="EasyMUN 主页" secondary="https://easymun.com" />
+      </ListItem>
     </List>
   </BasicLayout>;
 });
