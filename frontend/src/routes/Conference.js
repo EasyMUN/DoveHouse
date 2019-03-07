@@ -16,6 +16,7 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import Card from '@material-ui/core/Card';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
@@ -29,6 +30,7 @@ import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import Stepper from '@material-ui/core/Stepper';
 import Badge from '@material-ui/core/Badge';
+import Checkbox from '@material-ui/core/Checkbox';
 
 import { CONTACT, BRAND_PRIMARY, BRAND_SECONDARY } from '../config';
 
@@ -377,7 +379,7 @@ export default React.memo(() => {
 const regStyles = makeStyles(theme => ({
   badge: {
     position: 'absolute',
-    left: 26,
+    left: 10,
   },
 
   badgeAnchor: {
@@ -387,6 +389,7 @@ const regStyles = makeStyles(theme => ({
 
   commInfo: {
     transition: 'transform .2s ease',
+    paddingLeft: '0',
   },
 
   selected: {
@@ -429,7 +432,8 @@ function generateDefaultSecond(first, comms, original = new Map()) {
       const submap = new Map()
         .set(1, new Map())
         .set(2, new Map())
-        .set(3, new Map());
+        .set('SC', false)
+        .set('MPC', false);
 
       result = result.set(_id, submap);
     } else {
@@ -456,6 +460,10 @@ function toggleMap(map, id) {
   }
 }
 
+function blockSecondary(special) {
+  return special === 'crisis';
+}
+
 // Reg dialog
 const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
   const cls = regStyles();
@@ -480,32 +488,40 @@ const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
       return <>
         <DialogContent>
           <DialogContentText>感谢您对本会议的支持！</DialogContentText>
-          <DialogContentText>请您按顺序依次点选您的志愿委员会</DialogContentText>
-        </DialogContent>
-        <List>
-          { comms.map(({ title, abbr, _id }) => <ListItem
-            button
-            key={_id}
-            onClick={toggle(_id)}
-            className={clsx(cls.item, { [cls.selected]: first.has(_id) })}
-          >
-            <div className={cls.badgeAnchor}>
-              <Badge
-                className={cls.badge}
-                badgeContent={first.get(_id)}
-                invisible={!first.has(_id)}
-                color="secondary"
+          <DialogContentText>请您按顺序依次点选 <strong>两个</strong> 志愿委员会</DialogContentText>
+          <List>
+            { comms.map(({ title, abbr, _id, special }) => {
+              const b2 = blockSecondary(special);
+              let hint = abbr;
+              if(b2)
+                hint += ' - 仅第一志愿';
+
+              return <ListItem
+                button
+                disabled={!first.has(_id) && first.size !== 0 && b2}
+                key={_id}
+                onClick={toggle(_id)}
+                className={clsx(cls.item, { [cls.selected]: first.has(_id) })}
               >
-                <div className={cls.badgeInner}/>
-              </Badge>
-            </div>
-            <ListItemText
-              primary={title}
-              secondary={abbr}
-              className={cls.commInfo}
-            />
-          </ListItem>) }
-        </List>
+                <div className={cls.badgeAnchor}>
+                  <Badge
+                    className={cls.badge}
+                    badgeContent={first.get(_id)}
+                    invisible={!first.has(_id)}
+                    color="secondary"
+                  >
+                    <div className={cls.badgeInner}/>
+                  </Badge>
+                </div>
+                <ListItemText
+                  primary={title}
+                  secondary={hint}
+                  className={cls.commInfo}
+                />
+              </ListItem>;
+            })}
+          </List>
+        </DialogContent>
       </>;
     } else if(step === 1) {
       function commRender(comm, index, value, setValue) {
@@ -528,7 +544,28 @@ const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
             </DialogContent>
 
             <DialogContent>
-              { [1,2,3].map(level => <>
+              <DialogContentText>特殊席位意愿</DialogContentText>
+              <List>
+                <ListItem>
+                  <ListItemText primary="我希望得到安理会席位" />
+                  <ListItemSecondaryAction>
+                    <Checkbox
+                      onChange={() => setValue(value.set('SC', !value.get('SC')))}
+                      checked={value.get('SC')}
+                    />
+                  </ListItemSecondaryAction>
+                </ListItem>
+                <ListItem>
+                  <ListItemText primary="我希望得到 MPC 席位" />
+                  <ListItemSecondaryAction>
+                    <Checkbox
+                      onChange={() => setValue(value.set('MPC', !value.get('MPC')))}
+                      checked={value.get('MPC')}
+                    />
+                  </ListItemSecondaryAction>
+                </ListItem>
+              </List>
+              { [1,2].map(level => <>
                 <DialogContentText>第 { level } 级方向</DialogContentText>
                 <List>
                   { (buckets[level] || []).map(tag => <ListItem
@@ -586,7 +623,13 @@ const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
               <Typography variant="h6" className={cls.directionHint}>第 { index + 1 } 志愿</Typography>
               <Typography variant="h6" className={cls.directionComm}>{ comm.title }</Typography>
 
-              { [1,2,3].map(level => <>
+              <DialogContentText>特殊席位</DialogContentText>
+              <List>
+                { buckets.SC ? <ListItem><ListItemIcon><Icon>done</Icon></ListItemIcon><ListItemText primary="可能得到安理会席位" /></ListItem> : null }
+                { buckets.MPC ? <ListItem><ListItemIcon><Icon>done</Icon></ListItemIcon><ListItemText primary="可能得到 MPC 席位" /></ListItem> : null }
+              </List>
+
+              { [1,2].map(level => <>
                 <DialogContentText>第 { level } 级方向</DialogContentText>
                 <List>
                   { (buckets[level] || []).map((tag, index) => <ListItem
@@ -626,15 +669,14 @@ const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
 
   const canNext = useMemo(() => {
     if(step === 0)
-      return first.size !== 0;
+      return first.size === 2;
     else if(step === 1) {
       const selected = getSelectedComms(first, comms);
       let flag = true;
       selected.forEach(({ _id, special }) => {
         if(special === 'crisis')
           flag = flag && second.get(_id).get(1).size === 2
-            && second.get(_id).get(2).size === 2
-            && second.get(_id).get(3).size === 2;
+            && second.get(_id).get(2).size === 2;
 
         // TODO: implement other types
       });
