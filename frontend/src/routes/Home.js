@@ -1,10 +1,8 @@
-import React, { useState, useCallback, useContext } from 'react';
+import React, { useCallback } from 'react';
 
 import { makeStyles } from '@material-ui/styles';
 
-import clsx from 'clsx';
-
-import { useDispatch, useMappedState } from 'redux-react-hook';
+import { useMappedState } from 'redux-react-hook';
 
 import Typography from '@material-ui/core/Typography';
 

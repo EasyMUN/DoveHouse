@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useState, useCallback, useContext } from 'react';
+import React, { useMemo, useEffect, useState, useCallback } from 'react';
 
 import clsx from 'clsx';
 
@@ -8,7 +8,6 @@ import { Map } from 'immutable';
 
 import { useDispatch, useMappedState } from 'redux-react-hook';
 
-import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
 import Button from '@material-ui/core/Button';
@@ -24,7 +23,6 @@ import CardActionArea from '@material-ui/core/CardActionArea';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogActions from '@material-ui/core/DialogActions';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
@@ -32,11 +30,7 @@ import Stepper from '@material-ui/core/Stepper';
 import Badge from '@material-ui/core/Badge';
 import Checkbox from '@material-ui/core/Checkbox';
 
-import { CONTACT, BRAND_PRIMARY, BRAND_SECONDARY } from '../config';
-
 import { get, post } from '../store/actions';
-
-import { gravatar } from '../util';
 
 import { useRouter } from '../Router';
 import { NavLink } from 'react-router-dom';
@@ -283,7 +277,7 @@ export default React.memo(() => {
     return <div className={clsx(cls.header, { [cls.headerExt]: ext })}>
       <div className={cls.headerLeft}>
         <div className={cls.logo}>
-          <img src={ conf ? conf.logo : '' } />
+          <img alt="Logo" src={ conf ? conf.logo : '' } />
         </div>
         <div className={cls.names}>
           <Typography variant="h3" className={cls.abbr}>{ conf ? conf.abbr : '' }</Typography>
@@ -472,14 +466,14 @@ const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
   const [first, setFirst] = useState(new Map());
   const [second, setSecond] = useState(new Map());
 
+  const comms = _comms || [];
+
   const gotoNext = useCallback(() => {
     if(step === 0) setSecond(generateDefaultSecond(first, comms, second));
 
     setStep(step+1)
   }, [step, first, comms, second]);
   const gotoPrev = useCallback(() => step === 0 || setStep(step-1), [step]);
-
-  const comms = _comms || [];
 
   function generateStep() {
     if(step === 0) {

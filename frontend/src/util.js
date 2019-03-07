@@ -1,14 +1,24 @@
 import { BACKEND } from './config';
 import md5 from 'blueimp-md5';
 
+class FetchError extends Error {
+  constructor(code, text, body) {
+    super(body);
+
+    this.code = code;
+    this.text = text;
+    this.body = body;
+  }
+
+  static async from(resp) {
+    return new FetchError(resp.status, resp.statusText, await resp.text())
+  }
+}
+
 async function parseResp(resp) {
   if(resp.status === 204) return null;
   else if(resp.status >= 400)
-    throw {
-      code: resp.status,
-      text: resp.statusText,
-      body: await resp.text(),
-    };
+    throw await FetchError.from(resp);
   else if(resp.headers.get('Content-Type').indexOf('application/json') === 0)
     return resp.json();
   else return resp.text();

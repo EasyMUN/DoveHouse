@@ -1,17 +1,8 @@
-import React, { useState, useCallback, useContext } from 'react';
+import React, { useState, useCallback } from 'react';
 
 import { makeStyles } from '@material-ui/styles';
 
 import clsx from 'clsx';
-
-import { useDispatch, useMappedState } from 'redux-react-hook';
-
-import Typography from '@material-ui/core/Typography';
-
-import Card from '@material-ui/core/Card';
-import CardActions from '../overrides/CardActions';
-import CardContent from '../overrides/CardContent';
-import Button from '@material-ui/core/Button';
 
 const styles = makeStyles(theme => ({
   wrapper: {

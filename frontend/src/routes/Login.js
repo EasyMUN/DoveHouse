@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useContext } from 'react';
+import React, { useState, useCallback } from 'react';
 
 import { makeStyles } from '@material-ui/styles';
 
@@ -12,7 +12,7 @@ import CardActions from '../overrides/CardActions';
 
 import { useRouter } from '../Router';
 
-import { useDispatch, useMappedState } from 'redux-react-hook';
+import { useDispatch } from 'redux-react-hook';
 import { post, login } from '../store/actions';
 
 import { useSnackbar } from '../Snackbar';

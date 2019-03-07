@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { withStyles } from '@material-ui/styles';
 
 import CardContent from '@material-ui/core/CardContent';

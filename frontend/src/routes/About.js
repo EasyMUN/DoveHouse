@@ -1,25 +1,15 @@
-import React, { useState, useCallback, useContext } from 'react';
+import React from 'react';
 
 import { makeStyles } from '@material-ui/styles';
 
-import { useDispatch, useMappedState } from 'redux-react-hook';
-
-import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
-import Button from '@material-ui/core/Button';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 
 import { CONTACT, BRAND_PRIMARY, BRAND_SECONDARY } from '../config';
-
-import { post, refresh } from '../store/actions';
-
-import { gravatar } from '../util';
-
-import { useSnackbar } from '../Snackbar';
 
 import BasicLayout from '../layout/Basic';
 
