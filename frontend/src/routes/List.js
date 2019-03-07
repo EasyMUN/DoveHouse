@@ -80,7 +80,7 @@ export default React.memo(() => {
 
   useEffect(() => {
     fetchConfs();
-  });
+  }, []);
 
   const inner = confs ?
     confs.map(conf => <Card className={cls.card} key={conf._id}>
