@@ -430,8 +430,6 @@ function generateDefaultSecond(first, comms, original = new Map()) {
         .set('MPC', false);
 
       result = result.set(_id, submap);
-    } else {
-      result = result.set(_id, new Map());
     }
   });
 
@@ -458,6 +456,11 @@ function blockSecondary(special) {
   return special === 'crisis';
 }
 
+function noSecond(first, comms) {
+  const selected = getSelectedComms(first, comms);
+  return selected.every(e => e.special !== 'crisis');
+}
+
 // Reg dialog
 const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
   const cls = regStyles();
@@ -469,11 +472,27 @@ const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
   const comms = _comms || [];
 
   const gotoNext = useCallback(() => {
-    if(step === 0) setSecond(generateDefaultSecond(first, comms, second));
+    if(step === 0) {
+      setSecond(generateDefaultSecond(first, comms, second));
+
+      if(noSecond(first, comms)) {
+        setStep(step+2);
+        return;
+      }
+    }
 
     setStep(step+1)
   }, [step, first, comms, second]);
-  const gotoPrev = useCallback(() => step === 0 || setStep(step-1), [step]);
+  const gotoPrev = useCallback(() => {
+    if(step === 0) return;
+
+    if(step === 2 && noSecond(first, comms)) {
+      setStep(0);
+      return;
+    }
+
+    setStep(step-1);
+  }, [first, comms, step]);
 
   function generateStep() {
     if(step === 0) {
@@ -534,7 +553,7 @@ const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
               <Typography variant="h6" className={cls.directionHint}>第 { index + 1 } 志愿</Typography>
               <Typography variant="h6" className={cls.directionComm}>{ comm.title }</Typography>
 
-              <DialogContentText>请依次在下方三个级别的方向中 <strong>按志愿顺序</strong> 各做出 <strong>两个</strong> 选择</DialogContentText>
+              <DialogContentText>请填写特殊席位医院，并依次在下方两个级别的方向中 <strong>按志愿顺序</strong> 各做出 <strong>两个</strong> 选择</DialogContentText>
             </DialogContent>
 
             <DialogContent>
@@ -588,7 +607,14 @@ const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
             </DialogContent>
           </>;
         } else {
-          // TODO: implement
+          return <>
+            <DialogContent>
+              <Typography variant="h6" className={cls.directionHint}>第 { index + 1 } 志愿</Typography>
+              <Typography variant="h6" className={cls.directionComm}>{ comm.title }</Typography>
+
+              <DialogContentText>此委员会不需要额外选择方向</DialogContentText>
+            </DialogContent>
+          </>;
         }
       }
 
@@ -639,7 +665,14 @@ const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
             </DialogContent>
           </>;
         } else {
-          // TODO: implement
+          return <>
+            <DialogContent>
+              <Typography variant="h6" className={cls.directionHint}>第 { index + 1 } 志愿</Typography>
+              <Typography variant="h6" className={cls.directionComm}>{ comm.title }</Typography>
+
+              <DialogContentText>此委员会不需要额外选择方向</DialogContentText>
+            </DialogContent>
+          </>;
         }
       }
 
@@ -671,8 +704,6 @@ const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
         if(special === 'crisis')
           flag = flag && second.get(_id).get(1).size === 2
             && second.get(_id).get(2).size === 2;
-
-        // TODO: implement other types
       });
 
       return flag;
@@ -692,7 +723,7 @@ const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
   return <Dialog {...rest} scroll="body">
     <Stepper activeStep={step} color="secondary">
       <Step color="inherit"><StepLabel>选择委员会志愿</StepLabel></Step>
-      <Step color="inherit"><StepLabel>选择方向</StepLabel></Step>
+      <Step color="inherit" completed={step > 1 && !noSecond(first, comms)}><StepLabel>选择方向</StepLabel></Step>
       <Step color="inherit"><StepLabel>确认</StepLabel></Step>
     </Stepper>
 
