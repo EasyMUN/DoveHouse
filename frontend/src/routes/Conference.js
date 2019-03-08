@@ -415,6 +415,10 @@ const regStyles = makeStyles(theme => ({
   extra: {
     margin: '5px 0 20px 0',
   },
+
+  dialogRoot: {
+    width: 'calc(100% - 96px)',
+  },
 }));
 
 function getSelectedComms(first, comms) {
@@ -749,7 +753,9 @@ const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
       onSubmit(result, extra);
   }, [first, second, comms, extra]);
 
-  return <Dialog {...rest} scroll="body">
+  return <Dialog {...rest} scroll="body" classes={{
+    paper: cls.dialogRoot,
+  }}>
     <Stepper activeStep={step} color="secondary">
       <Step color="inherit"><StepLabel>选择委员会志愿</StepLabel></Step>
       <Step color="inherit" completed={step > 1 && !noSecond(first, comms)}><StepLabel>选择方向</StepLabel></Step>
