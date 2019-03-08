@@ -11,6 +11,7 @@ import { useDispatch, useMappedState } from 'redux-react-hook';
 import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
 import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -337,12 +338,12 @@ export default React.memo(() => {
       { commsRegion }
     </> : null;
 
-  const submitReg = useCallback(async submission => {
+  const submitReg = useCallback(async (reg, extra) => {
     if(submitting) return;
     setSubmitting(true);
 
     try {
-      await dispatch(post(`/conference/${match.params.id}/registrant/${user._id}`, submission, 'PUT'));
+      await dispatch(post(`/conference/${match.params.id}/registrant/${user._id}`, { reg, extra }, 'PUT'));
       await fetchReg();
 
       await dispatch(refresh());
@@ -410,6 +411,10 @@ const regStyles = makeStyles(theme => ({
     lineHeight: '20px',
     color: 'rgba(0,0,0,.54)',
   },
+
+  extra: {
+    margin: '5px 0 20px 0',
+  },
 }));
 
 function getSelectedComms(first, comms) {
@@ -473,6 +478,12 @@ const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
   const [step, setStep] = useState(0);
   const [first, setFirst] = useState(new Map());
   const [second, setSecond] = useState(new Map());
+  const [extra, setExtra] = useState('');
+
+  const changeExtra = useCallback(ev => {
+    console.log(ev.target.value);
+    setExtra(ev.target.value);
+  }, [setExtra]);
 
   const comms = _comms || [];
 
@@ -558,7 +569,7 @@ const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
               <Typography variant="h6" className={cls.directionHint}>第 { index + 1 } 志愿</Typography>
               <Typography variant="h6" className={cls.directionComm}>{ comm.title }</Typography>
 
-              <DialogContentText>请填写特殊席位医院，并依次在下方两个级别的方向中 <strong>按志愿顺序</strong> 各做出 <strong>两个</strong> 选择</DialogContentText>
+              <DialogContentText>请填写特殊席位意愿，并依次在下方两个级别的方向中 <strong>按志愿顺序</strong> 各做出 <strong>两个</strong> 选择</DialogContentText>
             </DialogContent>
 
             <DialogContent>
@@ -688,6 +699,16 @@ const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
 
       return <>
         <DialogContent>
+          <TextField
+            label="备注"
+            fullWidth
+            multiline
+            variant="filled"
+            className={cls.extra}
+
+            value={extra}
+            onChange={changeExtra}
+          />
           <DialogContentText>请检查您的报名志愿信息是否正确。提交后您将 <strong>无法</strong> 修改这些信息。</DialogContentText>
           <DialogContentText>我们会尽快根据您的志愿信息为您分配学测。届时，您的邮箱将会收到通知邮件，请保持关注。</DialogContentText>
         </DialogContent>
@@ -697,7 +718,7 @@ const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
     }
   }
 
-  const content = useMemo(generateStep, [comms, step, first, second]);
+  const content = useMemo(generateStep, [comms, step, first, second, extra]);
 
   const canNext = useMemo(() => {
     if(step === 0)
@@ -725,14 +746,14 @@ const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
     });
 
     if(onSubmit)
-      onSubmit(result);
-  }, [first, second, comms]);
+      onSubmit(result, extra);
+  }, [first, second, comms, extra]);
 
   return <Dialog {...rest} scroll="body">
     <Stepper activeStep={step} color="secondary">
       <Step color="inherit"><StepLabel>选择委员会志愿</StepLabel></Step>
       <Step color="inherit" completed={step > 1 && !noSecond(first, comms)}><StepLabel>选择方向</StepLabel></Step>
-      <Step color="inherit"><StepLabel>确认</StepLabel></Step>
+      <Step color="inherit"><StepLabel>备注 &amp; 确认</StepLabel></Step>
     </Stepper>
 
     { content }

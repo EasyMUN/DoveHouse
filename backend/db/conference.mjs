@@ -40,6 +40,7 @@ const schema = new mongoose.Schema({
     },
 
     reg: Object,
+    extra: String,
   }],
 });
 

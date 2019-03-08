@@ -91,7 +91,8 @@ router.put('/:id/registrant/:user', async ctx => {
     $push: { registrants: {
       user: ctx.params.user,
       stage: 'reg',
-      reg: ctx.request.body
+      reg: ctx.request.body.reg,
+      extra: ctx.request.body.extra,
     }},
   });
 
