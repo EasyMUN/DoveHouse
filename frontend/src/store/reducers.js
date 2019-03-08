@@ -21,8 +21,16 @@ function confs(state = null, action) {
   return state;
 }
 
+function payments(state = null, action) {
+  if(action.type === 'SET_PAYMENTS')
+    return action.payments;
+
+  return state;
+}
+
 export default combineReducers({
   token,
   user,
   confs,
+  payments,
 });

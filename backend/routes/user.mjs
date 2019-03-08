@@ -4,6 +4,7 @@ import request from '../request';
 
 import User from '../db/user';
 import Conference from '../db/conference';
+import Payment from '../db/payment';
 
 import { generateJWT } from '../util';
 import Config from '../config';
@@ -129,6 +130,14 @@ router.get('/:id/conferences', matcher, async ctx => {
     background: 1,
     logo: 1,
   }).lean();
+});
+
+router.get('/:id/payment', matcher, async ctx => {
+  const status = ctx.query.status;
+  ctx.body = await Payment.find({
+    payee: ctx.params.id,
+    status,
+  }).sort({ creation: -1 }).populate('conf', '_id logo abbr').lean();
 });
 
 export default router;

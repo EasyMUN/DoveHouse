@@ -19,6 +19,11 @@ export const setConfs = confs => ({
   confs,
 });
 
+export const setPayments = payments => ({
+  type: 'SET_PAYMENTS',
+  payments,
+});
+
 /* Basic networking */
 export const get = (endpoint, method = 'GET', override = null) => async (dispatch, getStore) => {
   const { token } = getStore();
@@ -33,10 +38,16 @@ export const post = (endpoint, payload, method = 'POST', override = null) => asy
 /* Composed */
 export const login = token => async dispatch => {
   const self = await dispatch(get('/login', 'GET', token));
-  const confs = await dispatch(get(`/user/${self._id}/conferences`, 'GET', token));
+  const [confs, payments] = await Promise.all([
+    dispatch(get(`/user/${self._id}/conferences`, 'GET', token)),
+    dispatch(get(`/user/${self._id}/payment?status=waiting`, 'GET', token)),
+  ]);
+
+  console.log(confs);
 
   dispatch(setUser(self));
   dispatch(setConfs(confs));
+  dispatch(setPayments(payments));
   dispatch(setToken(token));
 }
 

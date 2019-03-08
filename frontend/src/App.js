@@ -246,8 +246,8 @@ const App = () => {
           <ListItemText primary="所有会议" />
         </ListItem>
 
-        { confs.map(conf =>
-          <Tooltip title={conf.title} placement="top">
+        { confs ? confs.map(conf =>
+          <Tooltip title={conf.title} placement="top" key={conf._id}>
             <ListItem button component={NavLink} to={`/conference/${conf._id}`} onClick={closeDrawer} key={conf._id}>
               <ListItemAvatar>
                 <Avatar src={conf.logo}>list_alt</Avatar>
@@ -257,7 +257,7 @@ const App = () => {
               }} />
             </ListItem>
           </Tooltip>
-        ) }
+        ) : null }
 
         <Divider />
         <ListItem button component={NavLink} to="/profile" onClick={closeDrawer}>

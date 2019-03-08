@@ -84,22 +84,52 @@ const styles = makeStyles(theme => ({
     color: 'rgba(0,0,0,.54)',
     marginBottom: 20,
   },
+
+  paymentDesc: {
+    color: 'rgba(0,0,0,.38)',
+    fontSize: 20,
+    lineHeight: '24px',
+  },
+
+  paymentTotal: {
+    color: 'rgba(0,0,0,.87)',
+    fontSize: 32,
+    lineHeight: '36px',
+  },
 }));
 
 export default React.memo(() => {
   const cls = styles();
 
-  const mapS2P = useCallback(({ user, confs }) => ({
-    user, confs
+  const mapS2P = useCallback(({ user, confs, payments }) => ({
+    user, confs, payments
   }));
-  const { user, confs } = useMappedState(mapS2P);
+  const { user, confs, payments } = useMappedState(mapS2P);
 
   const hour = new Date().getHours();
   let greeting = '早上';
   if(hour <= 4 || hour >= 16) greeting = '晚上'
   else if(hour >= 10) greeting = '中午';
 
-  const confsRegion = confs ? confs.map(conf => <Card className={cls.card}>
+  const paymentsRegion = payments ? payments.map(payment => <Card className={cls.card} key={payment._id}>
+    <CardContent>
+      <div className={cls.abbrLine}>
+        <Avatar src={payment.conf.logo} className={cls.logo}/>
+        <Typography gutterBottom variant="body2" className={cls.type}>{ payment.conf.abbr }</Typography>
+      </div>
+      <Typography gutterBottom variant="h5" className={cls.title}>待付 / 未确认订单</Typography>
+
+      <Typography variant="body1" className={cls.paymentDesc}>{payment.desc}</Typography>
+      <Typography variant="body1" className={cls.paymentTotal}>{payment.total} CNY</Typography>
+    </CardContent>
+    <CardActions>
+      <NavLink to="/profile">
+        <Button color="secondary">付款</Button>
+      </NavLink>
+    </CardActions>
+  </Card>) : null;
+
+  const confsRegion = confs ? confs.map(conf => <Card className={cls.card} key={conf._id}>
     <CardContent>
       <div className={cls.abbrLine}>
         <Avatar src={conf.logo} className={cls.logo}/>
@@ -116,9 +146,12 @@ export default React.memo(() => {
     </CardContent>
   </Card>) : [];
 
+  const clear =
+    user.profile && user.idNumber && paymentsRegion.length === 0;
+
   return <BasicLayout>
     <Typography variant="h2" className={cls.greet}>{ greeting }好，{user.realname}!</Typography>
-    { user.profile && user.idNumber ?
+    { clear ?
         <Typography variant="h4" className={cls.hint}>你目前没有待办的通知!</Typography>
         :
         <Typography variant="h4" className={cls.hint}>以下是您收到的通知</Typography>
@@ -154,6 +187,7 @@ export default React.memo(() => {
         </Card>
         : null }
 
+    { paymentsRegion }
     <Divider className={cls.divider}/>
     { confsRegion.length > 0 ? confsRegion :
         <Card className={clsx(cls.empty, cls.card)}>
