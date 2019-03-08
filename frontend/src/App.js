@@ -16,6 +16,7 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Divider from '@material-ui/core/Divider';
 import Tooltip from '@material-ui/core/Tooltip';
 
@@ -248,10 +249,12 @@ const App = () => {
         { confs.map(conf =>
           <Tooltip title={conf.title} placement="top">
             <ListItem button component={NavLink} to={`/conference/${conf._id}`} onClick={closeDrawer} key={conf._id}>
-              <ListItemIcon>
-                <Icon>list_alt</Icon>
-              </ListItemIcon>
-              <ListItemText primary={conf.title} secondary={conf.abbr} alt={conf.title} className={cls.nowrap} />
+              <ListItemAvatar>
+                <Avatar src={conf.logo}>list_alt</Avatar>
+              </ListItemAvatar>
+              <ListItemText primary={conf.title} secondary={conf.abbr} alt={conf.title} classes={{
+                primary: cls.nowrap
+              }} />
             </ListItem>
           </Tooltip>
         ) }
