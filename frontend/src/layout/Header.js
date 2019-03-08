@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 
 import { makeStyles } from '@material-ui/styles';
 
@@ -79,15 +79,18 @@ export default React.memo(({ img, children, header, floating, pad = 0, height = 
   const cls = styles();
 
   const [scroll, setScroll] = useState(0);
+  const scrollRef = useRef();
 
   const onTop = scroll < height - 60;
   const percentage = Math.min(scroll / (height - 60), 1);
 
   const scrollCB = useCallback(ev => {
+    if(ev.target !== scrollRef.current)
+      return;
     setScroll(ev.target.scrollTop);
-  });
+  }, [scrollRef]);
 
-  return <div className={cls.wrapper} onScroll={scrollCB}>
+  return <div className={cls.wrapper} onScroll={scrollCB} ref={scrollRef}>
     <div className={clsx(cls.toolbar, { [cls.toolbarFloating]: !onTop })} style={{
       height: height + pad,
       top: -height + 60,
