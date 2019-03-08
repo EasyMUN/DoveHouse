@@ -14,7 +14,15 @@ function user(state = null, action) {
   return state;
 }
 
+function confs(state = null, action) {
+  if(action.type === 'SET_CONFS')
+    return action.confs;
+
+  return state;
+}
+
 export default combineReducers({
   token,
   user,
+  confs,
 });

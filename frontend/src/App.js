@@ -17,6 +17,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from '@material-ui/core/Divider';
+import Tooltip from '@material-ui/core/Tooltip';
 
 import { useDispatch, useMappedState } from 'redux-react-hook';
 import { logout } from './store/actions';
@@ -133,13 +134,19 @@ const styles = makeStyles(theme => ({
     display: 'flex',
     alignItems: 'center',
   },
+
+  nowrap: {
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  },
 }));
 
 const App = () => {
   const cls = styles();
 
-  const mapS2P = useCallback(({ token, user })=> ({ login: !!token, user }));
-  const { user, login } = useMappedState(mapS2P);
+  const mapS2P = useCallback(({ token, user, confs })=> ({ login: !!token, user, confs }));
+  const { user, login, confs } = useMappedState(mapS2P);
 
   const { match, history, location } = useRouter();
 
@@ -224,19 +231,32 @@ const App = () => {
           </ListItemIcon>
           <ListItemText primary="主页" />
         </ListItem>
+        <Divider />
         <ListItem button component={NavLink} to="/conference" onClick={closeDrawer}>
           <ListItemIcon>
             <Icon>list_alt</Icon>
           </ListItemIcon>
           <ListItemText primary="所有会议" />
         </ListItem>
+
+        { confs.map(conf =>
+          <Tooltip title={conf.title} placement="top">
+            <ListItem button component={NavLink} to={`/conference/${conf._id}`} onClick={closeDrawer} key={conf._id}>
+              <ListItemIcon>
+                <Icon>list_alt</Icon>
+              </ListItemIcon>
+              <ListItemText primary={conf.title} secondary={conf.abbr} alt={conf.title} className={cls.nowrap} />
+            </ListItem>
+          </Tooltip>
+        ) }
+
+        <Divider />
         <ListItem button component={NavLink} to="/profile" onClick={closeDrawer}>
           <ListItemIcon>
             <Icon>person</Icon>
           </ListItemIcon>
           <ListItemText primary="个人资料" />
         </ListItem>
-        <Divider />
         <ListItem button component={NavLink} to="/about" onClick={closeDrawer}>
           <ListItemIcon>
             <Icon>feedback</Icon>

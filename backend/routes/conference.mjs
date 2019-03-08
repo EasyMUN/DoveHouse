@@ -22,6 +22,7 @@ router.get('/', async ctx => {
     title: 1,
     background: 1,
     logo: 1,
+    closed: 1,
   }).lean();
 });
 
@@ -34,6 +35,7 @@ router.get('/:id', async ctx => {
     desc: 1,
     logo: 1,
 
+    closed: 1,
     requiresRealname: 1,
   });
 });

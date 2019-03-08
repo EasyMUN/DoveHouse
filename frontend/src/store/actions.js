@@ -14,6 +14,11 @@ export const setUser = user => ({
   user,
 });
 
+export const setConfs = confs => ({
+  type: 'SET_CONFS',
+  confs,
+});
+
 /* Basic networking */
 export const get = (endpoint, method = 'GET', override = null) => async (dispatch, getStore) => {
   const { token } = getStore();
@@ -28,14 +33,16 @@ export const post = (endpoint, payload, method = 'POST', override = null) => asy
 /* Composed */
 export const login = token => async dispatch => {
   const self = await dispatch(get('/login', 'GET', token));
+  const confs = await dispatch(get(`/user/${self._id}/conferences`, 'GET', token));
+
   dispatch(setUser(self));
+  dispatch(setConfs(confs));
   dispatch(setToken(token));
 }
 
 export const refresh = () => async (dispatch, getStore) => {
   const { token } = getStore();
-  const self = await dispatch(get('/login', 'GET', token));
-  dispatch(setUser(self));
+  await dispatch(login(token));
 }
 
 export const logout = () => dispatch => {

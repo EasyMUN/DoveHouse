@@ -3,6 +3,7 @@ import KoaRouter from '@circuitcoder/koa-router';
 import request from '../request';
 
 import User from '../db/user';
+import Conference from '../db/conference';
 
 import { generateJWT } from '../util';
 import Config from '../config';
@@ -113,6 +114,21 @@ router.post('/:id/idVerify', matcher, async ctx => {
   await user.save(); // Optimistic lock
 
   return ctx.status = 204;
+});
+
+router.get('/:id/conferences', matcher, async ctx => {
+  ctx.body = await Conference.find({
+    'registrants.user': ctx.params.id,
+  }, {
+    'registrants.$': 1,
+    closed: 1,
+
+    _id: 1,
+    abbr: 1,
+    title: 1,
+    background: 1,
+    logo: 1,
+  }).lean();
 });
 
 export default router;

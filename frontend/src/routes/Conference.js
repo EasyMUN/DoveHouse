@@ -30,7 +30,7 @@ import Stepper from '@material-ui/core/Stepper';
 import Badge from '@material-ui/core/Badge';
 import Checkbox from '@material-ui/core/Checkbox';
 
-import { get, post } from '../store/actions';
+import { get, post, refresh } from '../store/actions';
 
 import { useRouter } from '../Router';
 import { NavLink } from 'react-router-dom';
@@ -336,11 +336,11 @@ export default React.memo(() => {
     if(submitting) return;
     setSubmitting(true);
 
-    console.log(submission);
     try {
       await dispatch(post(`/conference/${match.params.id}/registrant/${user._id}`, submission, 'PUT'));
       await fetchReg();
 
+      await dispatch(refresh());
       enqueueSnackbar('报名成功！', {
         variant: 'success',
       });
@@ -711,10 +711,13 @@ const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
   }, [step, first, second]);
 
   const submit = useCallback(() => {
-    const result = getSelectedComms(first, comms).map(({ _id }) => ({
-      committee: _id,
-      payload: second.get(_id).toJS(),
-    }));
+    const result = getSelectedComms(first, comms).map(({ _id }) => {
+      const payload = second.has(_id) ? second.get(_id).toJS() : undefined;
+      return {
+        committee: _id,
+        payload,
+      }
+    });
 
     if(onSubmit)
       onSubmit(result);
