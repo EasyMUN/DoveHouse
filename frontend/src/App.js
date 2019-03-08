@@ -62,6 +62,12 @@ const styles = makeStyles(theme => ({
     margin: '0 10px',
   },
 
+  brandPrimary: {
+    [theme.breakpoints.down('sm')]: {
+      display: 'none',
+    },
+  },
+
   brandFirst: {
     fontSize: 28,
     fontWeight: 500,
@@ -185,7 +191,7 @@ const App = () => {
         </Icon>
       </IconButton>
 
-      <NavLink className={cls.brand} to="/">
+      <NavLink className={clsx(cls.brand, cls.brandPrimary)} to="/">
         <Typography className={cls.brandFirst} variant="h2">{ BRAND_PRIMARY }</Typography>
         <Typography className={cls.brandSecond} variant="h2">{ BRAND_SECONDARY }</Typography>
       </NavLink>

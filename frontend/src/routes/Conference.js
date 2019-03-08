@@ -85,6 +85,7 @@ const styles = makeStyles(theme => ({
     display: 'flex',
     alignItems: 'center',
     flex: 1,
+    overflow: 'hidden',
   },
 
   logo: {
@@ -104,6 +105,7 @@ const styles = makeStyles(theme => ({
 
   names: {
     flex: 1,
+    overflow: 'hidden',
   },
 
   title: {
@@ -111,6 +113,9 @@ const styles = makeStyles(theme => ({
     fontWeight: 600,
     lineHeight: '40px',
     color: 'rgba(255,255,255,.87)',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
 
   abbr: {
