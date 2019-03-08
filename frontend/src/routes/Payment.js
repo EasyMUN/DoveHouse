@@ -48,15 +48,39 @@ const styles = makeStyles(theme => ({
 
   paymentDesc: {
     textAlign: 'center',
+    '$done &': {
+      textDecoration: 'line-through',
+      textDecorationColor: 'rgba(0,0,0,.3)',
+    },
   },
 
   paymentTotal: {
     '& small': {
       color: 'rgba(0,0,0,.38)',
+      textDecoration: 'none',
     },
 
     margin: '40px 0',
     textAlign: 'center',
+
+    '$done &': {
+      textDecoration: 'line-through',
+      textDecorationColor: 'rgba(0,0,0,.3)',
+    },
+  },
+
+  paidHint: {
+    display: 'none',
+    textAlign: 'center',
+    color: 'rgba(0,0,0,.38)',
+    marginBottom: 40,
+    marginTop: -30,
+  },
+
+  done: {
+    '& $paidHint': {
+      display: 'block',
+    },
   },
 
   qrContainer: {
@@ -92,7 +116,7 @@ export default React.memo(() => {
   const inner = payment ? <>
     <Typography variant="h2">订单详情</Typography>
 
-    <Card className={cls.card}>
+    <Card className={clsx(cls.card, { [cls.done]: payment.status === 'paid' })}>
       <CardContent>
         <Typography variant="h4" className={cls.paymentDesc}>{ payment.desc }</Typography>
         <div className={cls.abbrLine}>
@@ -100,6 +124,7 @@ export default React.memo(() => {
           <Typography variant="body2" className={cls.abbr}>{ payment.conf.abbr }</Typography>
         </div>
         <Typography variant="h3" className={cls.paymentTotal}>{ payment.total } <small>CNY</small></Typography>
+        <Typography variant="body1" className={cls.paidHint}>已支付</Typography>
       </CardContent>
       <Tabs
         value={tab}
