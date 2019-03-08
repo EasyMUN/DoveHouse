@@ -85,8 +85,12 @@ const styles = makeStyles(theme => ({
     marginBottom: 20,
   },
 
+  paymentContent: {
+    paddingBottom: 20,
+  },
+
   paymentDesc: {
-    color: 'rgba(0,0,0,.38)',
+    color: 'rgba(0,0,0,.54)',
     fontSize: 20,
     lineHeight: '24px',
   },
@@ -95,6 +99,10 @@ const styles = makeStyles(theme => ({
     color: 'rgba(0,0,0,.87)',
     fontSize: 32,
     lineHeight: '36px',
+
+    '& small': {
+      color: 'rgba(0,0,0,.38)',
+    },
   },
 }));
 
@@ -112,21 +120,20 @@ export default React.memo(() => {
   else if(hour >= 10) greeting = '中午';
 
   const paymentsRegion = payments ? payments.map(payment => <Card className={cls.card} key={payment._id}>
-    <CardContent>
-      <div className={cls.abbrLine}>
-        <Avatar src={payment.conf.logo} className={cls.logo}/>
-        <Typography gutterBottom variant="body2" className={cls.type}>{ payment.conf.abbr }</Typography>
-      </div>
-      <Typography gutterBottom variant="h5" className={cls.title}>待付 / 未确认订单</Typography>
+    <NavLink to={`/payment/${payment._id}`}>
+      <CardActionArea>
+        <CardContent className={cls.paymentContent}>
+          <div className={cls.abbrLine}>
+            <Avatar src={payment.conf.logo} className={cls.logo}/>
+            <Typography variant="body2" className={cls.type}>{ payment.conf.abbr }</Typography>
+          </div>
+          <Typography gutterBottom variant="h5" className={cls.title}>待付 / 未确认订单</Typography>
 
-      <Typography variant="body1" className={cls.paymentDesc}>{payment.desc}</Typography>
-      <Typography variant="body1" className={cls.paymentTotal}>{payment.total} CNY</Typography>
-    </CardContent>
-    <CardActions>
-      <NavLink to="/profile">
-        <Button color="secondary">付款</Button>
-      </NavLink>
-    </CardActions>
+          <Typography variant="body1" className={cls.paymentDesc}>{payment.desc}</Typography>
+          <Typography variant="body1" className={cls.paymentTotal}>{payment.total} <small>CNY</small></Typography>
+        </CardContent>
+      </CardActionArea>
+    </NavLink>
   </Card>) : null;
 
   const confsRegion = confs ? confs.map(conf => <Card className={cls.card} key={conf._id}>

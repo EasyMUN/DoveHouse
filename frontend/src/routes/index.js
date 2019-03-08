@@ -6,6 +6,7 @@ import Profile from './Profile';
 import About from './About';
 import Conference from './Conference';
 import List from './List';
+import Payment from './Payment';
 
 import { Route } from '../Router';
 import { Switch } from 'react-router-dom';
@@ -39,6 +40,7 @@ export default ({ location }) => <TransitionGroup>
       <Route path="/about" component={About} exact />
       <Route path="/conference/:id" component={Conference} exact />
       <Route path="/conference" component={List} exact />
+      <Route path="/payment/:id" component={Payment} exact />
     </Switch>
   </CSSTransition>
 </TransitionGroup>;

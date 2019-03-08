@@ -18,6 +18,11 @@ const schema = new mongoose.Schema({
     ],
   },
 
+  payments: [{
+    provider: String,
+    qr: String,
+  }],
+
   requiresRealname: {
     type: Boolean,
     default: false,
