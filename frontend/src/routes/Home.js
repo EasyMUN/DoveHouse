@@ -1,5 +1,7 @@
 import React, { useCallback } from 'react';
 
+import clsx from 'clsx';
+
 import { makeStyles } from '@material-ui/styles';
 
 import { useMappedState } from 'redux-react-hook';
@@ -9,6 +11,13 @@ import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
 import CardActions from '../overrides/CardActions';
 import CardContent from '../overrides/CardContent';
+import CardActionArea from '@material-ui/core/CardActionArea';
+import Stepper from '@material-ui/core/Stepper';
+import Step from '@material-ui/core/Step';
+import StepLabel from '@material-ui/core/StepLabel';
+import Icon from '@material-ui/core/Icon';
+import Avatar from '@material-ui/core/Avatar';
+import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
 
 import { NavLink } from 'react-router-dom';
@@ -29,6 +38,16 @@ const styles = makeStyles(theme => ({
     marginTop: 40,
   },
 
+  divider: {
+    marginTop: 40,
+  },
+
+  logo: {
+    height: 18,
+    width: 18,
+    marginRight: theme.spacing.unit,
+  },
+
   type: {
     marginBottom: 0,
     color: 'rgba(0,0,0,.38)',
@@ -37,20 +56,65 @@ const styles = makeStyles(theme => ({
   title: {
     marginBottom: 20,
   },
+
+  abbrLine: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+
+  empty: {
+  },
+
+  emptyContent: {
+    textAlign: 'center',
+    paddingTop: 40,
+    paddingBottom: 40,
+  },
+
+  emptyIcon: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+
+    height: 160,
+    width: 160,
+    background: 'rgba(0,0,0,.12)',
+    borderRadius: '50%',
+    fontSize: 80,
+    color: 'rgba(0,0,0,.54)',
+    marginBottom: 20,
+  },
 }));
 
 export default React.memo(() => {
   const cls = styles();
 
-  const mapS2P = useCallback(({ user }) => ({
-    user,
+  const mapS2P = useCallback(({ user, confs }) => ({
+    user, confs
   }));
-  const { user } = useMappedState(mapS2P);
+  const { user, confs } = useMappedState(mapS2P);
 
   const hour = new Date().getHours();
   let greeting = '早上';
   if(hour <= 4 || hour >= 16) greeting = '晚上'
   else if(hour >= 10) greeting = '中午';
+
+  const confsRegion = confs ? confs.map(conf => <Card className={cls.card}>
+    <CardContent>
+      <div className={cls.abbrLine}>
+        <Avatar src={conf.logo} className={cls.logo}/>
+        <Typography gutterBottom variant="body2" className={cls.type}>{ conf.abbr }</Typography>
+      </div>
+      <Typography variant="h5" className={cls.title}>报名进度</Typography>
+
+      <Stepper>
+        <Step><StepLabel>报名</StepLabel></Step>
+        <Step><StepLabel>学测</StepLabel></Step>
+        <Step><StepLabel>面试</StepLabel></Step>
+        <Step><StepLabel>席位分配</StepLabel></Step>
+      </Stepper>
+    </CardContent>
+  </Card>) : [];
 
   return <BasicLayout>
     <Typography variant="h2" className={cls.greet}>{ greeting }好，{user.realname}!</Typography>
@@ -89,5 +153,19 @@ export default React.memo(() => {
           </CardActions>
         </Card>
         : null }
+
+    <Divider className={cls.divider}/>
+    { confsRegion.length > 0 ? confsRegion :
+        <Card className={clsx(cls.empty, cls.card)}>
+          <NavLink to="/conference">
+            <CardActionArea>
+              <CardContent className={cls.emptyContent}>
+                <Icon className={cls.emptyIcon}>assignment_turned_in</Icon>
+                <Typography variant="body1">报名中的会议什么的一个都没有，从侧边栏前往 <strong>全部会议</strong> 选个会议报名吧</Typography>
+              </CardContent>
+            </CardActionArea>
+          </NavLink>
+        </Card>
+    }
   </BasicLayout>
 });
