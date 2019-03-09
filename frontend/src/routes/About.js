@@ -56,7 +56,7 @@ export default React.memo(() => {
 
     <List>
       <ListItem button component="a" href={ `mailto:${CONTACT}` } target="_blank">
-        <ListItemIcon><Icon>alternate_email</Icon></ListItemIcon>
+        <ListItemIcon><Icon>email</Icon></ListItemIcon>
         <ListItemText primary="联系我们" secondary={CONTACT} />
       </ListItem>
 
