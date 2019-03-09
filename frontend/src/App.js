@@ -147,6 +147,12 @@ const styles = makeStyles(theme => ({
     overflow: 'hidden',
     textOverflow: 'ellipsis',
   },
+
+  confLogo: {
+    width: 24,
+    height: 24,
+    marginRight: 16,
+  },
 }));
 
 const App = () => {
@@ -250,7 +256,7 @@ const App = () => {
           <Tooltip title={conf.title} placement="top" key={conf._id}>
             <ListItem button component={NavLink} to={`/conference/${conf._id}`} onClick={closeDrawer} key={conf._id}>
               <ListItemAvatar>
-                <Avatar src={conf.logo}>list_alt</Avatar>
+                <Avatar src={conf.logo} className={cls.confLogo} />
               </ListItemAvatar>
               <ListItemText primary={conf.title} secondary={conf.abbr} alt={conf.title} classes={{
                 primary: cls.nowrap
