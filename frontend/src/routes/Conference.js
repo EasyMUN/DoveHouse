@@ -741,10 +741,10 @@ const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
   }, [step, first, second]);
 
   const submit = useCallback(() => {
-    const result = getSelectedComms(first, comms).map(({ _id }) => {
+    const result = getSelectedComms(first, comms).map(({ _id, slug }) => {
       const payload = second.has(_id) ? second.get(_id).toJS() : undefined;
       return {
-        committee: _id,
+        committee: slug,
         payload,
       }
     });
