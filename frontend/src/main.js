@@ -47,7 +47,6 @@ function withGA(Comp, opts = {}) {
   };
 
   return props => {
-    console.log(props);
     if(Config.GA)
       useEffect(() => track(props.location.pathname), [ props.location.pathname ]);
 
