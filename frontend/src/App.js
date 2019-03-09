@@ -131,6 +131,10 @@ const styles = makeStyles(theme => ({
     padding: 4,
   },
 
+  avatarFallback: {
+    position: 'absolute',
+  },
+
   sidebar: {
     width: 250,
   },
@@ -216,7 +220,8 @@ const App = () => {
       </div>
 
       <IconButton className={cls.avatarBtn} onClick={openAccountMenu} aria-owns="account-menu">
-        <Avatar src={user && gravatar(user.email)}>{ user && user.realname.slice(0, 1) }</Avatar>
+        <Avatar className={cls.avatarFallback}>{ user && user.realname.slice(0, 1) }</Avatar>
+        <Avatar src={user && gravatar(user.email)} />
       </IconButton>
 
       <Menu
