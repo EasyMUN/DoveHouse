@@ -9,7 +9,7 @@ export const Route = ({ component: Comp, ...props }) => (
   <ReactRoute {...props}
     render={ routeProps => (
       <RouterContext.Provider value={routeProps}>
-        <Comp />
+        <Comp {...routeProps} {...props} />
       </RouterContext.Provider>
     )}
   />

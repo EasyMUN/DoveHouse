@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
@@ -17,6 +17,9 @@ import blue from '@material-ui/core/colors/blue';
 import { createMuiTheme } from '@material-ui/core/styles';
 import { ThemeProvider } from '@material-ui/styles';
 
+import ReactGA from 'react-ga';
+import * as Config from './config';
+
 const root = document.getElementById('root');
 
 const theme = createMuiTheme({
@@ -30,12 +33,34 @@ const theme = createMuiTheme({
   },
 });
 
+if(Config.GA)
+  ReactGA.initialize(Config.GA);
+
+function withGA(Comp, opts = {}) {
+  const track = page => {
+    ReactGA.set({
+      page,
+      ...opts,
+    });
+
+    ReactGA.pageview(page);
+  };
+
+  return props => {
+    console.log(props);
+    if(Config.GA)
+      useEffect(() => track(props.location.pathname), [ props.location.pathname ]);
+
+    return <Comp {...props} />
+  };
+}
+
 async function render(Comp) {
   return ReactDOM.render(
     <StoreContext.Provider value={store}>
       <ThemeProvider theme={theme}>
         <Router>
-          <Route component={Comp} />
+          <Route component={withGA(Comp)} />
         </Router>
       </ThemeProvider>
     </StoreContext.Provider>,
