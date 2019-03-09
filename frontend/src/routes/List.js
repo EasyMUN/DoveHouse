@@ -63,7 +63,7 @@ const styles = makeStyles(theme => ({
     color: 'rgba(255,255,255,.54)',
     lineHeight: '20px',
     fontSize: 18,
-    fontWeight: 200,
+    fontWeight: 300,
   },
 }));
 

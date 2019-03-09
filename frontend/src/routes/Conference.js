@@ -64,7 +64,7 @@ const styles = makeStyles(theme => ({
 
     '& $title': {
       color: 'black',
-      fontWeight: 200,
+      fontWeight: 300,
     },
 
     '& $abbr': {
@@ -176,7 +176,7 @@ const styles = makeStyles(theme => ({
     color: 'rgba(255,255,255,.54)',
     lineHeight: '20px',
     fontSize: 18,
-    fontWeight: 200,
+    fontWeight: 300,
   },
 
   backdrop: {

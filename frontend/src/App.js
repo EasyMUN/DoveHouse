@@ -77,7 +77,7 @@ const styles = makeStyles(theme => ({
 
   brandSecond: {
     fontSize: 28,
-    fontWeight: 200,
+    fontWeight: 300,
     display: 'inline',
   },
 

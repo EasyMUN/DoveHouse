@@ -32,7 +32,7 @@ const styles = makeStyles(theme => ({
   },
 
   brandSecond: {
-    fontWeight: 200,
+    fontWeight: 300,
   },
 
   powered: {
