@@ -656,7 +656,8 @@ const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
         if(comm.special === 'crisis') {
           const buckets = value.toJS();
           for(const key in buckets)
-            buckets[key] = Object.keys(buckets[key]).sort((a, b) => buckets[key][a] - buckets[key][b]);
+            if(typeof buckets[key] === 'object')
+              buckets[key] = Object.keys(buckets[key]).sort((a, b) => buckets[key][a] - buckets[key][b]);
 
           return <>
             <DialogContent>
