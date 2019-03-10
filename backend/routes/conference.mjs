@@ -37,6 +37,7 @@ router.get('/:id', async ctx => {
 
     closed: 1,
     requiresRealname: 1,
+    publishes: 1,
   });
 });
 
@@ -113,6 +114,40 @@ router.get('/:id/registrant/:user', async ctx => {
 
   if(!conf) return ctx.status = 404;
   return ctx.body = { stage: conf.registrants[0].stage, reg: conf.registrants[0].reg };
+});
+
+router.get('/:id/role/:user', async ctx => {
+  const allowed = ctx.user.isAdmin || ctx.params.user === ctx.user._id.toString();
+  if(!allowed) return ctx.status = 403;
+
+  const conf = await Conference.findOne({
+    _id: ctx.params.id,
+    moderators: ctx.params.user,
+  });
+
+  if(!conf) return ctx.status = 404;
+  return ctx.body = { role: 'moderator' };
+});
+
+router.post('/:id/publish', async ctx => {
+  const criteria = {
+    _id: ctx.params.id,
+  };
+
+  if(!ctx.user.isAdmin)
+    criteria.moderators = ctx.user._id;
+
+  const conf = await Conference.findOneAndUpdate(criteria, { $push: {
+    publishes: {
+      title: ctx.request.body.title,
+      main: ctx.request.body.main,
+
+      date: new Date().toISOString(),
+    },
+  }});
+
+  if(conf) return ctx.status = 201;
+  else return ctx.status = 404;
 });
 
 export default router;

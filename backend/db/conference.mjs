@@ -42,6 +42,19 @@ const schema = new mongoose.Schema({
     reg: Object,
     extra: String,
   }],
+
+  moderators: [
+    mongoose.Schema.Types.ObjectId,
+  ],
+
+  publishes: [
+    {
+      title: String,
+      main: String,
+
+      date: String,
+    },
+  ],
 });
 
 const Conference = mongoose.model('Conference', schema);

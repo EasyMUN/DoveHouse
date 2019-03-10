@@ -8,9 +8,7 @@ import { useDispatch } from 'redux-react-hook';
 
 import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
-import CardActions from '../overrides/CardActions';
 import CardContent from '../overrides/CardContent';
-import CardActionArea from '@material-ui/core/CardActionArea';
 import Avatar from '@material-ui/core/Avatar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
@@ -140,7 +138,7 @@ export default React.memo(() => {
         onChangeIndex={updateTab}
       >
         { (payment.conf.payments || []).map((p, index) => <div key={index} className={cls.qrContainer}>
-          <img className={cls.qr} src={p.qr} />
+          <img className={cls.qr} src={p.qr} alt="QR Code" />
         </div>) }
       </SwipeableViews>
     </Card>

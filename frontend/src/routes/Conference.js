@@ -11,6 +11,7 @@ import { useDispatch, useMappedState } from 'redux-react-hook';
 import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
 import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -31,6 +32,8 @@ import StepLabel from '@material-ui/core/StepLabel';
 import Stepper from '@material-ui/core/Stepper';
 import Badge from '@material-ui/core/Badge';
 import Checkbox from '@material-ui/core/Checkbox';
+
+import PostEdit from '../comps/PostEdit';
 
 import { get, post, refresh } from '../store/actions';
 
@@ -129,6 +132,13 @@ const styles = makeStyles(theme => ({
 
   subtitle: {
     marginTop: 4*theme.spacing.unit,
+    display: 'flex',
+    alignItems: 'center',
+  },
+
+  subtitleBtn: {
+    padding: 8,
+    marginLeft: theme.spacing.unit,
   },
 
   join: {
@@ -139,6 +149,15 @@ const styles = makeStyles(theme => ({
     opacity: 0,
     position: 'absolute',
     top: '-100%',
+  },
+
+  postCard: {
+    marginTop: theme.spacing.unit,
+  },
+
+  postMain: {
+    marginTop: theme.spacing.unit,
+    whiteSpace: 'pre-wrap',
   },
 
   commCard: {
@@ -210,15 +229,19 @@ export default React.memo(() => {
   const [conf, setConf] = useState(null);
   const [comms, setComms] = useState(null);
   const [reg, setReg] = useState(null);
+  const [role, setRole] = useState(null);
   const [color, setColor] = useState(null);
+
   const [regOpen, setRegOpen] = useState(false);
   const [regDetailOpen, setRegDetailOpen] = useState(false);
+  const [postOpen, setPostOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const { enqueueSnackbar } = useSnackbar();
 
   const closeReg = useCallback(() => setRegOpen(false), [setRegOpen]);
   const closeRegDetail = useCallback(() => setRegDetailOpen(false), [setRegDetailOpen]);
+  const closePost = useCallback(() => setPostOpen(false), [setPostOpen]);
 
   const openReg = useCallback(() => {
     if(!user || !user.profile) {
@@ -239,6 +262,9 @@ export default React.memo(() => {
   }, [setRegOpen, conf]);
   const openRegDetail = useCallback(() => {
     setRegDetailOpen(true);
+  }, [setRegDetailOpen]);
+  const openPost = useCallback(() => {
+    setPostOpen(true);
   }, [setRegDetailOpen]);
 
   const dispatch = useDispatch();
@@ -264,10 +290,21 @@ export default React.memo(() => {
     }
   };
 
+  async function fetchRole() {
+    if(!user) return setRole(null);
+    try {
+      setRole((await dispatch(get(`/conference/${match.params.id}/role/${user._id}`))).role);
+    } catch(e) {
+      if(e.code === 404) return setRole(null);
+      throw e;
+    }
+  };
+
   useEffect(() => {
     fetchConf();
     fetchComms();
     fetchReg();
+    fetchRole();
   }, [match.params.id, dispatch, user]);
 
   function loadColor() {
@@ -317,9 +354,15 @@ export default React.memo(() => {
     </div>;
   }, [conf, color, openReg, reg]);
 
-  const notiRegion = <>
+  const notiRegion = (!conf || !conf.publishes || conf.publishes.length === 0) ? <>
     <Typography variant="body1" className={cls.empty}>什么都还没有</Typography>
-  </>;
+  </> : [...conf.publishes].reverse().map(pub => <Card className={cls.postCard}>
+    <CardContent>
+      <Typography variant="h5">{ pub.title }</Typography>
+      <Typography variant="body2">{ new Date(pub.date).toLocaleString() }</Typography>
+      <Typography variant="body1" className={cls.postMain}>{ pub.main }</Typography>
+    </CardContent>
+  </Card>);
 
   const commsRegion = comms ?
     <>
@@ -362,9 +405,28 @@ export default React.memo(() => {
     </CardActions>
   </Card> : null;
 
+  const submitPost = useCallback(async content => {
+    await dispatch(post(`/conference/${match.params.id}/publish`, content));
+    await fetchConf();
+    closePost();
+  }, [match]);
+
   const inner = conf ?
     <>
-      <Typography variant="h4" className={cls.subtitle}>近期公告</Typography>
+      <Typography variant="h4" className={cls.subtitle}>
+        近期公告
+        { role === 'moderator' ?
+            <IconButton
+              className={cls.subtitleBtn}
+              onClick={openPost}
+            ><Icon>add</Icon></IconButton>
+            : null }
+      </Typography>
+      <PostEdit
+        open={postOpen}
+        onClose={closePost}
+        onSubmit={submitPost}
+      />
       { notiRegion }
       <Typography variant="h4" className={cls.subtitle}>委员会</Typography>
       { commsRegion }
