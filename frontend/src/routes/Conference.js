@@ -21,6 +21,7 @@ import Card from '@material-ui/core/Card';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
 import CardActionArea from '@material-ui/core/CardActionArea';
+import CardActions from '@material-ui/core/CardActions';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
@@ -93,6 +94,7 @@ const styles = makeStyles(theme => ({
     padding: 5,
     background: 'rgba(255,255,255,.8)',
     height: 70,
+    width: 70,
     borderRadius: 35,
     boxShadow: 'rgba(0,0,0,.3) 0 2px 6px',
 
@@ -194,6 +196,10 @@ const styles = makeStyles(theme => ({
     textAlign: 'center',
     color: 'rgba(0,0,0,.38)',
   },
+
+  progressContent: {
+    paddingBottom: 0,
+  },
 }));
 
 export default React.memo(() => {
@@ -206,11 +212,14 @@ export default React.memo(() => {
   const [reg, setReg] = useState(null);
   const [color, setColor] = useState(null);
   const [regOpen, setRegOpen] = useState(false);
+  const [regDetailOpen, setRegDetailOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const { enqueueSnackbar } = useSnackbar();
 
   const closeReg = useCallback(() => setRegOpen(false), [setRegOpen]);
+  const closeRegDetail = useCallback(() => setRegDetailOpen(false), [setRegDetailOpen]);
+
   const openReg = useCallback(() => {
     if(!user || !user.profile) {
       enqueueSnackbar('您还没有填写个人信息，不能报名！', {
@@ -228,6 +237,9 @@ export default React.memo(() => {
 
     setRegOpen(true);
   }, [setRegOpen, conf]);
+  const openRegDetail = useCallback(() => {
+    setRegDetailOpen(true);
+  }, [setRegDetailOpen]);
 
   const dispatch = useDispatch();
   const { user } = useMappedState(({ user }) => ({ user }));
@@ -330,6 +342,26 @@ export default React.memo(() => {
       </Card>) }
     </> : null;
 
+  const progress = reg ? <Card>
+    <CardContent className={cls.progressContent}>
+      <Typography variant="h5" gutterBottom>报名进度</Typography>
+
+      <Stepper>
+        <Step><StepLabel>报名</StepLabel></Step>
+        <Step><StepLabel>学测</StepLabel></Step>
+        <Step><StepLabel>面试</StepLabel></Step>
+        <Step><StepLabel>席位分配</StepLabel></Step>
+      </Stepper>
+    </CardContent>
+    <CardActions>
+      <Button
+        onClick={openRegDetail}
+      >
+        查看志愿详情
+      </Button>
+    </CardActions>
+  </Card> : null;
+
   const inner = conf ?
     <>
       <Typography variant="h4" className={cls.subtitle}>近期公告</Typography>
@@ -361,6 +393,7 @@ export default React.memo(() => {
   }, [closeReg, user, enqueueSnackbar]);
 
   return <HeaderLayout img={conf ? conf.background : ''} floating={header} pad={70 + 16 * 2 - 4 - 28} height={240}>
+    { progress }
     { inner }
 
     <RegDialog
@@ -372,6 +405,16 @@ export default React.memo(() => {
 
       onSubmit={submitReg}
       disabled={submitting}
+    />
+
+    <RegDetailDialog
+      comms={comms}
+
+      open={regDetailOpen}
+      onClose={closeRegDetail}
+      fullWidth
+
+      value={reg ? reg.reg : null}
     />
   </HeaderLayout>;
 });
@@ -473,6 +516,56 @@ function blockSecondary(special) {
 function noSecond(first, comms) {
   const selected = getSelectedComms(first, comms);
   return selected.every(e => e.special !== 'crisis');
+}
+
+function renderLastStep(comm, index, value, cls) {
+  if(comm.special === 'crisis') {
+    let buckets;
+    if(value instanceof Map)
+      buckets = value.toJS();
+    else
+      buckets = { ...value };
+
+    for(const key in buckets)
+      if(typeof buckets[key] === 'object')
+        buckets[key] = Object.keys(buckets[key]).sort((a, b) => buckets[key][a] - buckets[key][b]);
+
+    return <>
+      <DialogContent>
+        <Typography variant="h6" className={cls.directionHint}>第 { index + 1 } 志愿</Typography>
+        <Typography variant="h6" className={cls.directionComm}>{ comm.title }</Typography>
+
+        <DialogContentText>特殊席位</DialogContentText>
+        <List>
+          { buckets.SC ? <ListItem><ListItemIcon><Icon>done</Icon></ListItemIcon><ListItemText primary="可能得到安理会席位" /></ListItem> : null }
+          { buckets.MPC ? <ListItem><ListItemIcon><Icon>done</Icon></ListItemIcon><ListItemText primary="可能得到 MPC 席位" /></ListItem> : null }
+        </List>
+
+        { [1,2].map(level => <>
+          <DialogContentText>第 { level } 级方向</DialogContentText>
+          <List>
+            { (buckets[level] || []).map((tag, index) => <ListItem
+              key={tag}
+            >
+              <ListItemText
+                primary={tag}
+                secondary={`第 ${index + 1} 志愿方向`}
+              />
+            </ListItem>) }
+          </List>
+          </>) }
+        </DialogContent>
+      </>;
+  } else {
+    return <>
+      <DialogContent>
+        <Typography variant="h6" className={cls.directionHint}>第 { index + 1 } 志愿</Typography>
+        <Typography variant="h6" className={cls.directionComm}>{ comm.title }</Typography>
+
+        <DialogContentText>此委员会不需要额外选择方向</DialogContentText>
+      </DialogContent>
+      </>;
+  }
 }
 
 // Reg dialog
@@ -652,55 +745,11 @@ const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
       </>;
     } else {
       // Last step
-      function commRender(comm, index, value) {
-        if(comm.special === 'crisis') {
-          const buckets = value.toJS();
-          for(const key in buckets)
-            if(typeof buckets[key] === 'object')
-              buckets[key] = Object.keys(buckets[key]).sort((a, b) => buckets[key][a] - buckets[key][b]);
-
-          return <>
-            <DialogContent>
-              <Typography variant="h6" className={cls.directionHint}>第 { index + 1 } 志愿</Typography>
-              <Typography variant="h6" className={cls.directionComm}>{ comm.title }</Typography>
-
-              <DialogContentText>特殊席位</DialogContentText>
-              <List>
-                { buckets.SC ? <ListItem><ListItemIcon><Icon>done</Icon></ListItemIcon><ListItemText primary="可能得到安理会席位" /></ListItem> : null }
-                { buckets.MPC ? <ListItem><ListItemIcon><Icon>done</Icon></ListItemIcon><ListItemText primary="可能得到 MPC 席位" /></ListItem> : null }
-              </List>
-
-              { [1,2].map(level => <>
-                <DialogContentText>第 { level } 级方向</DialogContentText>
-                <List>
-                  { (buckets[level] || []).map((tag, index) => <ListItem
-                    key={tag}
-                  >
-                    <ListItemText
-                      primary={tag}
-                      secondary={`第 ${index + 1} 志愿方向`}
-                    />
-                  </ListItem>) }
-                </List>
-              </>) }
-            </DialogContent>
-          </>;
-        } else {
-          return <>
-            <DialogContent>
-              <Typography variant="h6" className={cls.directionHint}>第 { index + 1 } 志愿</Typography>
-              <Typography variant="h6" className={cls.directionComm}>{ comm.title }</Typography>
-
-              <DialogContentText>此委员会不需要额外选择方向</DialogContentText>
-            </DialogContent>
-          </>;
-        }
-      }
-
       const selected = getSelectedComms(first, comms);
 
+      console.log(cls);
       const inner = selected.map((comm, index) =>
-        commRender(comm, index, second.get(comm._id)));
+        renderLastStep(comm, index, second.get(comm._id), cls));
 
       return <>
         <DialogContent>
@@ -772,3 +821,27 @@ const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
     </DialogActions>
   </Dialog>;
 };
+
+// RegDetail
+
+const RegDetailDialog = ({ comms: _comms, value, ...rest }) => {
+  const cls = regStyles();
+
+  if(!value) return null;
+
+  console.log(value);
+
+  const comms = _comms || [];
+  const mapper = comms.reduce((acc, comm) => acc.set(comm.slug, comm), new Map());
+  const inner = value.flatMap(({ committee, payload }, index) => {
+    const comm = mapper.get(committee);
+    if(!comm) return [];
+    return [renderLastStep(comm, index, payload, cls)];
+  });
+
+  return <Dialog {...rest} scroll="body" classes={{
+    paper: cls.dialogRoot,
+  }}>
+    { inner }
+  </Dialog>;
+}
