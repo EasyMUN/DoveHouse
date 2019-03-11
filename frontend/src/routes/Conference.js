@@ -34,6 +34,7 @@ import Badge from '@material-ui/core/Badge';
 import Checkbox from '@material-ui/core/Checkbox';
 
 import PostEdit from '../comps/PostEdit';
+import Loading from '../comps/Loading';
 
 import { get, post, refresh } from '../store/actions';
 
@@ -150,18 +151,14 @@ const styles = makeStyles(theme => ({
     position: 'absolute',
     top: '-100%',
   },
-
-  postCard: {
+  
+  card: {
     marginTop: theme.spacing.unit,
   },
 
   postMain: {
     marginTop: theme.spacing.unit,
     whiteSpace: 'pre-wrap',
-  },
-
-  commCard: {
-    marginTop: theme.spacing.unit,
   },
 
   commBG: {
@@ -230,6 +227,7 @@ export default React.memo(() => {
   const [comms, setComms] = useState(null);
   const [reg, setReg] = useState(null);
   const [role, setRole] = useState(null);
+  const [stat, setStat] = useState(null);
   const [color, setColor] = useState(null);
 
   const [regOpen, setRegOpen] = useState(false);
@@ -290,10 +288,20 @@ export default React.memo(() => {
     }
   };
 
+  async function fetchStat() {
+    const stat = await dispatch(get(`/conference/${match.params.id}/stat`));
+    console.log(stat);
+    setStat(stat);
+  }
+
   async function fetchRole() {
     if(!user) return setRole(null);
     try {
-      setRole((await dispatch(get(`/conference/${match.params.id}/role/${user._id}`))).role);
+      const role = (await dispatch(get(`/conference/${match.params.id}/role/${user._id}`))).role;
+      setRole(role);
+
+      if(role === 'moderator')
+        await fetchStat();
     } catch(e) {
       if(e.code === 404) return setRole(null);
       throw e;
@@ -356,7 +364,7 @@ export default React.memo(() => {
 
   const notiRegion = (!conf || !conf.publishes || conf.publishes.length === 0) ? <>
     <Typography variant="body1" className={cls.empty}>什么都还没有</Typography>
-  </> : [...conf.publishes].reverse().map(pub => <Card className={cls.postCard}>
+  </> : [...conf.publishes].reverse().map(pub => <Card className={cls.card}>
     <CardContent>
       <Typography variant="h5">{ pub.title }</Typography>
       <Typography variant="body2">{ new Date(pub.date).toLocaleString() }</Typography>
@@ -366,7 +374,7 @@ export default React.memo(() => {
 
   const commsRegion = comms ?
     <>
-      { comms.map(comm => <Card className={cls.commCard} key={comm._id}>
+      { comms.map(comm => <Card className={cls.card} key={comm._id}>
         <CardActionArea>
           <CardMedia
             className={cls.commBG}
@@ -385,7 +393,7 @@ export default React.memo(() => {
       </Card>) }
     </> : null;
 
-  const progress = reg ? <Card>
+  const progressCard = reg ? <Card className={cls.card}>
     <CardContent className={cls.progressContent}>
       <Typography variant="h5" gutterBottom>报名进度</Typography>
 
@@ -410,6 +418,20 @@ export default React.memo(() => {
     await fetchConf();
     closePost();
   }, [match]);
+
+  const statInner = stat ? <List>
+    <ListItem>
+      <ListItemText primary={stat.regCount} secondary="报名人数" />
+    </ListItem>
+  </List> : <Loading />;
+
+  const statCard = role === 'moderator' ? <Card className={cls.card}>
+    <CardContent>
+      <Typography variant="h5" gutterBottom>统计数据</Typography>
+
+      { statInner }
+    </CardContent>
+  </Card> : null;
 
   const inner = conf ?
     <>
@@ -455,7 +477,8 @@ export default React.memo(() => {
   }, [closeReg, user, enqueueSnackbar]);
 
   return <HeaderLayout img={conf ? conf.background : ''} floating={header} pad={70 + 16 * 2 - 4 - 28} height={240}>
-    { progress }
+    { statCard }
+    { progressCard }
     { inner }
 
     <RegDialog

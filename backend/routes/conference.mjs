@@ -150,4 +150,21 @@ router.post('/:id/publish', async ctx => {
   else return ctx.status = 404;
 });
 
+router.get('/:id/stat', async ctx => {
+  const criteria = {
+    _id: ctx.params.id,
+  };
+
+  if(!ctx.user.isAdmin)
+    criteria.moderators = ctx.user._id;
+
+  const conf = await Conference.findOne(criteria);
+
+  if(!conf) return ctx.status = 404;
+
+  return ctx.body = {
+    regCount: conf.registrants.length,
+  };
+});
+
 export default router;
