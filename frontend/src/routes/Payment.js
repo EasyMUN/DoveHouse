@@ -75,9 +75,23 @@ const styles = makeStyles(theme => ({
     marginTop: -30,
   },
 
+  ident: {
+    textAlign: 'center',
+    color: 'rgba(0,0,0,.38)',
+    marginBottom: 40,
+
+    '& strong': {
+      color: 'rgba(0,0,0,.87)',
+    },
+  },
+
   done: {
     '& $paidHint': {
       display: 'block',
+    },
+
+    '& $ident': {
+      display: 'none',
     },
   },
 
@@ -88,6 +102,10 @@ const styles = makeStyles(theme => ({
 
   qr: {
     maxWidth: 'calc(100% - 40px)',
+  },
+
+  pageTitle: {
+    color: 'rgba(0,0,0,.54)',
   },
 }));
 
@@ -112,7 +130,7 @@ export default React.memo(() => {
   const updateTab = useCallback((ev, t) => setTab(t), [setTab])
 
   const inner = payment ? <>
-    <Typography variant="h2">订单详情</Typography>
+    <Typography variant="h2" className={cls.pageTitle}>订单详情</Typography>
 
     <Card className={clsx(cls.card, { [cls.done]: payment.status === 'paid' })}>
       <CardContent>
@@ -123,6 +141,8 @@ export default React.memo(() => {
         </div>
         <Typography variant="h3" className={cls.paymentTotal}>{ payment.total } <small>CNY</small></Typography>
         <Typography variant="body1" className={cls.paidHint}>已支付</Typography>
+
+        <Typography variant="body1" className={cls.ident}>支付时请在备注中填入 <strong>{ payment.ident }</strong><br />并确保金额正确，以便我们确认订单</Typography>
       </CardContent>
       <Tabs
         value={tab}

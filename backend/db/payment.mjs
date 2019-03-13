@@ -9,12 +9,14 @@ const schema = new mongoose.Schema({
     ref: 'Conference',
   },
 
+  ident: String,
+
   total: Number,
   desc: String,
 
   status: {
     type: String,
-    enum: ['waiting', 'paid'],
+    enum: ['waiting', 'paid', 'closed'],
   },
 
   creation: Date,
