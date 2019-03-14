@@ -5,6 +5,7 @@ import request from '../request';
 import Conference from '../db/conference';
 import User from '../db/user';
 import Committee from '../db/committee';
+import Payment from '../db/payment';
 
 import Config from '../config';
 
@@ -162,8 +163,13 @@ router.get('/:id/stat', async ctx => {
 
   if(!conf) return ctx.status = 404;
 
+  const paymentCount = await Payment.count({
+    conf: ctx.params.id,
+  });
+
   return ctx.body = {
     regCount: conf.registrants.length,
+    paymentCount,
   };
 });
 

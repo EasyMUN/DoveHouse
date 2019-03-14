@@ -216,6 +216,15 @@ const styles = makeStyles(theme => ({
   progressContent: {
     paddingBottom: 0,
   },
+
+  statTitle: {
+    margin: 16,
+    marginBottom: 10,
+  },
+
+  statList: {
+    marginBottom: 16,
+  },
 }));
 
 export default React.memo(() => {
@@ -290,7 +299,6 @@ export default React.memo(() => {
 
   async function fetchStat() {
     const stat = await dispatch(get(`/conference/${match.params.id}/stat`));
-    console.log(stat);
     setStat(stat);
   }
 
@@ -419,18 +427,21 @@ export default React.memo(() => {
     closePost();
   }, [match]);
 
-  const statInner = stat ? <List>
-    <ListItem>
+  const statInner = stat ? <List className={cls.statList}>
+    <ListItem button>
+      <ListItemIcon><Icon>assignment_ind</Icon></ListItemIcon>
       <ListItemText primary={stat.regCount} secondary="报名人数" />
+    </ListItem>
+
+    <ListItem>
+      <ListItemIcon><Icon>receipt</Icon></ListItemIcon>
+      <ListItemText primary={stat.paymentCount} secondary="订单数" />
     </ListItem>
   </List> : <Loading />;
 
   const statCard = role === 'moderator' ? <Card className={cls.card}>
-    <CardContent>
-      <Typography variant="h5" gutterBottom>统计数据</Typography>
-
-      { statInner }
-    </CardContent>
+    <Typography variant="h5" className={cls.statTitle} gutterBottom>管理</Typography>
+    { statInner }
   </Card> : null;
 
   const inner = conf ?
