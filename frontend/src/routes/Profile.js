@@ -29,8 +29,40 @@ const styles = makeStyles(theme => ({
   },
 
   avatar: {
+    position: 'relative',
+    borderRadius: '50%',
     boxShadow: 'rgba(0,0,0,.3) 0 2px 6px',
     marginRight: 30,
+    overflow: 'hidden',
+  },
+
+  avatarMask: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+
+    background: 'rgba(0,0,0,.3)',
+    color: 'rgba(255,255,255,.6)',
+
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+
+    '& .material-icons': {
+      fontSize: '40px',
+    },
+
+    borderRadius: '50%',
+
+    opacity: 0,
+    transition: 'opacity .2s ease-in',
+
+    '&:hover': {
+      opacity: 1,
+      transition: 'opacity .2s ease-out',
+    },
   },
 
   info: {
@@ -130,7 +162,12 @@ export default React.memo(() => {
 
   return <BasicLayout>
     <div className={cls.header}>
-      <UserAvatar email={user.email} name={user.realname} className={cls.avatar} size={160} />
+      <div className={cls.avatar}>
+        <UserAvatar email={user.email} name={user.realname} size={160} />
+        <a className={cls.avatarMask} href="https://cn.gravatar.com/" target="_blank">
+          <Icon>camera_alt</Icon>
+        </a>
+      </div>
       <div className={cls.info}>
         <Typography variant="h2" className={cls.realname}>{ user.realname }</Typography>
         { user.profile ? 
