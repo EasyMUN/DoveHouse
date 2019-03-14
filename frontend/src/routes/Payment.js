@@ -12,6 +12,11 @@ import CardContent from '../overrides/CardContent';
 import Avatar from '@material-ui/core/Avatar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
+import Icon from '@material-ui/core/Icon';
+import Paper from '@material-ui/core/Paper';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
 
 import SwipeableViews from 'react-swipeable-views';
 
@@ -107,7 +112,66 @@ const styles = makeStyles(theme => ({
   pageTitle: {
     color: 'rgba(0,0,0,.54)',
   },
+
+  aux: {
+    position: 'absolute',
+    top: 0,
+    right: 20,
+    display: 'flex',
+    justifyContent: 'center',
+  },
+
+  auxItem: {
+    marginLeft: '10px',
+    color: 'rgba(0,0,0,.54)',
+
+    position: 'relative',
+
+    '&:hover $auxContent': {
+      opacity: 1,
+      transition: 'opacity .2s ease-out',
+    }
+  },
+
+  content: {
+    position: 'relative',
+  },
+
+  auxContent: {
+    pointerEvents: 'none',
+    opacity: 0,
+    position: 'absolute',
+    right: -10,
+    top: -10,
+
+    transition: 'opacity .2s ease-in',
+
+    width: 300,
+    background: 'white',
+    color: 'rgba(0,0,0,.87)',
+
+    zIndex: 2,
+  },
+
+  auxInnerIcon: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+  },
+
+  desc: {
+    minHeight: 100,
+    padding: 20,
+  },
 }));
+
+function buildDiscountDesc(discount) {
+  if(!discount.until) return discount.desc;
+
+  const d = new Date(discount.until);
+
+  return `${discount.desc} - 至 ${d.toLocaleString()}`;
+}
 
 export default React.memo(() => {
   const cls = styles();
@@ -129,16 +193,54 @@ export default React.memo(() => {
 
   const updateTab = useCallback((ev, t) => setTab(t), [setTab])
 
+  const hasDiscount = payment && payment.discounts && payment.discounts.length > 0;
+  const hasDesc = payment && payment.desc !== '';
+
   const inner = payment ? <>
     <Typography variant="h2" className={cls.pageTitle}>订单详情</Typography>
 
     <Card className={clsx(cls.card, { [cls.done]: payment.status === 'paid' })}>
-      <CardContent>
+      <CardContent className={cls.content}>
         <Typography variant="h4" className={cls.paymentDesc}>{ payment.desc }</Typography>
         <div className={cls.abbrLine}>
           <Avatar src={payment.conf.logo} className={cls.logo}/>
           <Typography variant="body2" className={cls.abbr}>{ payment.conf.abbr }</Typography>
         </div>
+
+        <div className={cls.aux}>
+          { hasDiscount ?
+            <div className={cls.auxItem}>
+              <Icon>money_off</Icon>
+
+              <Paper className={cls.auxContent}>
+                <Icon className={cls.auxInnerIcon}>money_off</Icon>
+
+                <List>
+                  { payment.discounts.map((e, index) =>
+                    <ListItem key={index}>
+                      <ListItemText
+                        primary={`-${e.amount} CNY`}
+                        secondary={buildDiscountDesc(e)}
+                      />
+                    </ListItem>) }
+                </List>
+              </Paper>
+            </div> : null }
+
+          { hasDesc ?
+            <div className={cls.auxItem}>
+              <Icon>list</Icon>
+
+              <Paper className={cls.auxContent}>
+                <Icon className={cls.auxInnerIcon}>list</Icon>
+
+                <div className={cls.desc}>
+                  <Typography variant="body1">{ payment.desc }</Typography>
+                </div>
+              </Paper>
+            </div> : null }
+        </div>
+
         <Typography variant="h3" className={cls.paymentTotal}>{ payment.total } <small>CNY</small></Typography>
         <Typography variant="body1" className={cls.paidHint}>已支付</Typography>
 

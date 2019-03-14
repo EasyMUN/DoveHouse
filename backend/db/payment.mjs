@@ -19,6 +19,10 @@ const schema = new mongoose.Schema({
     enum: ['waiting', 'paid', 'closed'],
   },
 
+  discounts: [
+    { amount: Number, desc: String, until: Date, },
+  ],
+
   creation: Date,
   confirmation: Date,
 });
