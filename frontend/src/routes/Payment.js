@@ -163,6 +163,10 @@ const styles = makeStyles(theme => ({
     minHeight: 100,
     padding: 20,
   },
+
+  outdated: {
+    textDecoration: 'line-through',
+  },
 }));
 
 function buildDiscountDesc(discount) {
@@ -171,6 +175,17 @@ function buildDiscountDesc(discount) {
   const d = new Date(discount.until);
 
   return `${discount.desc} - 至 ${d.toLocaleString()}`;
+}
+
+function isDiscountOutdated(discount, payment) {
+  if(!discount.until) return false;
+
+  const until = new Date(discount.until);
+  let d = new Date();
+  if(payment.status === 'paid') // Judge based on confirmation date 
+    d = new Date(payment.confirmation);
+
+  return until <= d;
 }
 
 export default React.memo(() => {
@@ -195,6 +210,14 @@ export default React.memo(() => {
 
   const hasDiscount = payment && payment.discounts && payment.discounts.length > 0;
   const hasDesc = payment && payment.desc !== '';
+
+  console.log(payment);
+  let total = 0;
+  if(payment)
+    total = (hasDiscount ? payment.discounts : []).reduce((acc, d) => {
+      if(isDiscountOutdated(d, payment)) return acc;
+      return acc - d.amount;
+    }, payment.total);
 
   const inner = payment ? <>
     <Typography variant="h2" className={cls.pageTitle}>订单详情</Typography>
@@ -221,6 +244,10 @@ export default React.memo(() => {
                       <ListItemText
                         primary={`-${e.amount} CNY`}
                         secondary={buildDiscountDesc(e)}
+
+                        classes={{
+                          primary: isDiscountOutdated(e, payment) ? cls.outdated : undefined,
+                        }}
                       />
                     </ListItem>) }
                 </List>
@@ -241,7 +268,7 @@ export default React.memo(() => {
             </div> : null }
         </div>
 
-        <Typography variant="h3" className={cls.paymentTotal}>{ payment.total } <small>CNY</small></Typography>
+        <Typography variant="h3" className={cls.paymentTotal}>{ total } <small>CNY</small></Typography>
         <Typography variant="body1" className={cls.paidHint}>已支付</Typography>
 
         <Typography variant="body1" className={cls.ident}>支付时请在备注中填入 <strong>{ payment.ident }</strong><br />并确保金额正确，以便我们确认订单</Typography>
