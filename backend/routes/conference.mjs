@@ -173,4 +173,22 @@ router.get('/:id/stat', async ctx => {
   };
 });
 
+router.get('/:id/list', async ctx => {
+  const criteria = {
+    _id: ctx.params.id,
+  };
+
+  if(!ctx.user.isAdmin)
+    criteria.moderators = ctx.user._id;
+
+  const conf = await Conference
+    .findOne(criteria, { registrants: 1 })
+    .populate('registrants.user', 'email realname profile phone')
+    .lean();
+
+  if(!conf) return ctx.status = 404;
+
+  return ctx.body = conf.registrants;
+});
+
 export default router;

@@ -36,7 +36,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import PostEdit from '../comps/PostEdit';
 import Loading from '../comps/Loading';
 
-import { get, post, refresh } from '../store/actions';
+import { get, post, refresh, fetchConf, fetchComms } from '../store/actions';
 
 import { useRouter } from '../Router';
 import { NavLink } from 'react-router-dom';
@@ -277,13 +277,13 @@ export default React.memo(() => {
   const dispatch = useDispatch();
   const { user } = useMappedState(({ user }) => ({ user }));
 
-  async function fetchConf() {
-    const conf = await dispatch(get(`/conference/${match.params.id}`));
+  async function updateConf() {
+    const conf = await dispatch(fetchConf(match.params.id));
     setConf(conf);
   };
 
-  async function fetchComms() {
-    const comms = await dispatch(get(`/conference/${match.params.id}/committee`));
+  async function updateComms() {
+    const comms = await dispatch(fetchComms(match.params.id));
     setComms(comms);
   };
 
@@ -317,8 +317,8 @@ export default React.memo(() => {
   };
 
   useEffect(() => {
-    fetchConf();
-    fetchComms();
+    updateConf();
+    updateComms();
     fetchReg();
     fetchRole();
   }, [match.params.id, dispatch, user]);
@@ -428,7 +428,7 @@ export default React.memo(() => {
   }, [match]);
 
   const statInner = stat ? <List className={cls.statList}>
-    <ListItem button>
+    <ListItem button component={NavLink} to={`/conference/${match.params.id}/admin/reg`}>
       <ListItemIcon><Icon>assignment_ind</Icon></ListItemIcon>
       <ListItemText primary={stat.regCount} secondary="报名人数" />
     </ListItem>
@@ -665,7 +665,7 @@ function renderLastStep(comm, index, value, cls) {
 }
 
 // Reg dialog
-const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
+const RegDialog = React.memo(({ comms: _comms, onSubmit, disabled, ...rest }) => {
   const cls = regStyles();
 
   const [step, setStep] = useState(0);
@@ -843,7 +843,6 @@ const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
       // Last step
       const selected = getSelectedComms(first, comms);
 
-      console.log(cls);
       const inner = selected.map((comm, index) =>
         renderLastStep(comm, index, second.get(comm._id), cls));
 
@@ -916,16 +915,15 @@ const RegDialog = ({ comms: _comms, onSubmit, disabled, ...rest }) => {
       { step === 2 ? <Button variant="contained" color="secondary" onClick={submit} disabled={disabled || !canNext}>确认提交</Button> : null }
     </DialogActions>
   </Dialog>;
-};
+});
 
 // RegDetail
 
-const RegDetailDialog = ({ comms: _comms, value, ...rest }) => {
+export const RegDetailDialog = React.memo(({ comms: _comms, value, ...rest }) => {
   const cls = regStyles();
 
   if(!value) return null;
-
-  console.log(value);
+  console.log(_comms);
 
   const comms = _comms || [];
   const mapper = comms.reduce((acc, comm) => acc.set(comm.slug, comm), new Map());
@@ -940,4 +938,4 @@ const RegDetailDialog = ({ comms: _comms, value, ...rest }) => {
   }}>
     { inner }
   </Dialog>;
-}
+});

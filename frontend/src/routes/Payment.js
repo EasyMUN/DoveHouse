@@ -220,7 +220,7 @@ export default React.memo(() => {
     }, payment.total);
 
   const inner = payment ? <>
-    <Typography variant="h2" className={cls.pageTitle}>订单详情</Typography>
+    <Typography variant="h3" className={cls.pageTitle}>订单详情</Typography>
 
     <Card className={clsx(cls.card, { [cls.done]: payment.status === 'paid' })}>
       <CardContent className={cls.content}>

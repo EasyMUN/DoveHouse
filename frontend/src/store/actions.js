@@ -24,6 +24,17 @@ export const setPayments = payments => ({
   payments,
 });
 
+export const cacheConf = conf => ({
+  type: 'CACHE_CONF',
+  conf,
+});
+
+export const cacheComms = (id, comms) => ({
+  type: 'CACHE_COMMS',
+  id,
+  comms,
+});
+
 /* Basic networking */
 export const get = (endpoint, method = 'GET', override = null) => async (dispatch, getStore) => {
   const { token } = getStore();
@@ -43,8 +54,6 @@ export const login = token => async dispatch => {
     dispatch(get(`/user/${self._id}/payment?status=waiting`, 'GET', token)),
   ]);
 
-  console.log(confs);
-
   dispatch(setUser(self));
   dispatch(setConfs(confs));
   dispatch(setPayments(payments));
@@ -60,3 +69,29 @@ export const logout = () => dispatch => {
   dispatch(setUser(null));
   dispatch(setToken(null));
 }
+
+export const fetchConf = (id, allowCache = false) => async (dispatch, getStore) => {
+  if(allowCache) {
+    const { confCache } = getStore();
+
+    if(confCache.has(id)) return confCache.get(id);
+  }
+
+  const conf = await dispatch(get(`/conference/${id}`));
+  dispatch(cacheConf(conf));
+
+  return conf;
+};
+
+export const fetchComms = (id, allowCache = false) => async (dispatch, getStore) => {
+  if(allowCache) {
+    const { commsCache } = getStore();
+
+    if(commsCache.has(id)) return commsCache.get(id);
+  }
+
+  const conf = await dispatch(get(`/conference/${id}/committee`));
+  dispatch(cacheComms(id, conf));
+
+  return conf;
+};

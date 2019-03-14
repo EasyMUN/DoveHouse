@@ -29,7 +29,10 @@ const schema = new mongoose.Schema({
   },
 
   registrants: [{
-    user: mongoose.Schema.Types.ObjectId,
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
 
     stage: {
       type: String,
@@ -38,6 +41,8 @@ const schema = new mongoose.Schema({
       ],
       default: 'reg',
     },
+
+    tags: [String],
 
     reg: Object,
     extra: String,
