@@ -30,7 +30,8 @@ import { SnackbarProvider } from './Snackbar';
 
 import { useRouter } from './Router';
 
-import { gravatar } from './util';
+import UserAvatar from './comps/UserAvatar';
+
 import { BRAND_PRIMARY, BRAND_SECONDARY } from './config';
 
 const styles = makeStyles(theme => ({
@@ -131,10 +132,6 @@ const styles = makeStyles(theme => ({
     padding: 4,
   },
 
-  avatarFallback: {
-    position: 'absolute',
-  },
-
   sidebar: {
     width: 250,
   },
@@ -220,8 +217,10 @@ const App = () => {
       </div>
 
       <IconButton className={cls.avatarBtn} onClick={openAccountMenu} aria-owns="account-menu">
-        <Avatar className={cls.avatarFallback}>{ user && user.realname.slice(0, 1) }</Avatar>
-        <Avatar src={user && gravatar(user.email)} />
+        <UserAvatar
+          name={ user ? user.realname : '' }
+          email={ user ? user.email : null }
+        />
       </IconButton>
 
       <Menu

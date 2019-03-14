@@ -923,7 +923,6 @@ export const RegDetailDialog = React.memo(({ comms: _comms, value, ...rest }) =>
   const cls = regStyles();
 
   if(!value) return null;
-  console.log(_comms);
 
   const comms = _comms || [];
   const mapper = comms.reduce((acc, comm) => acc.set(comm.slug, comm), new Map());

@@ -29,8 +29,7 @@ import { NavLink } from 'react-router-dom';
 import { useRouter } from '../Router';
 
 import Loading from '../comps/Loading';
-
-import { gravatar } from '../util';
+import UserAvatar from '../comps/UserAvatar';
 
 import BasicLayout from '../layout/Basic';
 
@@ -157,7 +156,7 @@ export default React.memo(() => {
       <ExpansionPanel key={reg.user._id}>
         <ExpansionPanelSummary expandIcon={<Icon>expand_more</Icon>}>
           <div className={cls.regSummary}>
-            <Avatar src={gravatar(reg.user.email)} />
+            <UserAvatar email={reg.user.email} name={reg.user.realname} />
             <Typography className={cls.regName}>{ reg.user.realname }</Typography>
           </div>
         </ExpansionPanelSummary>

@@ -15,7 +15,7 @@ import Button from '@material-ui/core/Button';
 
 import { post, refresh } from '../store/actions';
 
-import { gravatar } from '../util';
+import UserAvatar from '../comps/UserAvatar';
 
 import { useSnackbar } from '../Snackbar';
 
@@ -29,10 +29,7 @@ const styles = makeStyles(theme => ({
   },
 
   avatar: {
-    width: 160,
-    height: 160,
     boxShadow: 'rgba(0,0,0,.3) 0 2px 6px',
-
     marginRight: 30,
   },
 
@@ -133,7 +130,7 @@ export default React.memo(() => {
 
   return <BasicLayout>
     <div className={cls.header}>
-      <Avatar src={gravatar(user.email, 160)} className={cls.avatar} />
+      <UserAvatar email={user.email} name={user.realname} className={cls.avatar} size={160} />
       <div className={cls.info}>
         <Typography variant="h2" className={cls.realname}>{ user.realname }</Typography>
         { user.profile ? 
