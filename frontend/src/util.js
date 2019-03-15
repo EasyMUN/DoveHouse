@@ -55,6 +55,7 @@ export async function get(endpoint, token = null, method = 'GET') {
 }
 
 export function gravatar(email, size=80) {
+  if(!email) return '';
   const hash = md5(email.trim().toLowerCase());
   return `https://www.gravatar.com/avatar/${hash}?s=${size}&d=blank`;
 }
