@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 
 import { makeStyles } from '@material-ui/styles';
 
@@ -44,6 +44,13 @@ const styles = makeStyles(theme => ({
 export default React.memo(() => {
   const cls = styles();
 
+  const [erroring, setErroring] = useState(false);
+  if(erroring) throw new Error('Here you have it!');
+
+  const trigger = useCallback(() => {
+    setErroring(true);
+  });
+
   return <BasicLayout>
     <div className={cls.header}>
       <div className={cls.brand}>
@@ -68,6 +75,11 @@ export default React.memo(() => {
       <ListItem button component="a" href="https://easymun.com" target="_blank">
         <ListItemIcon><Icon>home</Icon></ListItemIcon>
         <ListItemText primary="EasyMUN 主页" secondary="https://easymun.com" />
+      </ListItem>
+
+      <ListItem button onClick={trigger}>
+        <ListItemIcon><Icon>bug_report</Icon></ListItemIcon>
+        <ListItemText primary="看看精心设计的错误页面" secondary="这当然是用来调试的" />
       </ListItem>
     </List>
   </BasicLayout>;

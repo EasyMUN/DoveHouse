@@ -6,3 +6,5 @@ export const BRAND_SECONDARY = 'House';
 export const CONTACT = 'YOUR_EMAIL_HERE';
 
 export const GA = null;
+
+export const SENTRY = null;

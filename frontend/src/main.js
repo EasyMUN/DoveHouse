@@ -20,6 +20,8 @@ import { ThemeProvider } from '@material-ui/styles';
 import ReactGA from 'react-ga';
 import * as Config from './config';
 
+import Boundary from './Boundary';
+
 const root = document.getElementById('root');
 
 const theme = createMuiTheme({
@@ -56,13 +58,15 @@ function withGA(Comp, opts = {}) {
 
 async function render(Comp) {
   return ReactDOM.render(
-    <StoreContext.Provider value={store}>
-      <ThemeProvider theme={theme}>
-        <Router>
-          <Route component={withGA(Comp)} />
-        </Router>
-      </ThemeProvider>
-    </StoreContext.Provider>,
+    <Boundary>
+      <StoreContext.Provider value={store}>
+        <ThemeProvider theme={theme}>
+          <Router>
+            <Route component={withGA(Comp)} />
+          </Router>
+        </ThemeProvider>
+      </StoreContext.Provider>
+    </Boundary>,
     root
   );
 }

@@ -5,6 +5,7 @@
   "dependencies": {
     "@material-ui/core": "^3.9.2",
     "@material-ui/styles": "^3.0.0-alpha.10",
+    "@sentry/browser": "^4.6.4",
     "blueimp-md5": "^2.10.0",
     "chroma-js": "^2.0.3",
     "clsx": "^1.0.3",
