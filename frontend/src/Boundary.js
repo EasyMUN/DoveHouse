@@ -32,7 +32,7 @@ export default class Boundary extends React.Component {
               鸽子都飞走了！
             </p>
             <p>
-              我们已经通知了我们中<strong>跑得最快</strong>去追赶鸽子了。如果好心的您碰巧见证了鸽笼是怎么坏掉的，可以告诉我们，来节约一秒的宝贵时间。
+              我们已经通知了我们中<strong>跑得最快</strong>的去追赶鸽子了。如果好心的您碰巧见证了鸽笼是怎么坏掉的，可以告诉我们，来节约一秒的宝贵时间。
             </p>
           </div>
 
