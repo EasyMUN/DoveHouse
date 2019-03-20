@@ -191,4 +191,23 @@ router.get('/:id/list', async ctx => {
   return ctx.body = conf.registrants;
 });
 
+router.get('/:id/list/:uid', async ctx => {
+  const criteria = {
+    _id: ctx.params.id,
+    'registrants.user': ctx.params.id,
+  };
+
+  if(!ctx.user.isAdmin)
+    criteria.moderators = ctx.user._id;
+
+  const conf = await Conference
+    .findOne(criteria, { 'registrants.$': 1 })
+    .populate('registrants.user', 'email realname profile phone')
+    .lean();
+
+  if(!conf) return ctx.status = 404;
+
+  return ctx.body = conf.registrants[0];
+});
+
 export default router;

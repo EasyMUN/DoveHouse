@@ -31,7 +31,7 @@ const styles = makeStyles(theme => ({
 export default React.memo(({ name, email, size, className, ...rest }) => {
   const cls = styles();
 
-  return <div className={clsx(cls.root, className)} {...rest} style={{
+  return <div className={clsx(cls.root, className)} style={{
     width: size,
     height: size,
   }}>

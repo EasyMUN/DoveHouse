@@ -1,8 +1,10 @@
-import React, { useMemo, useEffect, useState, useCallback } from 'react';
+import React, { useMemo, useRef, useEffect, useState, useCallback } from 'react';
 
 import { useDispatch } from 'redux-react-hook';
 
 import { makeStyles } from '@material-ui/styles';
+
+import clsx from 'clsx';
 
 import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
@@ -13,15 +15,12 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Card from '@material-ui/core/Card';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
 import CardActionArea from '@material-ui/core/CardActionArea';
 import CardActions from '@material-ui/core/CardActions';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
-import ExpansionPanelActions from '@material-ui/core/ExpansionPanelActions';
 
 import { get, post, refresh, fetchConf, fetchComms } from '../store/actions';
 
@@ -32,6 +31,8 @@ import Loading from '../comps/Loading';
 import UserAvatar from '../comps/UserAvatar';
 
 import BasicLayout from '../layout/Basic';
+
+import { debounceEv } from '../util';
 
 import { RegDetailDialog } from './Conference';
 
@@ -64,6 +65,10 @@ const styles = makeStyles(theme => ({
     display: 'flex',
     alignItems: 'center',
 
+    position: 'sticky',
+    top: 64 + 20,
+    zIndex: 1,
+
     '& .material-icons': {
       marginRight: theme.spacing.unit,
       color: 'rgba(0,0,0,.3)',
@@ -87,6 +92,13 @@ const styles = makeStyles(theme => ({
   actions: {
     padding: 16,
   },
+
+  searchCounter: {
+    fontSize: 14,
+    lineHeight: '14px',
+    color: 'rgba(0,0,0,.38)',
+    marginLeft: theme.spacing.unit,
+  },
 }));
 
 export default React.memo(() => {
@@ -101,10 +113,32 @@ export default React.memo(() => {
   const closeRegDetail = useCallback(() => setRegDetailOpen(false), [setRegDetailOpen]);
 
   const [search, setSearch] = useState('');
-  const changeSearch = useCallback(ev => setSearch(ev.target.value));
+  const changeSearch = useCallback(debounceEv(ev => {
+    setSearch(ev.target.value);
+  }, 200));
 
   const { match } = useRouter();
   const dispatch = useDispatch();
+
+  const [skipped, setSkipped] = useState(0);
+  const [win, setWin] = useState(Infinity);
+  const listRef = useRef();
+  const rowHeight = 56;
+  const virtualize = useCallback(() => {
+    const list = listRef.current;
+    const { y } = list.getBoundingClientRect();
+
+    if(y > 0) setSkipped(0);
+    else setSkipped(Math.floor((-y) / rowHeight));
+
+    setWin(Math.ceil(window.innerHeight / rowHeight) + 1);
+  }, [setSkipped, setWin]);
+
+  useEffect(() => {
+    window.addEventListener('resize', virtualize);
+
+    return () => window.removeEventListener('resize', virtualize);
+  }, [virtualize]);
 
   async function updateConf() {
     const conf = await dispatch(fetchConf(match.params.id, true));
@@ -119,27 +153,35 @@ export default React.memo(() => {
   async function updateList() {
     const list = await dispatch(get(`/conference/${match.params.id}/list`));
     setList(list);
+    virtualize();
   }
 
   useEffect(() => {
     updateConf();
     updateComms();
     updateList();
-  }, [match.params.id, dispatch]);
+  }, [match.params.id, dispatch, virtualize]);
 
   if(!conf) return <BasicLayout>
     <Loading />
   </BasicLayout>;
 
+  const shown = new Set();
   function filterList(list) {
     if(search === '') return list;
     return list.filter(e => {
-      if(e.user.realname.indexOf(search) !== -1) return true;
+      if(search === '') return true;
+      else if(e.user.realname.indexOf(search) !== -1) return true;
       else if(e.user.profile.school.indexOf(search) !== -1) return true;
       else if(e.tags  && e.tags.includes(search)) return true;
       return false;
     });
   }
+
+  const filtered = list ? filterList(list) : [];
+  const shownCount = filtered.length;
+
+  const sliced = filtered.slice(skipped).slice(0, win);
 
   const inner = !list ? <Loading /> : <>
     <Card className={cls.search}>
@@ -147,46 +189,39 @@ export default React.memo(() => {
       <InputBase
         placeholder="标签/姓名/学校 空格分隔"
         className={cls.searchInput}
-        value={search}
         onChange={changeSearch}
       />
+      <div className={cls.searchCounter}>
+        { shownCount } / { list.length }
+      </div>
     </Card>
 
-    { filterList(list).map(reg =>
-      <ExpansionPanel key={reg.user._id}>
-        <ExpansionPanelSummary expandIcon={<Icon>expand_more</Icon>}>
-          <div className={cls.regSummary}>
-            <UserAvatar email={reg.user.email} name={reg.user.realname} />
-            <Typography className={cls.regName}>{ reg.user.realname }</Typography>
-          </div>
-        </ExpansionPanelSummary>
-        <ExpansionPanelDetails>
-          <List>
-            <ListItem>
-              <ListItemIcon><Icon>email</Icon></ListItemIcon>
-              <ListItemText primary={reg.user.email} />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon><Icon>phone</Icon></ListItemIcon>
-              <ListItemText primary={reg.user.profile.phone} />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon><Icon>school</Icon></ListItemIcon>
-              <ListItemText primary={reg.user.profile.school} />
-            </ListItem>
-          </List>
-        </ExpansionPanelDetails>
-        <ExpansionPanelActions className={cls.actions}>
-          <Button onClick={() => {
-            setRegDetailOpen(true);
-            setRegViewing(reg.reg);
-          }}>志愿详情</Button>
-        </ExpansionPanelActions>
-      </ExpansionPanel>
-    ) }
+    <div
+      ref={listRef}
+      style={{
+        paddingTop: `${skipped*rowHeight}px`,
+        height: `${shownCount*rowHeight}px`,
+      }}
+    >
+      <List>
+        { sliced.map(reg =>
+          <ListItem
+            key={reg.user._id}
+            button
+            component={NavLink}
+            to={`/conference/${match.params.id}/admin/reg/${reg.user._id}`}
+          >
+            <ListItemAvatar>
+              <UserAvatar email={reg.user.email} name={reg.user.realname} />
+            </ListItemAvatar>
+            <ListItemText primary={reg.user.realname} />
+          </ListItem>
+        )}
+      </List>
+    </div>
   </>;
 
-  return <BasicLayout>
+  return <BasicLayout onScroll={virtualize}>
     <NavLink className={cls.abbrLine} to={`/conference/${match.params.id}`}>
       <Avatar src={conf.logo} className={cls.logo}/>
       <Typography variant="body2" className={cls.abbr}>{ conf.abbr }</Typography>

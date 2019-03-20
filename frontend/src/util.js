@@ -59,3 +59,14 @@ export function gravatar(email, size=80) {
   const hash = md5(email.trim().toLowerCase());
   return `https://www.gravatar.com/avatar/${hash}?s=${size}&d=blank`;
 }
+
+export function debounceEv(func, timeout) {
+  let last = null;
+  return (...args) => {
+    console.log(last);
+    for(const ev of args)
+      ev.persist();
+    if(last !== null) clearTimeout(last);
+    last = setTimeout(() => func(...args), timeout);
+  }
+}

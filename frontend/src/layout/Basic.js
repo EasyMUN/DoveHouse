@@ -43,7 +43,7 @@ const styles = makeStyles(theme => ({
   },
 }));
 
-export default React.memo(({ children }) => {
+export default React.memo(({ children, onScroll }) => {
   const cls = styles();
 
   const [onTop, setOnTop] = useState(true);
@@ -51,7 +51,9 @@ export default React.memo(({ children }) => {
   const scrollCB = useCallback(ev => {
     const scrollTop = ev.target.scrollTop;
     setOnTop(scrollTop === 0);
-  });
+
+    if(onScroll) onScroll();
+  }, [onScroll]);
 
   return <div className={cls.wrapper} onScroll={scrollCB}>
     <div className={clsx(cls.toolbar, { [cls.toolbarFloating]: !onTop })}></div>
