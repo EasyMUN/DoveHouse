@@ -194,7 +194,7 @@ router.get('/:id/list', async ctx => {
 router.get('/:id/list/:uid', async ctx => {
   const criteria = {
     _id: ctx.params.id,
-    'registrants.user': ctx.params.id,
+    'registrants.user': ctx.params.uid,
   };
 
   if(!ctx.user.isAdmin)

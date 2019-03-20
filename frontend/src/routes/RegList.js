@@ -18,7 +18,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Card from '@material-ui/core/Card';
 import CardMedia from '@material-ui/core/CardMedia';
-import CardContent from '@material-ui/core/CardContent';
+import CardContent from '../overrides/CardContent';
 import CardActionArea from '@material-ui/core/CardActionArea';
 import CardActions from '@material-ui/core/CardActions';
 
@@ -33,8 +33,6 @@ import UserAvatar from '../comps/UserAvatar';
 import BasicLayout from '../layout/Basic';
 
 import { debounceEv } from '../util';
-
-import { RegDetailDialog } from './Conference';
 
 const styles = makeStyles(theme => ({
   logo: {
@@ -105,12 +103,7 @@ export default React.memo(() => {
   const cls = styles();
 
   const [conf, setConf] = useState(null);
-  const [comms, setComms] = useState(null);
   const [list, setList] = useState(null);
-
-  const [regDetailOpen, setRegDetailOpen] = useState(false);
-  const [regViewing, setRegViewing] = useState(null);
-  const closeRegDetail = useCallback(() => setRegDetailOpen(false), [setRegDetailOpen]);
 
   const [search, setSearch] = useState('');
   const changeSearch = useCallback(debounceEv(ev => {
@@ -126,6 +119,12 @@ export default React.memo(() => {
   const rowHeight = 56;
   const virtualize = useCallback(() => {
     const list = listRef.current;
+    if(!list) {
+      setSkipped(0);
+      setWin(Infinity);
+      return;
+    }
+
     const { y } = list.getBoundingClientRect();
 
     if(y > 0) setSkipped(0);
@@ -145,11 +144,6 @@ export default React.memo(() => {
     setConf(conf);
   };
 
-  async function updateComms() {
-    const conf = await dispatch(fetchComms(match.params.id, true));
-    setComms(conf);
-  };
-
   async function updateList() {
     const list = await dispatch(get(`/conference/${match.params.id}/list`));
     setList(list);
@@ -158,7 +152,6 @@ export default React.memo(() => {
 
   useEffect(() => {
     updateConf();
-    updateComms();
     updateList();
   }, [match.params.id, dispatch, virtualize]);
 
@@ -231,15 +224,5 @@ export default React.memo(() => {
     <div className={cls.inner}>
       { inner }
     </div>
-
-    <RegDetailDialog
-      comms={comms || []}
-
-      open={regDetailOpen}
-      onClose={closeRegDetail}
-      fullWidth
-
-      value={regViewing}
-    />
   </BasicLayout>;
 });

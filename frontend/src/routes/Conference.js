@@ -626,7 +626,7 @@ function renderLastStep(comm, index, value, cls) {
       if(typeof buckets[key] === 'object')
         buckets[key] = Object.keys(buckets[key]).sort((a, b) => buckets[key][a] - buckets[key][b]);
 
-    return <>
+    return <React.Fragment key={index}>
       <DialogContent>
         <Typography variant="h6" className={cls.directionHint}>第 { index + 1 } 志愿</Typography>
         <Typography variant="h6" className={cls.directionComm}>{ comm.title }</Typography>
@@ -637,7 +637,7 @@ function renderLastStep(comm, index, value, cls) {
           { buckets.MPC ? <ListItem><ListItemIcon><Icon>done</Icon></ListItemIcon><ListItemText primary="可能得到 MPC 席位" /></ListItem> : null }
         </List>
 
-        { [1,2].map(level => <>
+        { [1,2].map(level => <React.Fragment key={level}>
           <DialogContentText>第 { level } 级方向</DialogContentText>
           <List>
             { (buckets[level] || []).map((tag, index) => <ListItem
@@ -649,18 +649,18 @@ function renderLastStep(comm, index, value, cls) {
               />
             </ListItem>) }
           </List>
-          </>) }
-        </DialogContent>
-      </>;
+        </React.Fragment>) }
+      </DialogContent>
+    </React.Fragment>;
   } else {
-    return <>
+    return <React.Fragment key={index}>
       <DialogContent>
         <Typography variant="h6" className={cls.directionHint}>第 { index + 1 } 志愿</Typography>
         <Typography variant="h6" className={cls.directionComm}>{ comm.title }</Typography>
 
         <DialogContentText>此委员会不需要额外选择方向</DialogContentText>
       </DialogContent>
-      </>;
+    </React.Fragment>;
   }
 }
 
