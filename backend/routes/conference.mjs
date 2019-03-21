@@ -210,4 +210,22 @@ router.get('/:id/list/:uid', async ctx => {
   return ctx.body = conf.registrants[0];
 });
 
+router.put('/:id/list/:uid/tags', async ctx => {
+  const criteria = {
+    _id: ctx.params.id,
+    'registrants.user': ctx.params.uid,
+  };
+
+  if(!ctx.user.isAdmin)
+    criteria.moderators = ctx.user._id;
+
+  // TODO: sanitize body
+  const conf = await Conference
+    .findOneAndUpdate(criteria, { $set: { 'registrants.$.tags': ctx.request.body }})
+    .lean();
+
+  if(!conf) return ctx.status = 404;
+  return ctx.status = 201;
+});
+
 export default router;

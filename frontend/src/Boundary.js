@@ -19,7 +19,6 @@ export default class Boundary extends React.Component {
   }
 
   render() {
-    console.log('render');
     if(this.state.error) {
       return <>
         <div className="error">
