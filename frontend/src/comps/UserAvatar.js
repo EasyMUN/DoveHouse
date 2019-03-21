@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 
 import clsx from 'clsx';
 
@@ -28,7 +28,7 @@ const styles = makeStyles(theme => ({
   },
 }));
 
-export default React.memo(({ name, email, size, className, ...rest }) => {
+export default React.memo(({ name, email, size, className }) => {
   const cls = styles();
 
   return <div className={clsx(cls.root, className)} style={{

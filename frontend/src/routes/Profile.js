@@ -4,7 +4,6 @@ import { makeStyles } from '@material-ui/styles';
 
 import { useDispatch, useMappedState } from 'redux-react-hook';
 
-import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
 import Card from '@material-ui/core/Card';
@@ -164,7 +163,7 @@ export default React.memo(() => {
     <div className={cls.header}>
       <div className={cls.avatar}>
         <UserAvatar email={user.email} name={user.realname} size={160} />
-        <a className={cls.avatarMask} href="https://cn.gravatar.com/" target="_blank">
+        <a className={cls.avatarMask} href="https://cn.gravatar.com/" target="_blank" rel="noopener noreferrer">
           <Icon>camera_alt</Icon>
         </a>
       </div>

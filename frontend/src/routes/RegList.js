@@ -1,28 +1,20 @@
-import React, { useMemo, useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 
 import { useDispatch } from 'redux-react-hook';
 
 import { makeStyles } from '@material-ui/styles';
 
-import clsx from 'clsx';
-
 import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
-import Button from '@material-ui/core/Button';
 import InputBase from '@material-ui/core/InputBase';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Card from '@material-ui/core/Card';
-import CardMedia from '@material-ui/core/CardMedia';
-import CardContent from '../overrides/CardContent';
-import CardActionArea from '@material-ui/core/CardActionArea';
-import CardActions from '@material-ui/core/CardActions';
 
-import { get, post, refresh, fetchConf, fetchComms } from '../store/actions';
+import { get, fetchConf } from '../store/actions';
 
 import { NavLink } from 'react-router-dom';
 import { useRouter } from '../Router';
@@ -159,7 +151,6 @@ export default React.memo(() => {
     <Loading />
   </BasicLayout>;
 
-  const shown = new Set();
   function filterList(list) {
     if(search === '') return list;
     return list.filter(e => {

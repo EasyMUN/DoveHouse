@@ -24,7 +24,7 @@ import UserAvatar from '../comps/UserAvatar';
 import BasicLayout from '../layout/Basic';
 
 import { NavLink } from 'react-router-dom';
-import { get, post, refresh, fetchConf, fetchComms } from '../store/actions';
+import { get, fetchConf, fetchComms } from '../store/actions';
 
 import { RegDetailDialog } from './Conference';
 
