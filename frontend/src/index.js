@@ -1,4 +1,7 @@
 /* eslint-disable import/first */
+// Manually import shims
+import 'core-js/fn/array/flat-map';
+
 import { BRAND_PRIMARY, BRAND_SECONDARY } from './config';
 document.title = `${BRAND_PRIMARY}${BRAND_SECONDARY}`;
 
