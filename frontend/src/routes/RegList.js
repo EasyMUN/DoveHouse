@@ -205,9 +205,11 @@ export default React.memo(() => {
     return list.filter(e =>
       segs.every(s=> {
         if(s[0] === '@') {
-          if(!e.tags)
-            return false;
           const tag = s.slice(1);
+
+          if(!e.tags)
+            return tag[0] === '!';
+
           if(tag[0] === '!')
             return !e.tags.includes(tag.slice(1));
           else return e.tags.includes(tag); 
