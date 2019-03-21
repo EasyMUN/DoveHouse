@@ -24,9 +24,10 @@ import UserAvatar from '../comps/UserAvatar';
 import BasicLayout from '../layout/Basic';
 
 import { NavLink } from 'react-router-dom';
-import { get, fetchConf, fetchComms } from '../store/actions';
+import { get, post, fetchConf, fetchComms } from '../store/actions';
 
 import { RegDetailDialog } from './Conference';
+import { TagEditDialog } from './RegList';
 
 const styles = makeStyles(theme => ({
   logo: {
@@ -64,7 +65,16 @@ const styles = makeStyles(theme => ({
 
   name: {
   },
+
+  emptyTags: {
+    fontStyle: 'italic',
+  },
 }));
+
+function generateTagNode(tags, cls) {
+  if(!tags || tags.length === 0) return <span className={cls.emptyTags}>无标签</span>;
+  return <span className={cls.tags}>{ tags.join(', ') }</span>;
+}
 
 export default () => {
   const cls = styles();
@@ -97,12 +107,26 @@ export default () => {
     setComms(conf);
   };
 
-
   useEffect(() => {
     updateConf();
     updateComms();
     updateReg();
   }, [match.params.id, dispatch]);
+
+  const [editing, setEditing] = useState(false);
+  const closeTagEdit = useCallback(() => setEditing(false));
+
+  const [editTag, setEditTag] = useState(null);
+  const openTagEdit = useCallback(() => {
+    setEditTag(reg.tags);
+    setEditing(true);
+  }, [reg]);
+
+  const submitTag = useCallback(async () => {
+    await dispatch(post(`/conference/${match.params.id}/list/${match.params.user}/tags`, editTag, 'PUT'));
+    await updateReg();
+    closeTagEdit();
+  }, [editTag, match]);
 
   if(!reg) return <BasicLayout>
     <Loading />
@@ -132,6 +156,10 @@ export default () => {
             <ListItemIcon><Icon>school</Icon></ListItemIcon>
             <ListItemText primary={reg.user.profile.school} />
           </ListItem>
+          <ListItem button onClick={openTagEdit}>
+            <ListItemIcon><Icon>label</Icon></ListItemIcon>
+            <ListItemText primary={generateTagNode(reg.tags, cls)} />
+          </ListItem>
         </List>
       </CardContent>
       <CardActions>
@@ -147,6 +175,16 @@ export default () => {
       fullWidth
 
       value={reg.reg}
+    />
+
+    <TagEditDialog
+      value={editTag}
+      onChange={setEditTag}
+
+      open={editing}
+      onClose={closeTagEdit}
+
+      onSubmit={submitTag}
     />
   </BasicLayout>
 }

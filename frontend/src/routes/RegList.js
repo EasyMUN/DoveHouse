@@ -101,15 +101,21 @@ const styles = makeStyles(theme => ({
   },
 
   tags: {
-    whiteSpace: 'no-wrap',
+    whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    maxWidth: '100%',
+    display: 'inline-block',
+  },
+
+  infoLine: {
+    flex: 1,
   },
 }));
 
-function generateTagsNode(tags, cls) {
+function generateTagNode(tags, cls) {
   if(!tags || tags.length === 0) return <span className={cls.emptyTags}>无标签</span>;
-  else if(tags.length < 3) return <span className={cls.tags}>{ tags.join(', ') }</span>;
+  return <span className={cls.tags}>{ tags.join(', ') }</span>;
 }
 
 export default React.memo(() => {
@@ -175,7 +181,7 @@ export default React.memo(() => {
   const [editTarget, setEditTarget] = useState(null);
   const [editInner, setEditInner] = useState(null);
 
-  const submitTags = useCallback(async () => {
+  const submitTag = useCallback(async () => {
     await dispatch(post(`/conference/${match.params.id}/list/${editTarget.user._id}/tags`, editInner, 'PUT'));
     await updateList();
     closeTagEdit();
@@ -190,7 +196,7 @@ export default React.memo(() => {
     const segs = search.split(' ').filter(e => e.length > 0);
 
     return list.filter(e =>
-      segs.some(s=> {
+      segs.every(s=> {
         if(s[0] === '@') {
           const tag = s.slice(1);
           return e.tags.includes(tag);
@@ -241,8 +247,9 @@ export default React.memo(() => {
               <UserAvatar email={reg.user.email} name={reg.user.realname} />
             </ListItemAvatar>
             <ListItemText
+              className={cls.infoLine}
               primary={reg.user.realname}
-              secondary={generateTagsNode(reg.tags, cls)}/>
+              secondary={generateTagNode(reg.tags, cls)}/>
             <ListItemSecondaryAction>
               <IconButton onClick={() => {
                 openTagEdit();
@@ -277,7 +284,7 @@ export default React.memo(() => {
       value={editInner}
       onChange={setEditInner}
 
-      onSubmit={submitTags}
+      onSubmit={submitTag}
     />
   </BasicLayout>;
 });
@@ -288,7 +295,7 @@ const dialogStyles = makeStyles(theme => ({
   },
 }));
 
-const TagEditDialog = React.memo(({ value, onChange, onSubmit, ...rest }) => {
+export const TagEditDialog = React.memo(({ value, onChange, onSubmit, ...rest }) => {
   const cls = dialogStyles();
 
   const tags = value || [];
