@@ -187,13 +187,21 @@ export default React.memo(() => {
 
   function filterList(list) {
     if(search === '') return list;
-    return list.filter(e => {
-      if(search === '') return true;
-      else if(e.user.realname.indexOf(search) !== -1) return true;
-      else if(e.user.profile.school.indexOf(search) !== -1) return true;
-      else if(e.tags  && e.tags.includes(search)) return true;
-      return false;
-    });
+    const segs = search.split(' ').filter(e => e.length > 0);
+
+    return list.filter(e =>
+      segs.some(s=> {
+        if(s[0] === '@') {
+          const tag = s.slice(1);
+          return e.tags.includes(tag);
+        } else {
+          if(e.user.realname.indexOf(search) !== -1) return true;
+          else if(e.user.profile.school.indexOf(search) !== -1) return true;
+          else if(e.tags  && e.tags.includes(search)) return true;
+          return false;
+        }
+      })
+    );
   }
 
   const filtered = list ? filterList(list) : [];
