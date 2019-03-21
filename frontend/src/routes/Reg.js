@@ -92,7 +92,6 @@ export default () => {
   const dispatch = useDispatch();
 
   async function updateReg() {
-    console.log(match.params);
     const reg = await dispatch(get(`/conference/${match.params.id}/list/${match.params.user}`));
     setReg(reg);
   }

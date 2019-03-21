@@ -674,7 +674,6 @@ const RegDialog = React.memo(({ comms: _comms, onSubmit, disabled, ...rest }) =>
   const [extra, setExtra] = useState('');
 
   const changeExtra = useCallback(ev => {
-    console.log(ev.target.value);
     setExtra(ev.target.value);
   }, [setExtra]);
 

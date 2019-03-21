@@ -63,7 +63,6 @@ export function gravatar(email, size=80) {
 export function debounceEv(func, timeout) {
   let last = null;
   return (...args) => {
-    console.log(last);
     for(const ev of args)
       ev.persist();
     if(last !== null) clearTimeout(last);

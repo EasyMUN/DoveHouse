@@ -208,7 +208,9 @@ export default React.memo(() => {
           if(!e.tags)
             return false;
           const tag = s.slice(1);
-          return e.tags.includes(tag);
+          if(tag[0] === '!')
+            return !e.tags.includes(tag.slice(1));
+          else return e.tags.includes(tag); 
         } else {
           if(e.user.realname.indexOf(search) !== -1) return true;
           else if(e.user.profile.school.indexOf(search) !== -1) return true;
