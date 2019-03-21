@@ -98,6 +98,7 @@ const styles = makeStyles(theme => ({
 
   emptyTags: {
     fontStyle: 'italic',
+    lineHeight: '20px',
   },
 
   tags: {
@@ -106,6 +107,12 @@ const styles = makeStyles(theme => ({
     textOverflow: 'ellipsis',
     maxWidth: '100%',
     display: 'inline-block',
+    lineHeight: '20px',
+  },
+
+  tagLine: {
+    lineHeight: '20px',
+    height: 20,
   },
 
   infoLine: {
@@ -198,6 +205,8 @@ export default React.memo(() => {
     return list.filter(e =>
       segs.every(s=> {
         if(s[0] === '@') {
+          if(!e.tags)
+            return false;
           const tag = s.slice(1);
           return e.tags.includes(tag);
         } else {
@@ -249,7 +258,11 @@ export default React.memo(() => {
             <ListItemText
               className={cls.infoLine}
               primary={reg.user.realname}
-              secondary={generateTagNode(reg.tags, cls)}/>
+              secondary={generateTagNode(reg.tags, cls)}
+              classes={{
+                secondary: cls.tagLine
+              }}
+            />
             <ListItemSecondaryAction>
               <IconButton onClick={() => {
                 openTagEdit();
