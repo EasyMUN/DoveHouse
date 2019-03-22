@@ -188,6 +188,16 @@ function isDiscountOutdated(discount, payment) {
   return until <= d;
 }
 
+export function calcTotal(payment) {
+  const hasDiscount = payment && payment.discounts && payment.discounts.length > 0;
+  if(!hasDiscount) return payment.total;
+
+  return payment.discounts.reduce((acc, d) => {
+    if(isDiscountOutdated(d, payment)) return acc;
+    return acc - d.amount;
+  }, payment.total);
+}
+
 export default React.memo(() => {
   const cls = styles();
 
@@ -211,13 +221,9 @@ export default React.memo(() => {
   const hasDiscount = payment && payment.discounts && payment.discounts.length > 0;
   const hasDesc = payment && payment.desc !== '';
 
-  console.log(payment);
   let total = 0;
   if(payment)
-    total = (hasDiscount ? payment.discounts : []).reduce((acc, d) => {
-      if(isDiscountOutdated(d, payment)) return acc;
-      return acc - d.amount;
-    }, payment.total);
+    total = calcTotal(payment);
 
   const inner = payment ? <>
     <Typography variant="h3" className={cls.pageTitle}>订单详情</Typography>

@@ -24,6 +24,8 @@ import { NavLink } from 'react-router-dom';
 
 import BasicLayout from '../layout/Basic';
 
+import { calcTotal } from './Payment';
+
 const styles = makeStyles(theme => ({
   greet: {
     color: 'rgba(0,0,0,.87)',
@@ -130,7 +132,7 @@ export default React.memo(() => {
           <Typography gutterBottom variant="h5" className={cls.title}>待付 / 未确认订单</Typography>
 
           <Typography variant="body1" className={cls.paymentDesc}>{payment.desc}</Typography>
-          <Typography variant="body1" className={cls.paymentTotal}>{payment.total} <small>CNY</small></Typography>
+          <Typography variant="body1" className={cls.paymentTotal}>{calcTotal(payment)} <small>CNY</small></Typography>
         </CardContent>
       </CardActionArea>
     </NavLink>
