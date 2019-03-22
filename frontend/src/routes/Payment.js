@@ -22,6 +22,8 @@ import SwipeableViews from 'react-swipeable-views';
 
 import { useRouter } from '../Router';
 
+import { NavLink } from 'react-router-dom';
+
 import { get } from '../store/actions';
 
 import BasicLayout from '../layout/Basic';
@@ -231,10 +233,10 @@ export default React.memo(() => {
     <Card className={clsx(cls.card, { [cls.done]: payment.status === 'paid' })}>
       <CardContent className={cls.content}>
         <Typography variant="h4" className={cls.paymentDesc}>{ payment.desc }</Typography>
-        <div className={cls.abbrLine}>
+        <NavLink className={cls.abbrLine} to={`/conference/${payment.conf._id}`}>
           <Avatar src={payment.conf.logo} className={cls.logo}/>
           <Typography variant="body2" className={cls.abbr}>{ payment.conf.abbr }</Typography>
-        </div>
+        </NavLink>
 
         <div className={cls.aux}>
           { hasDiscount ?
