@@ -235,6 +235,7 @@ export default React.memo(() => {
   const [conf, setConf] = useState(null);
   const [comms, setComms] = useState(null);
   const [reg, setReg] = useState(null);
+  const [payments, setPayments] = useState([]);
   const [role, setRole] = useState(null);
   const [stat, setStat] = useState(null);
   const [color, setColor] = useState(null);
@@ -297,6 +298,16 @@ export default React.memo(() => {
     }
   };
 
+  async function fetchPayments() {
+    if(!user) return setPayments([]);
+    try {
+      setPayments(await dispatch(get(`/conference/${match.params.id}/payment/${user._id}`)));
+    } catch(e) {
+      if(e.code === 404) return;
+      throw e;
+    }
+  };
+
   async function fetchStat() {
     const stat = await dispatch(get(`/conference/${match.params.id}/stat`));
     setStat(stat);
@@ -320,6 +331,7 @@ export default React.memo(() => {
     updateConf();
     updateComms();
     fetchReg();
+    fetchPayments();
     fetchRole();
   }, [match.params.id, dispatch, user]);
 
@@ -372,7 +384,7 @@ export default React.memo(() => {
 
   const notiRegion = (!conf || !conf.publishes || conf.publishes.length === 0) ? <>
     <Typography variant="body1" className={cls.empty}>什么都还没有</Typography>
-  </> : [...conf.publishes].reverse().map(pub => <Card className={cls.card}>
+  </> : [...conf.publishes].reverse().map(pub => <Card className={cls.card} key={pub._id}>
     <CardContent>
       <Typography variant="h5">{ pub.title }</Typography>
       <Typography variant="body2">{ new Date(pub.date).toLocaleString() }</Typography>
@@ -419,6 +431,23 @@ export default React.memo(() => {
         查看志愿详情
       </Button>
     </CardActions>
+  </Card> : null;
+
+  function generatePaymentIcon(status) {
+    if(status === 'paid') return <Icon>done</Icon>;
+    else if(status === 'closed') return <Icon>close</Icon>;
+    return <Icon>hourglass_empty</Icon>;
+  }
+
+  const paymentsCard = (payments && payments.length > 0) ? <Card className={cls.card}>
+    <List>
+      { payments.map(payment => <ListItem button component={NavLink} to={`/payment/${payment._id}`} key={payment._id}>
+        <ListItemIcon>
+          { generatePaymentIcon(payment.status) }
+        </ListItemIcon>
+        <ListItemText primary={payment.total} secondary={payment.desc} />
+      </ListItem>) }
+    </List>
   </Card> : null;
 
   const submitPost = useCallback(async content => {
@@ -490,6 +519,7 @@ export default React.memo(() => {
   return <HeaderLayout img={conf ? conf.background : ''} floating={header} pad={70 + 16 * 2 - 4 - 28} height={240}>
     { statCard }
     { progressCard }
+    { paymentsCard }
     { inner }
 
     <RegDialog

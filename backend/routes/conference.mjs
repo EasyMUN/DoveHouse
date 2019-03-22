@@ -117,6 +117,16 @@ router.get('/:id/registrant/:user', async ctx => {
   return ctx.body = { stage: conf.registrants[0].stage, reg: conf.registrants[0].reg };
 });
 
+router.get('/:id/payment/:user', async ctx => {
+  const allowed = ctx.user.isAdmin || ctx.params.user === ctx.user._id.toString();
+  if(!allowed) return ctx.status = 403;
+
+  return ctx.body = await Payment.find({
+    conf: ctx.params.id,
+    payee: ctx.params.user,
+  }).sort({ creation: -1 }).lean();
+});
+
 router.get('/:id/role/:user', async ctx => {
   const allowed = ctx.user.isAdmin || ctx.params.user === ctx.user._id.toString();
   if(!allowed) return ctx.status = 403;
