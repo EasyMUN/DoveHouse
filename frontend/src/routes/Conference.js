@@ -447,7 +447,7 @@ export default React.memo(() => {
         <ListItemIcon>
           { generatePaymentIcon(payment.status) }
         </ListItemIcon>
-        <ListItemText primary={calcTotal(payment)} secondary={payment.desc} />
+        <ListItemText primary={`${calcTotal(payment)} CNY`} secondary={payment.desc} />
       </ListItem>) }
     </List>
   </Card> : null;
