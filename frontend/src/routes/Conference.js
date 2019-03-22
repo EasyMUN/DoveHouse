@@ -48,6 +48,8 @@ import HeaderLayout from '../layout/Header';
 import ColorThief from 'color-thief';
 import Chroma from 'chroma-js';
 
+import { calcTotal } from './Payment';
+
 const styles = makeStyles(theme => ({
   header: {
     paddingBottom: theme.spacing.unit * 4,
@@ -445,7 +447,7 @@ export default React.memo(() => {
         <ListItemIcon>
           { generatePaymentIcon(payment.status) }
         </ListItemIcon>
-        <ListItemText primary={payment.total} secondary={payment.desc} />
+        <ListItemText primary={calcTotal(payment)} secondary={payment.desc} />
       </ListItem>) }
     </List>
   </Card> : null;
