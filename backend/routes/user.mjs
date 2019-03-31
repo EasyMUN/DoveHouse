@@ -121,6 +121,19 @@ router.post('/:id/profile', matcher, async ctx => {
   return ctx.status = 204;
 });
 
+router.post('/:id/pass', matcher, async ctx => {
+  const user = await User.findById(ctx.params.id);
+  if(!user) return ctx.status = 404;
+  
+  if(!ctx.user.isAdmin)
+    if(!await user.testPass(ctx.request.body.curpass))
+      return ctx.status = 403;
+
+  await user.setPass(ctx.request.body.newpass);
+  await user.save();
+  return ctx.status = 201;
+});
+
 router.post('/:id/idVerify', matcher, async ctx => {
   const { idNumber, realname } = ctx.request.body;
 

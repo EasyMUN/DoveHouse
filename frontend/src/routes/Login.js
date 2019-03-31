@@ -120,13 +120,6 @@ const Login = React.memo(() => {
   }, [email, pass, realname]);
 
   const forgotCB = useCallback(async () => {
-    if(!email) {
-      enqueueSnackbar('请填写邮箱', {
-        variant: 'error',
-      });
-      return;
-    }
-
     try {
       await dispatch(post('/user/pass', { email }));
     } catch(e) {}
@@ -183,7 +176,7 @@ const Login = React.memo(() => {
         <CardActions>
           <Button color="secondary" onClick={submit}>提交</Button>
           { toggle }
-          { reg ? null : <Button onClick={forgotCB}>找回密码</Button> }
+          { reg ? null : <Button onClick={forgotCB} disabled={!email}>找回密码</Button> }
         </CardActions>
       </Card>
     </div>

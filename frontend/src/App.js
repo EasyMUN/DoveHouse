@@ -274,7 +274,7 @@ const App = () => {
           <ListItemIcon>
             <Icon>person</Icon>
           </ListItemIcon>
-          <ListItemText primary="个人资料" />
+          <ListItemText primary="帐号设置" />
         </ListItem>
         <ListItem button component={NavLink} to="/about" onClick={closeDrawer}>
           <ListItemIcon>

@@ -159,6 +159,30 @@ export default React.memo(() => {
   const updateDisabled = !profile.school || !profile.grade || !profile.phone || !profile.qq;
   const verifyDisabled = !id || !(realname === null ? user.realname : realname);
 
+  const [curpass, setCurpass] = useState('');
+  const [newpass, setNewpass] = useState('');
+
+  const updateCurpass = useCallback(ev => setCurpass(ev.target.value));
+  const updateNewpass = useCallback(ev => setNewpass(ev.target.value));
+
+  const passDisabled = !curpass || !newpass;
+  const doPass = useCallback(async () => {
+    try {
+      await dispatch(post(`/user/${user._id}/pass`, { curpass, newpass }));
+
+      enqueueSnackbar('密码修改成功!', {
+        variant: 'success',
+      });
+
+      setCurpass('');
+      setNewpass('');
+    } catch(e) {
+      enqueueSnackbar('当前密码错误', {
+        variant: 'error',
+      });
+    }
+  }, [curpass, newpass]);
+
   return <BasicLayout>
     <div className={cls.header}>
       <div className={cls.avatar}>
@@ -193,6 +217,37 @@ export default React.memo(() => {
         }
       </div>
     </div>
+
+    <Card className={cls.card}>
+      <CardContent>
+        <Typography gutterBottom variant="h5" className={cls.type}>修改密码</Typography>
+
+        <TextField
+          label="当前密码"
+          margin="normal"
+          value={curpass}
+          onChange={updateCurpass}
+          fullWidth
+          type="password"
+          required
+        />
+
+        <TextField
+          label="新密码"
+          margin="normal"
+          value={newpass}
+          onChange={updateNewpass}
+          fullWidth
+          type="password"
+          required
+        />
+      </CardContent>
+      <CardActions>
+        <Button color="secondary" onClick={doPass} disabled={passDisabled}>
+          提交
+        </Button>
+      </CardActions>
+    </Card>
 
     <Card className={cls.card}>
       <CardContent>
