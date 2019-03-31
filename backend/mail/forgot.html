@@ -1,0 +1,49 @@
+<div class="wrapper">
+  <div class="hint">{{ BRAND }}</div>
+  <div class="title">找回密码</div>
+
+  <p class="body">尊敬的{{ name }}:</p>
+  <p class="body">您刚刚在 {{ BRAND }} 平台上申请了一次密码重置。请点击下方链接确认密码重置，之后我们会把新密码发送至您的邮箱。</p>
+
+  <a href="{{ link }}" class="link">{{ link }}</a>
+
+  <p class="body">如果您未申请密码重置，请忽略此邮件。点击链接前您的密码不会被更改。</p>
+
+  <p class="signing">{{BRAND}} 团队 | EasyMUN</p>
+</div>
+
+<style>
+.wrapper {
+  max-width: 400px;
+  margin: 0 auto;
+  border: #DDD 1px solid;
+  padding: 20px;
+}
+.hint {
+  font-size: 14px;
+  color: rgba(0,0,0,.38);
+  line-height: 16px;
+}
+
+.title{
+  font-size: 28px;
+  color: rgba(0,0,0,.87);
+  line-height: 32px;
+}
+
+.body {
+  color: rgba(0,0,0,.7);
+}
+
+.signing {
+  color: rgba(0,0,0,.38);
+  font-size: 14px;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.link {
+  color: rgba(0,0,0,.7);
+  word-break: break-work;
+}
+</style>

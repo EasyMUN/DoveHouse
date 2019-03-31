@@ -33,6 +33,7 @@ const schema = new mongoose.Schema({
   },
 
   token: String,
+  passToken: String,
 
   phone: String,
 

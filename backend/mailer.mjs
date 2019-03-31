@@ -35,7 +35,7 @@ export async function send(rcpt, title, tmpl, data) {
 
   const mail = {
     to: rcpt,
-    subject: `[${BRAND}] title`,
+    subject: `[${BRAND}] ${title}`,
     html: injected,
     text: injected,
   };

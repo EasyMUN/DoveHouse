@@ -119,6 +119,22 @@ const Login = React.memo(() => {
     }
   }, [email, pass, realname]);
 
+  const forgotCB = useCallback(async () => {
+    if(!email) {
+      enqueueSnackbar('请填写邮箱', {
+        variant: 'error',
+      });
+      return;
+    }
+
+    try {
+      await dispatch(post('/user/pass', { email }));
+    } catch(e) {}
+    enqueueSnackbar('密码重置链接已发往指定的邮箱！', {
+      variant: 'success',
+    });
+  }, [email]);
+
   const submit = reg ? registerCB : loginCB;
 
   const keydownCheck = useCallback(ev => {
@@ -167,6 +183,7 @@ const Login = React.memo(() => {
         <CardActions>
           <Button color="secondary" onClick={submit}>提交</Button>
           { toggle }
+          { reg ? null : <Button onClick={forgotCB}>找回密码</Button> }
         </CardActions>
       </Card>
     </div>

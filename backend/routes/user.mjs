@@ -48,6 +48,41 @@ router.post('/', async ctx => {
   return ctx.body = { token: jwt };
 });
 
+router.post('/pass', async ctx => {
+  const { email } = ctx.request.body;
+
+  const token = (await randomBytes(24)).toString('hex');
+
+  const user = await User.findOneAndUpdate({ email }, {
+    $set: { passToken: token },
+  });
+
+  if(!user) return ctx.status = 201; // Hide error
+
+  await mailer.send(email, '密码重置', 'forgot', {
+    name: user.realname,
+    link: `${Config.base}/user/pass/${token}`,
+  });
+
+  return ctx.status = 201;
+});
+
+router.get('/pass/:token', async ctx => {
+  const pass = (await randomBytes(8)).toString('hex');
+  const user = await User.findOneAndUpdate({ passToken: ctx.params.token }, { $set: { passToken: null }});
+  if(!user) return ctx.status = 404;
+
+  await user.setPass(pass);
+  await user.save();
+
+  await mailer.send(user.email, '密码重置 - 完成', 'pass', {
+    name: user.realname,
+    pass,
+  });
+
+  return ctx.body = '新密码已发往您的邮箱，您可以关闭此页面了';
+});
+
 // Match id and self
 const matcher = async (ctx, next) => {
   if(ctx.params.id)
