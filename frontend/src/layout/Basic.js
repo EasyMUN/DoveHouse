@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 
 import { makeStyles } from '@material-ui/styles';
 
@@ -48,14 +48,19 @@ export default React.memo(({ children, onScroll }) => {
 
   const [onTop, setOnTop] = useState(true);
 
+  const scrollRef = useRef();
+
   const scrollCB = useCallback(ev => {
+    if(ev.target !== scrollRef.current)
+      return;
+
     const scrollTop = ev.target.scrollTop;
     setOnTop(scrollTop === 0);
 
     if(onScroll) onScroll();
-  }, [onScroll]);
+  }, [onScroll, scrollRef]);
 
-  return <div className={cls.wrapper} onScroll={scrollCB}>
+  return <div className={cls.wrapper} onScroll={scrollCB} ref={scrollRef}>
     <div className={clsx(cls.toolbar, { [cls.toolbarFloating]: !onTop })}></div>
     <div className={cls.toolbarSpacer}></div>
     <div className={cls.inner}>
