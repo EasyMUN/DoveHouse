@@ -1,5 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 
+import clsx from 'clsx';
+
 import { useDispatch } from 'redux-react-hook';
 
 import { makeStyles } from '@material-ui/styles';
@@ -19,6 +21,10 @@ import Card from '@material-ui/core/Card';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
+
+import { VariableSizeList } from 'react-window';
+
+import CardContent from '../overrides/CardContent';
 
 import { get, post, fetchConf } from '../store/actions';
 
@@ -64,15 +70,49 @@ const styles = makeStyles(theme => ({
     position: 'sticky',
     top: 64 + 20,
     zIndex: 1,
+  },
 
-    '& .material-icons': {
-      marginRight: theme.spacing.unit,
-      color: 'rgba(0,0,0,.3)',
-    }
+  searchIcon: {
+    padding: 8,
+    marginTop: -8,
+    marginLeft: -8,
+    marginBottom: -8,
+    marginRight: 8,
+  },
+
+  searchIconDisabled: {
+    color: 'rgba(0,0,0,.3) !important',
+  },
+
+  searchSlide: {
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    transition: 'transform .2s ease',
+  },
+
+  searchSlideOff: {
+    transform: 'translateX(100%) translateX(-24px)',
   },
 
   searchInput: {
     flex: 1,
+  },
+
+  prefixInput: {
+    position: 'absolute',
+    left: 56,
+    right: 56,
+    opacity: 0,
+    pointerEvents: 'none',
+    transition: 'opacity .2s ease, transform .2s ease',
+    transform: 'translateX(-8px)',
+  },
+
+  prefixInputShown: {
+    opacity: 1,
+    pointerEvents: 'all',
+    transform: 'translateX(0)',
   },
 
   regSummary: {
@@ -118,6 +158,52 @@ const styles = makeStyles(theme => ({
   infoLine: {
     flex: 1,
   },
+
+  boxesWrapper: {
+    width: '100vw',
+    position: 'absolute',
+    left: 0,
+    bottom: 0,
+    right: 0,
+    top: 327,
+    overflowX: 'auto',
+  },
+
+  boxes: {
+    height: 'calc(100vh - 60px - 327px)',
+    maxWidth: 700,
+    padding: '0 20px',
+    margin: 'auto',
+    whiteSpace: 'nowrap',
+  },
+
+  boxesOverhang: {
+    display: 'inline-block',
+    verticalAlign: 'top',
+    width: 'calc(50vw - 330px)',
+    marginLeft: -theme.spacing.unit,
+    height: '100%',
+  },
+
+  box: {
+    display: 'inline-flex',
+    verticalAlign: 'top',
+    flexDirection: 'column',
+    height: '100%',
+    width: 300,
+    marginRight: theme.spacing.unit,
+  },
+
+  boxHeader: {
+    boxShadow: 'rgba(0,0,0,.3) 0 1px 3px',
+    zIndex: 1,
+    height: 68,
+  },
+
+  boxContent: {
+    flex: 1,
+    overflowY: 'auto'
+  },
 }));
 
 function generateTagNode(tags, cls) {
@@ -136,8 +222,10 @@ export default React.memo(() => {
     setSearch(ev.target.value);
   }, 200));
 
-  const { match } = useRouter();
+  const { match, location } = useRouter();
   const dispatch = useDispatch();
+
+  const [boxHeight, setBoxHeight] = useState(window.innerHeight - 327 - 60 - 68);
 
   const [skipped, setSkipped] = useState(0);
   const [win, setWin] = useState(Infinity);
@@ -160,9 +248,13 @@ export default React.memo(() => {
   }, [setSkipped, setWin]);
 
   useEffect(() => {
-    window.addEventListener('resize', virtualize);
+    const cb = () => {
+      virtualize();
+      setBoxHeight(window.innerHeight - 327 - 60 - 68);
+    };
 
-    return () => window.removeEventListener('resize', virtualize);
+    window.addEventListener('resize', cb);
+    return () => window.removeEventListener('resize', cb);
   }, [virtualize]);
 
   async function updateConf() {
@@ -187,6 +279,50 @@ export default React.memo(() => {
 
   const [editTarget, setEditTarget] = useState(null);
   const [editInner, setEditInner] = useState(null);
+
+  const [mode, setMode] = useState(location.hash ? 'box' : 'list');
+  const [prefix, setPrefix] = useState(location.hash ? location.hash.substr(1) : '');
+  const gotoList = useCallback(() => setMode('list'));
+  const gotoBox = useCallback(() => setMode('box'));
+
+  const [moving, setMoving] = useState(null);
+  const [currentBox, setCurrentBox] = useState('');
+  const openMoveTo = useCallback(target => setMoving(target));
+  const closeMoveTo = useCallback(() => setMoving(null));
+  const commitMove = useCallback(async box => {
+    const tags = moving.tags.filter(e => e.indexOf(`${prefix}:`) !== 0);
+    if(box !== null)
+      tags.push(`${prefix}:${box}`);
+
+    await dispatch(post(`/conference/${match.params.id}/list/${moving.user._id}/tags`, tags, 'PUT'));
+    await updateList();
+    closeMoveTo();
+  }, [prefix, moving]);
+
+  const [shiftHold, setShiftHold] = useState(false);
+  useEffect(() => {
+    const press = ev => {
+      if(ev.key === 'Shift')
+        setShiftHold(true);
+    };
+
+    const release = ev => {
+      if(ev.key === 'Shift')
+        setShiftHold(false);
+    };
+
+    window.addEventListener('keydown', press);
+    window.addEventListener('keyup', release);
+    return () => {
+      window.removeEventListener('keydown', press);
+      window.removeEventListener('keyup', release);
+    };
+  });
+
+  const changePrefix = useCallback(debounceEv(ev => {
+    setPrefix(ev.target.value);
+    window.location.href = `#${ev.target.value}`;
+  }, 200));
 
   const submitTag = useCallback(async () => {
     await dispatch(post(`/conference/${match.params.id}/list/${editTarget.user._id}/tags`, editInner, 'PUT'));
@@ -228,58 +364,162 @@ export default React.memo(() => {
 
   const sliced = filtered.slice(skipped).slice(0, win);
 
+  const boxes = [];
+  const boxContents = {};
+  const backlog = [];
+  if(list && mode === 'box' && prefix !== '') {
+    // Populate boxes
+    for(const user of list) {
+      const tag = user.tags.find(tag => tag.indexOf(`${prefix}:`) === 0);
+      if(!tag) backlog.push(user);
+      else {
+        const suffix = tag.substr(prefix.length + 1);
+        if(suffix in boxContents) boxContents[suffix].push(user);
+        else {
+          boxes.push(suffix);
+          boxContents[suffix] = [user];
+        }
+      }
+    }
+  }
+
+  const renderBox = (box, content) => <Card className={cls.box} key={box}>
+    <CardContent className={cls.boxHeader}>
+      <Typography variant="h6">{ box || '未分组' }</Typography>
+    </CardContent>
+    <List disablePadding>
+      <VariableSizeList
+        height={boxHeight}
+        itemCount={content.length + 2}
+        itemSize={index => index === 0 || index === content.length + 1 ? 8 : rowHeight }
+      >
+        { ({ index, style }) => {
+          if(index === 0 || index === content.length + 1) return <div />;
+          const reg = content[index-1];
+          return <div style={style}>
+            <ListItem
+              key={reg.user._id}
+              button
+              component={NavLink}
+              to={`/conference/${match.params.id}/admin/reg/${reg.user._id}`}
+            >
+              <ListItemAvatar>
+                <UserAvatar email={reg.user.email} name={reg.user.realname} />
+              </ListItemAvatar>
+              <ListItemText
+                className={cls.infoLine}
+                primary={reg.user.realname}
+                secondary={generateTagNode(reg.tags, cls)}
+                classes={{
+                  secondary: cls.tagLine
+                }}
+              />
+              <ListItemSecondaryAction>
+                { shiftHold ? 
+                    <IconButton onClick={() => {
+                      openTagEdit();
+                      setEditTarget(reg);
+                      setEditInner(reg.tags);
+                    }}>
+                    <Icon>label</Icon>
+                  </IconButton>
+                    :
+                    <IconButton onClick={() => {
+                      openMoveTo(reg);
+                      setCurrentBox(box);
+                    }}>
+                    <Icon>move_to_inbox</Icon>
+                  </IconButton>
+                }
+              </ListItemSecondaryAction>
+            </ListItem>
+          </div>;
+        }}
+      </VariableSizeList>
+    </List>
+  </Card>;
+
   const inner = !list ? <Loading /> : <>
     <Card className={cls.search}>
-      <Icon>search</Icon>
+      <IconButton className={cls.searchIcon} disabled={mode === 'box'} onClick={gotoBox} classes={{
+        disabled: cls.searchIconDisabled,
+      }}>
+        <Icon>view_column</Icon>
+      </IconButton>
+
       <InputBase
-        placeholder="标签/姓名/学校 空格分隔"
-        className={cls.searchInput}
-        onChange={changeSearch}
+        placeholder="标签前缀"
+        className={clsx(cls.prefixInput, mode === 'box' ? cls.prefixInputShown : null)}
+        onChange={changePrefix}
+        defaultValue={location.hash ? location.hash.substr(1) : ''}
       />
-      <div className={cls.searchCounter}>
-        { shownCount } / { list.length }
+
+      <div className={clsx(cls.searchSlide, mode !== 'list' ? cls.searchSlideOff : null)}>
+        <IconButton className={cls.searchIcon} disabled={mode === 'list'} onClick={gotoList} classes={{
+          disabled: cls.searchIconDisabled,
+        }}>
+          <Icon>search</Icon>
+        </IconButton>
+
+        <InputBase
+          placeholder="标签/姓名/学校 空格分隔"
+          className={cls.searchInput}
+          onChange={changeSearch}
+        />
+        <div className={cls.searchCounter}>
+          { shownCount } / { list.length }
+        </div>
       </div>
     </Card>
 
-    <div
-      ref={listRef}
-      style={{
-        paddingTop: `${skipped*rowHeight}px`,
-        height: `${shownCount*rowHeight}px`,
-      }}
-    >
-      <List>
-        { sliced.map(reg =>
-          <ListItem
-            key={reg.user._id}
-            button
-            component={NavLink}
-            to={`/conference/${match.params.id}/admin/reg/${reg.user._id}`}
-          >
-            <ListItemAvatar>
-              <UserAvatar email={reg.user.email} name={reg.user.realname} />
-            </ListItemAvatar>
-            <ListItemText
-              className={cls.infoLine}
-              primary={reg.user.realname}
-              secondary={generateTagNode(reg.tags, cls)}
-              classes={{
-                secondary: cls.tagLine
-              }}
-            />
-            <ListItemSecondaryAction>
-              <IconButton onClick={() => {
-                openTagEdit();
-                setEditTarget(reg);
-                setEditInner(reg.tags);
-              }}>
-                <Icon>label</Icon>
-              </IconButton>
-            </ListItemSecondaryAction>
-          </ListItem>
-        )}
-      </List>
-    </div>
+    { mode === 'list' ?
+        <div
+          ref={listRef}
+          style={{
+            paddingTop: `${skipped*rowHeight}px`,
+            height: `${shownCount*rowHeight}px`,
+          }}
+        >
+          <List>
+            { sliced.map(reg =>
+              <ListItem
+                key={reg.user._id}
+                button
+                component={NavLink}
+                to={`/conference/${match.params.id}/admin/reg/${reg.user._id}`}
+              >
+                <ListItemAvatar>
+                  <UserAvatar email={reg.user.email} name={reg.user.realname} />
+                </ListItemAvatar>
+                <ListItemText
+                  className={cls.infoLine}
+                  primary={reg.user.realname}
+                  secondary={generateTagNode(reg.tags, cls)}
+                  classes={{
+                    secondary: cls.tagLine
+                  }}
+                />
+                <ListItemSecondaryAction>
+                  <IconButton onClick={() => {
+                    openTagEdit();
+                    setEditTarget(reg);
+                    setEditInner(reg.tags);
+                  }}>
+                  <Icon>label</Icon>
+                </IconButton>
+              </ListItemSecondaryAction>
+            </ListItem>
+            )}
+          </List>
+        </div> : null }
+    { mode === 'box' && prefix !== '' ?
+        <div className={cls.boxesWrapper}>
+          <div className={cls.boxes}>
+            { renderBox(null, backlog) }
+            { boxes.map(box => renderBox(box, boxContents[box])) }
+            <div className={cls.boxesOverhang} />
+          </div>
+        </div> : null }
   </>;
 
   return <BasicLayout onScroll={virtualize}>
@@ -302,6 +542,16 @@ export default React.memo(() => {
       onChange={setEditInner}
 
       onSubmit={submitTag}
+    />
+
+    <MoveToDialog
+      open={moving !== null}
+      onClose={closeMoveTo}
+      fullWidth
+
+      boxes={boxes}
+      current={currentBox}
+      onMove={commitMove}
     />
   </BasicLayout>;
 });
@@ -356,5 +606,52 @@ export const TagEditDialog = React.memo(({ value, onChange, onSubmit, ...rest })
     <DialogActions>
       <Button onClick={onSubmit}>上传</Button>
     </DialogActions>
+  </Dialog>;
+});
+
+export const MoveToDialog = React.memo(({ current, boxes, onMove, ...rest }) => {
+  const cls = dialogStyles();
+
+  const [input, setInput] = useState('');
+  const changeInput = useCallback(ev => setInput(ev.target.value));
+  const checkEnter = useCallback(ev => {
+    if(ev.key !== 'Enter') return;
+    if(input === '') return;
+
+    onMove(input);
+  });
+
+  return <Dialog {...rest}>
+    <List>
+      { current ?
+          <ListItem>
+            <ListItemIcon><Icon>inbox</Icon></ListItemIcon>
+            <ListItemText primary={current} secondary="从此移动至:" />
+          </ListItem> : null }
+      <ListItem>
+        <ListItemIcon><Icon>add</Icon></ListItemIcon>
+        <InputBase
+          value={input}
+          onChange={changeInput}
+          onKeyDown={checkEnter}
+          className={cls.input}
+        />
+      </ListItem>
+      { current !== null ?
+          <ListItem button onClick={() => onMove(null)}>
+            <ListItemIcon><Icon>delete</Icon></ListItemIcon>
+            <ListItemText primary='删除分组' />
+          </ListItem> : null }
+      { boxes.filter(box => box !== current).map((box, index) => <ListItem
+        key={box}
+        button
+        onClick={() => {
+          onMove(box)
+        }}
+      >
+        <ListItemIcon><Icon>move_to_inbox</Icon></ListItemIcon>
+        <ListItemText primary={box} />
+      </ListItem>) }
+    </List>
   </Dialog>;
 });

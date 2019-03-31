@@ -6395,6 +6395,11 @@ mem@^4.0.0:
     mimic-fn "^1.0.0"
     p-is-promise "^2.0.0"
 
+"memoize-one@>=3.1.1 <6":
+  version "5.0.2"
+  resolved "http://registry.npm.taobao.org/memoize-one/download/memoize-one-5.0.2.tgz#6aba5276856d72fb44ead3efab86432f94ba203d"
+  integrity sha1-arpSdoVtcvtE6tPvq4ZDL5S6ID0=
+
 memory-fs@^0.4.0, memory-fs@~0.4.1:
   version "0.4.1"
   resolved "http://registry.npm.taobao.org/memory-fs/download/memory-fs-0.4.1.tgz#3a9a20b8462523e447cfbc7e8bb80ed667bfc552"
@@ -8517,6 +8522,14 @@ react-transition-group@^2.6.0:
     loose-envify "^1.4.0"
     prop-types "^15.6.2"
     react-lifecycles-compat "^3.0.4"
+
+react-window@^1.7.1:
+  version "1.7.1"
+  resolved "http://registry.npm.taobao.org/react-window/download/react-window-1.7.1.tgz#c1db640415b97b85bc0a1c66eb82dadabca39b86"
+  integrity sha1-wdtkBBW5e4W8Chxm64La2ryjm4Y=
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    memoize-one ">=3.1.1 <6"
 
 react@^16.8.2:
   version "16.8.2"
