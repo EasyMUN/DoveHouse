@@ -79,7 +79,15 @@ const styles = makeStyles(theme => ({
     textAlign: 'center',
     color: 'rgba(0,0,0,.38)',
     marginBottom: 40,
-    marginTop: -30,
+    marginTop: -35,
+  },
+
+  ddlHint: {
+    display: 'block',
+    textAlign: 'center',
+    color: 'rgba(0,0,0,.38)',
+    marginBottom: 40,
+    marginTop: -35,
   },
 
   ident: {
@@ -95,6 +103,10 @@ const styles = makeStyles(theme => ({
   done: {
     '& $paidHint': {
       display: 'block',
+    },
+
+    '& $ddlHint': {
+      display: 'none',
     },
 
     '& $ident': {
@@ -200,6 +212,17 @@ export function calcTotal(payment) {
   }, payment.total);
 }
 
+export function calcDDL(payment) {
+  let minimal = null;
+  for(const d of payment.discounts) {
+    if(isDiscountOutdated(d, payment)) continue;
+
+    if(minimal === null || new Date(d.until) < new Date(minimal)) minimal = d.until;
+  }
+
+  return minimal;
+}
+
 export default React.memo(() => {
   const cls = styles();
 
@@ -221,11 +244,14 @@ export default React.memo(() => {
   const updateTab = useCallback((ev, t) => setTab(t), [setTab])
 
   const hasDiscount = payment && payment.discounts && payment.discounts.length > 0;
-  const hasDesc = payment && payment.desc !== '';
+  const hasDetail = payment && payment.detail;
 
   let total = 0;
-  if(payment)
+  let ddl = null;
+  if(payment) {
     total = calcTotal(payment);
+    ddl = calcDDL(payment);
+  }
 
   const inner = payment ? <>
     <Typography variant="h3" className={cls.pageTitle}>订单详情</Typography>
@@ -262,7 +288,7 @@ export default React.memo(() => {
               </Paper>
             </div> : null }
 
-          { hasDesc ?
+          { hasDetail ?
             <div className={cls.auxItem}>
               <Icon>list</Icon>
 
@@ -270,7 +296,7 @@ export default React.memo(() => {
                 <Icon className={cls.auxInnerIcon}>list</Icon>
 
                 <div className={cls.desc}>
-                  <Typography variant="body1">{ payment.desc }</Typography>
+                  <Typography variant="body1">{ payment.detail }</Typography>
                 </div>
               </Paper>
             </div> : null }
@@ -278,6 +304,7 @@ export default React.memo(() => {
 
         <Typography variant="h3" className={cls.paymentTotal}>{ total } <small>CNY</small></Typography>
         <Typography variant="body1" className={cls.paidHint}>已支付</Typography>
+        { ddl ? <Typography variant="body1" className={cls.ddlHint}>{ new Date(ddl).toLocaleString() } 前</Typography> : null }
 
         <Typography variant="body1" className={cls.ident}>支付时请在备注中填入 <strong>{ payment.ident }</strong><br />并确保金额正确，以便我们确认订单</Typography>
       </CardContent>

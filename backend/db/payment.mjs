@@ -13,6 +13,7 @@ const schema = new mongoose.Schema({
 
   total: Number,
   desc: String,
+  detail: String,
 
   status: {
     type: String,
