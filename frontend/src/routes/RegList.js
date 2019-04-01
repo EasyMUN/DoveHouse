@@ -228,7 +228,7 @@ export default React.memo(() => {
   const [boxHeight, setBoxHeight] = useState(window.innerHeight - 327 - 60 - 68);
 
   const [skipped, setSkipped] = useState(0);
-  const [win, setWin] = useState(Infinity);
+  const [win, setWin] = useState(Math.ceil(window.innerHeight / rowHeight)+1);
   const listRef = useRef();
   const rowHeight = 60;
   const virtualize = useCallback(() => {
