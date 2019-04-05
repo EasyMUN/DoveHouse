@@ -194,7 +194,7 @@ router.post('/:id/accessKey', matcher, async ctx => {
 
   const bytes = await randomBytes(16);
   const key = bytes.toString('hex');
-  const jwt = await generateJWT(key);
+  const jwt = await generateJWT(key, 'key');
 
   const found = await User.findOneAndUpdate({
     _id: ctx.params.id,
