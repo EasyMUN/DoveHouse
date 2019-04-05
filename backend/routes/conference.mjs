@@ -100,9 +100,14 @@ router.put('/:id/registrant/:user', async ctx => {
       reg: ctx.request.body.reg,
       extra: ctx.request.body.extra,
     }},
-  });
+  }, { fields: {
+    webhooks,
+  }});
 
   if(!result) return ctx.status = 404;
+
+  // TODO: Send webhooks
+
   return ctx.status = 201;
 });
 
@@ -173,7 +178,7 @@ router.get('/:id/stat', async ctx => {
   if(!ctx.user.isAdmin)
     criteria.moderators = ctx.user._id;
 
-  const conf = await Conference.findOne(criteria);
+  const conf = await Conference.findOne(criteria, { webhooks: 1, 'registrants._id': 1 });
 
   if(!conf) return ctx.status = 404;
 
@@ -184,6 +189,7 @@ router.get('/:id/stat', async ctx => {
   return ctx.body = {
     regCount: conf.registrants.length,
     paymentCount,
+    webhooks: conf.webhooks,
   };
 });
 
@@ -285,6 +291,22 @@ router.post('/:id/list/:uid/payment', async ctx => {
   });
 
   return ctx.body = { _id };
+});
+
+router.put('/:id/webhooks', async ctx => {
+  const criteria = {
+    _id: ctx.params.id,
+  };
+
+  if(!ctx.user.isAdmin)
+    criteria.moderators = ctx.user._id;
+
+  const conf = await Conference.findOneAndUpdate(criteria, {
+    $set: { webhooks: ctx.request.body },
+  });
+
+  if(!conf) return ctx.status = 404;
+  return ctx.status = 204;
 });
 
 export default router;

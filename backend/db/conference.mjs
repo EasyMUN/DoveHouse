@@ -60,6 +60,8 @@ const schema = new mongoose.Schema({
       date: String,
     },
   ],
+
+  webhooks: [String],
 });
 
 const Conference = mongoose.model('Conference', schema);

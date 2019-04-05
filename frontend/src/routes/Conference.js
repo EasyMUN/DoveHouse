@@ -32,6 +32,8 @@ import StepLabel from '@material-ui/core/StepLabel';
 import Stepper from '@material-ui/core/Stepper';
 import Badge from '@material-ui/core/Badge';
 import Checkbox from '@material-ui/core/Checkbox';
+import Collapse from '@material-ui/core/Collapse';
+import InputBase from '@material-ui/core/InputBase';
 
 import PostEdit from '../comps/PostEdit';
 import Loading from '../comps/Loading';
@@ -226,6 +228,23 @@ const styles = makeStyles(theme => ({
 
   statList: {
     marginBottom: 16,
+  },
+
+  expand: {
+    transition: 'transform .2s ease',
+  },
+
+  expandInverted: {
+    transform: 'rotate(180deg)',
+  },
+
+  listNew: {
+    marginLeft: 16,
+    flex: 1,
+  },
+
+  nestedList: {
+    paddingLeft: theme.spacing.unit * 4,
   },
 }));
 
@@ -459,6 +478,24 @@ export default React.memo(() => {
     closePost();
   }, [match]);
 
+  const [webhooksOpen, setWebhooksOpen] = useState(false);
+  const toggleWebhooks = useCallback(() => setWebhooksOpen(!webhooksOpen), [webhooksOpen]);
+  const tryAddWebhook = useCallback(async ev => {
+    if(ev.key === 'Enter') {
+      const webhook = ev.target.value;
+      ev.target.value = '';
+      const webhooks = [...stat.webhooks, webhook];
+      await dispatch(post(`/conference/${match.params.id}/webhooks`, webhooks, 'PUT'));
+      await fetchStat();
+    }
+  }, [stat]);
+  const deleteWebhook = useCallback(async id => {
+    const webhooks = [...stat.webhooks]
+    webhooks.splice(id, 1);
+    await dispatch(post(`/conference/${match.params.id}/webhooks`, webhooks, 'PUT'));
+    await fetchStat();
+  }, [stat]);
+
   const statInner = stat ? <List className={cls.statList}>
     <ListItem button component={NavLink} to={`/conference/${match.params.id}/admin/reg`}>
       <ListItemIcon><Icon>assignment_ind</Icon></ListItemIcon>
@@ -469,6 +506,31 @@ export default React.memo(() => {
       <ListItemIcon><Icon>receipt</Icon></ListItemIcon>
       <ListItemText primary={stat.paymentCount} secondary="订单数" />
     </ListItem>
+
+    <ListItem button onClick={toggleWebhooks}>
+      <ListItemIcon><Icon>link</Icon></ListItemIcon>
+      <ListItemText primary={stat.webhooks.length} secondary="Webhooks" />
+      <Icon className={clsx(cls.expand, webhooksOpen ? cls.expandInverted : null)}>expand_more</Icon>
+    </ListItem>
+    <Collapse in={webhooksOpen} timeout="auto" unmountOnExit>
+      <List disablePadding component="div" className={cls.nestedList}>
+        <ListItem>
+          <ListItemIcon><Icon>add</Icon></ListItemIcon>
+          <InputBase
+            className={cls.listNew}
+            placeholder="https://example.com/path"
+            onKeyDown={tryAddWebhook}
+          />
+        </ListItem>
+        { stat.webhooks.map((hook, id) => <ListItem key={id}>
+          <ListItemIcon><Icon>link</Icon></ListItemIcon>
+          <ListItemText primary={hook} />
+          <ListItemSecondaryAction>
+            <IconButton onClick={() => deleteWebhook(id)}><Icon>delete</Icon></IconButton>
+          </ListItemSecondaryAction>
+        </ListItem>) }
+      </List>
+    </Collapse>
   </List> : <Loading />;
 
   const statCard = role === 'moderator' ? <Card className={cls.card}>
