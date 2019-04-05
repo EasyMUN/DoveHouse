@@ -219,7 +219,7 @@ const styles = makeStyles(theme => ({
     paddingBottom: 0,
   },
 
-  statTitle: {
+  listTitle: {
     margin: 16,
     marginBottom: 10,
   },
@@ -442,6 +442,7 @@ export default React.memo(() => {
   }
 
   const paymentsCard = (payments && payments.length > 0) ? <Card className={cls.card}>
+    <Typography variant="h5" className={cls.listTitle}>订单</Typography>
     <List>
       { payments.map(payment => <ListItem button component={NavLink} to={`/payment/${payment._id}`} key={payment._id}>
         <ListItemIcon>
@@ -471,7 +472,7 @@ export default React.memo(() => {
   </List> : <Loading />;
 
   const statCard = role === 'moderator' ? <Card className={cls.card}>
-    <Typography variant="h5" className={cls.statTitle} gutterBottom>管理</Typography>
+    <Typography variant="h5" className={cls.listTitle} gutterBottom>管理</Typography>
     { statInner }
   </Card> : null;
 

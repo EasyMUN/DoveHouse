@@ -140,10 +140,12 @@ export default React.memo(() => {
 
   const confsRegion = confs ? confs.map(conf => <Card className={cls.card} key={conf._id}>
     <CardContent>
-      <div className={cls.abbrLine}>
-        <Avatar src={conf.logo} className={cls.logo}/>
-        <Typography gutterBottom variant="body2" className={cls.type}>{ conf.abbr }</Typography>
-      </div>
+      <NavLink to={`/conference/${conf._id}`}>
+        <div className={cls.abbrLine}>
+          <Avatar src={conf.logo} className={cls.logo}/>
+          <Typography gutterBottom variant="body2" className={cls.type}>{ conf.abbr }</Typography>
+        </div>
+      </NavLink>
       <Typography variant="h5" className={cls.title}>报名进度</Typography>
 
       <Stepper>
