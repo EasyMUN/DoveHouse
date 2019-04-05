@@ -1,7 +1,5 @@
 import KoaRouter from '@circuitcoder/koa-router';
 
-import request from '../request';
-
 import User from '../db/user';
 import Conference from '../db/conference';
 import Payment from '../db/payment';

@@ -1,7 +1,5 @@
 import KoaRouter from '@circuitcoder/koa-router';
 
-import request from '../request';
-
 import Conference from '../db/conference';
 import User from '../db/user';
 import Committee from '../db/committee';
@@ -11,6 +9,7 @@ import Config from '../config';
 
 import { promisify } from 'util';
 import crypto from 'crypto';
+import fetch from 'node-fetch';
 import mailer from '../mailer';
 
 const randomBytes = promisify(crypto.randomBytes);
@@ -101,12 +100,30 @@ router.put('/:id/registrant/:user', async ctx => {
       extra: ctx.request.body.extra,
     }},
   }, { fields: {
-    webhooks,
+    webhooks: 1,
   }});
 
   if(!result) return ctx.status = 404;
 
-  // TODO: Send webhooks
+  for(const wh of result.webhooks)
+    try {
+      await fetch(wh, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'new-reg',
+          payload: {
+            user: ctx.params.user,
+            reg: ctx.request.body.reg,
+            extra: ctx.request.body.extra,
+          },
+        }),
+      });
+    } catch(e) {
+      console.error(e);
+    }
 
   return ctx.status = 201;
 });
