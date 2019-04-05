@@ -6,9 +6,9 @@ import { promisify } from 'util';
 
 const randomBytes = promisify(crypto.randomBytes);
 
-export async function generateJWT(user) {
+export async function generateJWT(value, key = 'user') {
   // TODO: expire
   const bytes = await randomBytes(16);
   const jwtid = bytes.toString('hex');
-  return JWT.sign({ user }, Config.secret[0], { jwtid });
+  return JWT.sign({ [key]: value }, Config.secret[0], { jwtid });
 };

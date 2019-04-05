@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 
 import { makeStyles } from '@material-ui/styles';
 
@@ -10,15 +10,29 @@ import Card from '@material-ui/core/Card';
 import CardActions from '../overrides/CardActions';
 import CardContent from '../overrides/CardContent';
 import TextField from '@material-ui/core/TextField';
+import InputBase from '@material-ui/core/InputBase';
+import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 
-import { post, refresh } from '../store/actions';
+import { get, post, refresh } from '../store/actions';
 
 import UserAvatar from '../comps/UserAvatar';
+import Loading from '../comps/Loading';
 
 import { useSnackbar } from '../Snackbar';
 
 import BasicLayout from '../layout/Basic';
+
+function formatLastAccess(d) {
+  if(!d) return '从未被使用';
+
+  return `最近使用: ${new Date(d).toLocaleString()}`;
+}
 
 const styles = makeStyles(theme => ({
   header: {
@@ -93,6 +107,17 @@ const styles = makeStyles(theme => ({
   hint: {
     marginBottom: theme.spacing.unit,
     color: 'rgba(0,0,0,.38)',
+  },
+
+  inputBase: {
+    marginLeft: 16,
+    flex: 1,
+  },
+
+  copySource: {
+    border: 0,
+    position: 'absolute',
+    top: -100,
   },
 }));
 
@@ -182,6 +207,40 @@ export default React.memo(() => {
       });
     }
   }, [curpass, newpass]);
+
+  const [keys, setKeys] = useState(null);
+  const fetchKeys = async () => {
+    const resp = await dispatch(get(`/user/${user._id}/accessKey`));
+    setKeys(resp);
+  };
+
+  useEffect(() => {
+    fetchKeys();
+  }, []);
+
+  const [newKey, setNewKey] = useState('');
+  const updateNewKey = useCallback(ev => setNewKey(ev.target.value));
+  const copySource = useRef();
+  const testNewKey = useCallback(async ev => {
+    if(ev.key === 'Enter' && newKey) {
+      const { token } = await dispatch(post(`/user/${user._id}/accessKey`, { name: newKey }));
+      const copy = copySource.current;
+      copy.value = token;
+      copy.select();
+      document.execCommand('copy');
+
+      enqueueSnackbar('API Access Key 已被复制到您的剪贴板，请妥善保管，您不会再在平台上见到它', {
+        variant: 'success',
+      });
+
+      setNewKey('');
+      await fetchKeys();
+    }
+  }, [newKey, copySource]);
+  const deleteKey = useCallback(async name => {
+    await dispatch(get(`/user/${user._id}/accessKey/${name}`, 'DELETE'));
+    await fetchKeys();
+  });
 
   return <BasicLayout>
     <div className={cls.header}>
@@ -340,5 +399,38 @@ export default React.memo(() => {
           </CardActions>
         </Card>
     }
+
+    <Card className={cls.card}>
+      <CardContent>
+        <Typography gutterBottom variant="h5" className={cls.type}>API Access Keys</Typography>
+        <Typography variant="body1">使用时请以 Bearer Authorization 头形式传给服务器，即可以用户身份进行 API 调用</Typography>
+        <Typography variant="body1">编程是一件危险的事情，如果你不知道上面在说什么，请不要触碰以下的选项。</Typography>
+      </CardContent>
+      <List>
+        <ListItem>
+          <ListItemIcon><Icon>add</Icon></ListItemIcon>
+          <InputBase
+            className={cls.inputBase}
+            placeholder="Key 名称，回车添加"
+            onKeyDown={testNewKey}
+            onChange={updateNewKey}
+            value={newKey}
+          />
+        </ListItem>
+        { keys ? keys.map(key => <ListItem key={key.name}>
+          <ListItemIcon><Icon>vpn_key</Icon></ListItemIcon>
+          <ListItemText
+            primary={key.name}
+            secondary={formatLastAccess(key.lastAccess)}
+          />
+          <ListItemSecondaryAction>
+            <IconButton onClick={() => deleteKey(key.name)}>
+              <Icon>delete</Icon>
+            </IconButton>
+          </ListItemSecondaryAction>
+        </ListItem>) : <Loading /> }
+      </List>
+    </Card>
+    <input ref={copySource} className={cls.copySource} />
   </BasicLayout>;
 });

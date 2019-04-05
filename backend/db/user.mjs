@@ -42,6 +42,12 @@ const schema = new mongoose.Schema({
     required: true,
     default: false,
   },
+
+  accessKeys: [{
+    name: String,
+    lastAccess: Date,
+    key: String,
+  }],
 });
 
 schema.methods.setPass = async function(pass) {

@@ -26,8 +26,8 @@ app.use(KoaJWT({
 
 app.use(async (ctx, next) => {
   if(ctx.state.user) {
-    // TODO: verify jti
-    const user = await User.findById(ctx.state.user.user, {
+    let user;
+    const filter = {
       status: 1,
       isAdmin: 1,
       _id: 1,
@@ -35,15 +35,33 @@ app.use(async (ctx, next) => {
       idNumber: 1,
       profile: 1,
       realname: 1,
-    }).lean();
+    };
 
-    // Hide sensitive stuff
-    const hasID = 
-    user.idNumber = !!user.idNumber;
+    if(ctx.state.user.user) {
+      // Is user token
+      // TODO: verify jti
+      user = await User.findById(ctx.state.user.user, filter).lean();
+    } else if(ctx.state.user.key) {
+      // Is access key
+      user = await User.findOneAndUpdate({
+        'accessKeys.key': ctx.state.user.key,
+      }, {
+        $currentDate: {
+          'accessKeys.$.lastAccess': true,
+        },
+      }, {
+        fields: filter,
+      });
+    }
 
-    ctx.jwt = ctx.state.user;
-    ctx.user = user;
-    ctx.uid = user._id.toString();
+    if(user) {
+      // Hide sensitive stuff
+      user.idNumber = !!user.idNumber;
+
+      ctx.jwt = ctx.state.user;
+      ctx.user = user;
+      ctx.uid = user._id.toString();
+    }
   }
 
   await next();

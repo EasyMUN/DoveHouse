@@ -188,4 +188,53 @@ router.get('/:id/payment', matcher, async ctx => {
   }).sort({ creation: -1 }).populate('conf', '_id logo abbr').lean();
 });
 
+router.post('/:id/accessKey', matcher, async ctx => {
+  const { name } = ctx.request.body;
+  // TODO: sanitize
+
+  const bytes = await randomBytes(16);
+  const key = bytes.toString('hex');
+  const jwt = await generateJWT(key);
+
+  const found = await User.findOneAndUpdate({
+    _id: ctx.params.id,
+    'accessKeys.name': { $ne: name },
+  }, {
+    $push: {
+      accessKeys: {
+        name,
+        lastAccess: null,
+        key,
+      },
+    },
+  });
+
+  if(!found) return ctx.status = 400; // No such user or duplicate name
+  return ctx.body = { token: jwt };
+});
+
+router.delete('/:id/accessKey/:name', matcher, async ctx => {
+  const { id, name } = ctx.params;
+
+
+  const found = await User.findOneAndUpdate({
+    _id: id,
+    'accessKeys.name': name,
+  }, {
+    $pull: { accessKeys: { name } },
+  }).lean();
+
+  if(!found) return ctx.status = 404;
+  return ctx.status = 204;
+});
+
+router.get('/:id/accessKey', matcher, async  ctx => {
+  const result = await User.findById(ctx.params.id, {
+    'accessKeys.name': 1,
+    'accessKeys.lastAccess': 1,
+  }).lean();
+
+  if(result) return ctx.body = result.accessKeys || [];
+});
+
 export default router;
