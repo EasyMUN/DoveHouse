@@ -9,7 +9,11 @@ import Payment from '../db/payment';
 
 import Config from '../config';
 
+import { promisify } from 'util';
+import crypto from 'crypto';
 import mailer from '../mailer';
+
+const randomBytes = promisify(crypto.randomBytes);
 
 const router = new KoaRouter();
 
@@ -236,6 +240,51 @@ router.put('/:id/list/:uid/tags', async ctx => {
 
   if(!conf) return ctx.status = 404;
   return ctx.status = 201;
+});
+
+router.post('/:id/list/:uid/payment', async ctx => {
+  const { total, desc, detail, discounts: _dis } = ctx.request.body;
+  const discounts = _dis || [];
+
+  const criteria = {
+    _id: ctx.params.id,
+    'registrants.user': ctx.params.uid,
+  };
+
+  if(!ctx.user.isAdmin)
+    criteria.moderators = ctx.user._id;
+
+  const conf = await Conference.findOne(criteria, { abbr: 1 });
+  if(!conf) return ctx.status = 403;
+
+  const user = await User.findById(ctx.params.uid, { email: 1, realname: 1 });
+
+  const ident = (parseInt((await randomBytes(4)).toString('hex'), 16) % 1000000).toString().padStart(6, '0');
+
+  const { _id } = await Payment.create({
+    conf: ctx.params.id,
+    payee: ctx.params.uid,
+    ident,
+
+    total, desc, detail, discounts,
+
+    status: 'waiting',
+    creation: new Date(),
+    confirmation: null,
+  });
+
+  const discount = discounts.reduce((acc, e) => acc + e.amount, 0);
+  const pricing = discount > 0 ? `${total} - ${discount} = ${total - discount}` : `${total}`;
+
+  await mailer.send(user.email, `新订单: ${desc}`, 'payment', {
+    name: user.realname,
+    conf: conf.abbr,
+
+    desc, pricing, detail,
+    link: `${Config.frontend}/payment/${_id}`,
+  });
+
+  return ctx.body = { _id };
 });
 
 export default router;
