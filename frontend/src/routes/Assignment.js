@@ -19,7 +19,13 @@ import Paper from '@material-ui/core/Paper';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import Tooltip from '@material-ui/core/Tooltip';
 import TextField from '@material-ui/core/TextField';
+import Dialog from '@material-ui/core/Dialog';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
 import SwipeableViews from 'react-swipeable-views';
 
@@ -143,6 +149,7 @@ export default React.memo(() => {
   const [assignment, setAssignment] = useState(null);
   const [ans, setAns] = useState(null);
   const [syncing, setSyncing] = useState(null);
+  const [helpOpen, setHelpOpen] = useState(null);
 
   const { match } = useRouter();
   const dispatch = useDispatch();
@@ -150,7 +157,7 @@ export default React.memo(() => {
   async function fetchAssignment() {
     const a = await dispatch(get(`/assignment/${match.params.id}`));
     setAssignment(a);
-    setAns(a.ans || a.probs.map(() => ''));
+    if(!ans) setAns(a.ans || a.probs.map(() => ''));
   }
 
   const syncUp = useMemo(() => debounce(async ans => {
@@ -159,6 +166,20 @@ export default React.memo(() => {
     await dispatch(post(`/assignment/${match.params.id}/ans`, { ans }, 'PUT'));
     setSyncing(false);
   }, 1000), [match, setSyncing]);
+
+  const submit = useCallback(async () => {
+    await dispatch(post(`/assignment/${match.params.id}/submitted`, { submitted: true }, 'PUT'));
+    const a = await dispatch(get(`/assignment/${match.params.id}`));
+    setAssignment(a);
+  });
+
+  const openHelp = useCallback(() => {
+    setHelpOpen(true);
+  });
+
+  const closeHelp = useCallback(() => {
+    setHelpOpen(false);
+  });
 
   useEffect(() => {
     fetchAssignment();
@@ -201,9 +222,32 @@ export default React.memo(() => {
           </div>
 
           <Icon className={clsx(cls.syncIndicator, syncing ? cls.syncIndicatorShown : null)}>sync</Icon>
-          <IconButton className={cls.helpBtn}><Icon>help</Icon></IconButton>
-          <Button variant="contained" color="secondary" disabled={outdated || assignment.submitted}>{ btnText }</Button>
+          <IconButton className={cls.helpBtn} onClick={openHelp}><Icon>help</Icon></IconButton>
+          <Button
+            variant="contained"
+            color="secondary"
+            disabled={outdated || assignment.submitted}
+            onClick={submit}
+          >
+            { btnText }
+          </Button>
         </Card>
+
+        <Dialog
+          open={helpOpen}
+          onClose={closeHelp}
+          scroll="paper"
+        >
+          <DialogTitle>关于提交的说明</DialogTitle>
+          <DialogContent>
+            <DialogContentText>所有的更改都是自动保存的，并且无论是否标记为完成或超时，您都可以进行修改。</DialogContentText>
+            <DialogContentText>但是默认情况下主办方不会在已完成的学测中看到您的提交，除非您将其标记为已提交，或者超时。</DialogContentText>
+            <DialogContentText>所以虽然您再标记完成后仍能够进行修改，但是我们推荐只有当您确信您的提交无误后，再标记成完成。</DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button color="primary" onClick={closeHelp}>懂了</Button>
+          </DialogActions>
+        </Dialog>
       </div>
     </div>
   </> : null;
