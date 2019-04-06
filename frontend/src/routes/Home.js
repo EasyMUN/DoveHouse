@@ -34,14 +34,16 @@ const styles = makeStyles(theme => ({
   hint: {
     color: 'rgba(0,0,0,.38)',
     marginTop: theme.spacing.unit,
+    marginBottom: 40,
   },
 
   card: {
-    marginTop: 40,
+    marginTop: 20,
   },
 
   divider: {
     marginTop: 40,
+    marginBottom: 40,
   },
 
   logo: {
