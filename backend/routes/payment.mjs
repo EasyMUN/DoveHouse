@@ -12,10 +12,12 @@ router.get('/:id', async ctx => {
   if(result.payee.toString() !== ctx.user._id.toString()
     && !ctx.user.isAdmin
     && result.conf.moderators.every(e => e.toString() !== ctx.user._id.toString())) return ctx.status = 404; // For secrutiy consideration
+
+  result.conf.moderators = undefined;
   return ctx.body = result;
 });
 
-router.post('/:id', async ctx => {
+router.post('/:id/status', async ctx => {
   const payment = await Payment.findById(ctx.params.id).populate('conf', 'moderators').lean();
 
   // We never mutate conf of a payment, so this is thread safe

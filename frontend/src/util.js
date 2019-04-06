@@ -60,6 +60,14 @@ export function gravatar(email, size=80) {
   return `https://www.gravatar.com/avatar/${hash}?s=${size}&d=blank`;
 }
 
+export function debounce(func, timeout) {
+  let last = null;
+  return (...args) => {
+    if(last !== null) clearTimeout(last);
+    last = setTimeout(() => func(...args), timeout);
+  }
+}
+
 export function debounceEv(func, timeout) {
   let last = null;
   return (...args) => {

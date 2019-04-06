@@ -4,6 +4,7 @@ import login from './login';
 import user from './user';
 import conference from './conference';
 import payment from './payment';
+import assignment from './assignment';
 
 export function routes() {
   const router = new KoaRouter();
@@ -12,6 +13,7 @@ export function routes() {
   router.use('/user', user.routes());
   router.use('/conference', conference.routes());
   router.use('/payment', payment.routes());
+  router.use('/assignment', assignment.routes());
 
   return router;
 }
