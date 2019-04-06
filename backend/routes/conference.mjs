@@ -210,13 +210,20 @@ router.get('/:id/stat', async ctx => {
 
   if(!conf) return ctx.status = 404;
 
-  const paymentCount = await Payment.count({
+  const pcp = Payment.count({
     conf: ctx.params.id,
   });
+
+  const acp = Assignment.count({
+    conf: ctx.params.id,
+  });
+
+  const [paymentCount, assignmentCount] = await Promise.all([pcp, acp]);
 
   return ctx.body = {
     regCount: conf.registrants.length,
     paymentCount,
+    assignmentCount,
     webhooks: conf.webhooks,
   };
 });

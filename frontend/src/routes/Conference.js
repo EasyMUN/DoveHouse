@@ -544,6 +544,11 @@ export default React.memo(() => {
       <ListItemText primary={stat.paymentCount} secondary="订单数" />
     </ListItem>
 
+    <ListItem>
+      <ListItemIcon><Icon>assignment</Icon></ListItemIcon>
+      <ListItemText primary={stat.assignmentCount} secondary="学测数" />
+    </ListItem>
+
     <ListItem button onClick={toggleWebhooks}>
       <ListItemIcon><Icon>link</Icon></ListItemIcon>
       <ListItemText primary={stat.webhooks.length} secondary="Webhooks" />
