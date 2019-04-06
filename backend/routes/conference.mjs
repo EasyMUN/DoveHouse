@@ -276,6 +276,32 @@ router.put('/:id/list/:uid/tags', async ctx => {
   return ctx.status = 201;
 });
 
+router.put('/:id/list/:uid/stage', async ctx => {
+  const criteria = {
+    _id: ctx.params.id,
+    'registrants.user': ctx.params.uid,
+  };
+
+  if(!ctx.user.isAdmin)
+    criteria.moderators = ctx.user._id;
+
+  const { stage } = ctx.request.body;
+
+  if(![
+    'reg',
+    'exam',
+    'interview',
+    'seating',
+  ].includes(stage)) return ctx.status = 400;
+
+  const conf = await Conference
+    .findOneAndUpdate(criteria, { $set: { 'registrants.$.stage': stage }})
+    .lean();
+
+  if(!conf) return ctx.status = 404;
+  return ctx.status = 201;
+});
+
 router.post('/:id/payment/:uid', async ctx => {
   const { total, desc, detail, discounts: _dis } = ctx.request.body;
   const discounts = _dis || [];

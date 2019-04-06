@@ -40,7 +40,7 @@ const schema = new mongoose.Schema({
         'reg',
         'exam',
         'interview',
-        'seat',
+        'seating',
       ],
       default: 'reg',
     },

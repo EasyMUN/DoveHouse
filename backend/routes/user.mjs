@@ -164,7 +164,7 @@ router.post('/:id/idVerify', matcher, async ctx => {
 });
 
 router.get('/:id/conferences', matcher, async ctx => {
-  ctx.body = await Conference.find({
+  const list = await Conference.find({
     'registrants.user': ctx.params.id,
   }, {
     'registrants.$': 1,
@@ -176,6 +176,13 @@ router.get('/:id/conferences', matcher, async ctx => {
     background: 1,
     logo: 1,
   }).lean();
+
+  for(const conf of list) {
+    conf.reg = conf.registrants[0];
+    conf.registrants = undefined;
+  }
+
+  ctx.body = list;
 });
 
 router.get('/:id/payment', matcher, async ctx => {

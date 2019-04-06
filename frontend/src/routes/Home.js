@@ -108,6 +108,10 @@ const styles = makeStyles(theme => ({
   },
 }));
 
+function getActiveStage(stage) {
+  return ['reg', 'exam', 'interview', 'seating'].indexOf(stage || 'reg');
+}
+
 export default React.memo(() => {
   const cls = styles();
 
@@ -148,7 +152,7 @@ export default React.memo(() => {
       </NavLink>
       <Typography variant="h5" className={cls.title}>报名进度</Typography>
 
-      <Stepper>
+      <Stepper activeStep={getActiveStage(conf.reg.stage)}>
         <Step><StepLabel>报名</StepLabel></Step>
         <Step><StepLabel>学测</StepLabel></Step>
         <Step><StepLabel>面试</StepLabel></Step>

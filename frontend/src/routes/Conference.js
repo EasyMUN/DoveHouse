@@ -446,11 +446,12 @@ export default React.memo(() => {
       </Card>) }
     </> : null;
 
+  const progress = reg ? ['reg', 'exam', 'interview', 'seating'].indexOf(reg.stage || 'reg') : 0;
   const progressCard = reg ? <Card className={cls.card}>
     <CardContent className={cls.progressContent}>
       <Typography variant="h5" gutterBottom>报名进度</Typography>
 
-      <Stepper>
+      <Stepper activeStep={progress}>
         <Step><StepLabel>报名</StepLabel></Step>
         <Step><StepLabel>学测</StepLabel></Step>
         <Step><StepLabel>面试</StepLabel></Step>
