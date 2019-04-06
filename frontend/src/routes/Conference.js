@@ -475,8 +475,8 @@ export default React.memo(() => {
 
   function generateAssignmentDesc(a) {
     if(a.submitted) return '已提交';
-    else if(new Date(a.deadline) < new Date()) return '已超时';
-    return '未提交';
+    else if(new Date(a.deadline) < new Date()) return `已超时 - ${new Date(a.deadline).toLocaleString()}`;
+    return `未提交 - DDL @ ${new Date(a.deadline).toLocaleString()}`;
   }
 
   function generatePaymentIcon(status) {
