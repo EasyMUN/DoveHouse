@@ -3,6 +3,7 @@ import KoaRouter from '@circuitcoder/koa-router';
 import User from '../db/user';
 import Conference from '../db/conference';
 import Payment from '../db/payment';
+import Assignment from '../db/assignment';
 
 import { generateJWT } from '../util';
 import Config from '../config';
@@ -190,6 +191,14 @@ router.get('/:id/payment', matcher, async ctx => {
   ctx.body = await Payment.find({
     payee: ctx.params.id,
     status,
+  }).sort({ creation: -1 }).populate('conf', '_id logo abbr').lean();
+});
+
+router.get('/:id/assignment', matcher, async ctx => {
+  const submitted = ctx.query.submitted === 'true' ? true : { $ne: true };
+  ctx.body = await Assignment.find({
+    assignee: ctx.params.id,
+    submitted,
   }).sort({ creation: -1 }).populate('conf', '_id logo abbr').lean();
 });
 

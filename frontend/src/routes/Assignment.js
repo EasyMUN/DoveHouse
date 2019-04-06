@@ -33,7 +33,7 @@ import { useRouter } from '../Router';
 
 import { NavLink } from 'react-router-dom';
 
-import { get, post } from '../store/actions';
+import { get, post, refresh } from '../store/actions';
 import { debounce } from '../util';
 
 import BasicLayout from '../layout/Basic';
@@ -53,15 +53,10 @@ const styles = makeStyles(theme => ({
   abbrLine: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
   },
 
   card: {
     marginTop: 20,
-  },
-
-  pageHint: {
-    color: 'rgba(0,0,0,.38)',
   },
 
   pageTitle: {
@@ -141,6 +136,14 @@ const styles = makeStyles(theme => ({
     opacity: 1,
     transition: 'opacity .2s ease-out',
   },
+
+  helpText: {
+    marginBottom: theme.spacing.unit,
+
+    '&:last-child': {
+      marginBottom: 0,
+    },
+  },
 }));
 
 export default React.memo(() => {
@@ -148,8 +151,8 @@ export default React.memo(() => {
 
   const [assignment, setAssignment] = useState(null);
   const [ans, setAns] = useState(null);
-  const [syncing, setSyncing] = useState(null);
-  const [helpOpen, setHelpOpen] = useState(null);
+  const [syncing, setSyncing] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   const { match } = useRouter();
   const dispatch = useDispatch();
@@ -169,8 +172,12 @@ export default React.memo(() => {
 
   const submit = useCallback(async () => {
     await dispatch(post(`/assignment/${match.params.id}/submitted`, { submitted: true }, 'PUT'));
+    const rp = refresh();
     const a = await dispatch(get(`/assignment/${match.params.id}`));
     setAssignment(a);
+
+    // Parallel request and join on rp
+    await rp;
   });
 
   const openHelp = useCallback(() => {
@@ -191,7 +198,12 @@ export default React.memo(() => {
   else if(outdated) btnText = '已超时';
 
   const inner = assignment ? <>
-    <Typography variant="h6" className={cls.pageHint}>学测</Typography>
+    <NavLink to={`/conference/${assignment.conf._id}`}>
+      <div className={cls.abbrLine}>
+        <Avatar src={assignment.conf.logo} className={cls.logo}/>
+        <Typography variant="body2" className={cls.abbr}>{ assignment.conf.abbr }</Typography>
+      </div>
+    </NavLink>
     <Typography variant="h3" className={cls.pageTitle}>{ assignment.title }</Typography>
 
     { assignment.probs.map((prob, index) => <Card key={index} className={cls.card}>
@@ -240,9 +252,10 @@ export default React.memo(() => {
         >
           <DialogTitle>关于提交的说明</DialogTitle>
           <DialogContent>
-            <DialogContentText>所有的更改都是自动保存的，并且无论是否标记为完成或超时，您都可以进行修改。</DialogContentText>
-            <DialogContentText>但是默认情况下主办方不会在已完成的学测中看到您的提交，除非您将其标记为已提交，或者超时。</DialogContentText>
-            <DialogContentText>所以虽然您再标记完成后仍能够进行修改，但是我们推荐只有当您确信您的提交无误后，再标记成完成。</DialogContentText>
+            <DialogContentText className={cls.helpText}>所有的更改都是自动保存的，并且无论是否标记为完成或超时，您都可以进行修改。自动保存时，底栏上会闪烁同步标志。</DialogContentText>
+            <DialogContentText className={cls.helpText}>但是默认情况下主办方不会在已完成的学测中看到您的提交，除非您将其标记为已提交，或者超时。</DialogContentText>
+            <DialogContentText className={cls.helpText}>所以虽然您再标记完成后仍能够进行修改，但是我们推荐只有当您确信您的提交无误后，再标记成完成。</DialogContentText>
+            <DialogContentText className={cls.helpText}>此外，如果此学测已经超时，但是您还没有标记为完成，那么此学测将会仍然显示在您的主页上，并且在面试官视角将会显示为 "超时"。因此即使超时，我们推荐您尽快将其完成并标记。</DialogContentText>
           </DialogContent>
           <DialogActions>
             <Button color="primary" onClick={closeHelp}>懂了</Button>

@@ -211,6 +211,8 @@ function generateTagNode(tags, cls) {
   return <span className={cls.tags}>{ tags.join(', ') }</span>;
 }
 
+const rowHeight = 60;
+
 export default React.memo(() => {
   const cls = styles();
 
@@ -230,7 +232,6 @@ export default React.memo(() => {
   const [skipped, setSkipped] = useState(0);
   const [win, setWin] = useState(Math.ceil(window.innerHeight / rowHeight)+1);
   const listRef = useRef();
-  const rowHeight = 60;
   const virtualize = useCallback(() => {
     const list = listRef.current;
     if(!list) {

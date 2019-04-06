@@ -24,6 +24,11 @@ export const setPayments = payments => ({
   payments,
 });
 
+export const setAssignments = assignments => ({
+  type: 'SET_ASSIGNMENTS',
+  assignments,
+});
+
 export const cacheConf = conf => ({
   type: 'CACHE_CONF',
   conf,
@@ -49,14 +54,16 @@ export const post = (endpoint, payload, method = 'POST', override = null) => asy
 /* Composed */
 export const login = token => async dispatch => {
   const self = await dispatch(get('/login', 'GET', token));
-  const [confs, payments] = await Promise.all([
+  const [confs, payments, assignments] = await Promise.all([
     dispatch(get(`/user/${self._id}/conferences`, 'GET', token)),
     dispatch(get(`/user/${self._id}/payment?status=waiting`, 'GET', token)),
+    dispatch(get(`/user/${self._id}/assignment?submitted=false`, 'GET', token)),
   ]);
 
   dispatch(setUser(self));
   dispatch(setConfs(confs));
   dispatch(setPayments(payments));
+  dispatch(setAssignments(assignments));
   dispatch(setToken(token));
 }
 
