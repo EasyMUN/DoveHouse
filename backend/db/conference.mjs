@@ -38,6 +38,9 @@ const schema = new mongoose.Schema({
       type: String,
       enum: [
         'reg',
+        'exam',
+        'interview',
+        'seat',
       ],
       default: 'reg',
     },

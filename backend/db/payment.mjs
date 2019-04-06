@@ -1,6 +1,4 @@
 import mongoose from 'mongoose';
-import crypto from 'crypto';
-import { promisify } from 'util';
 
 const schema = new mongoose.Schema({
   payee: mongoose.Schema.Types.ObjectId,

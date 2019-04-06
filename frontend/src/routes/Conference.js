@@ -257,6 +257,7 @@ export default React.memo(() => {
   const [comms, setComms] = useState(null);
   const [reg, setReg] = useState(null);
   const [payments, setPayments] = useState([]);
+  const [assignments, setAssignments] = useState([]);
   const [role, setRole] = useState(null);
   const [stat, setStat] = useState(null);
   const [color, setColor] = useState(null);
@@ -329,6 +330,16 @@ export default React.memo(() => {
     }
   };
 
+  async function fetchAssignments() {
+    if(!user) return setAssignments([]);
+    try {
+      setAssignments(await dispatch(get(`/conference/${match.params.id}/assignment/${user._id}`)));
+    } catch(e) {
+      if(e.code === 404) return;
+      throw e;
+    }
+  };
+
   async function fetchStat() {
     const stat = await dispatch(get(`/conference/${match.params.id}/stat`));
     setStat(stat);
@@ -353,6 +364,7 @@ export default React.memo(() => {
     updateComms();
     fetchReg();
     fetchPayments();
+    fetchAssignments();
     fetchRole();
   }, [match.params.id, dispatch, user]);
 
@@ -454,11 +466,35 @@ export default React.memo(() => {
     </CardActions>
   </Card> : null;
 
+  function generateAssignmentIcon(a) {
+    if(a.submitted) return <Icon>done</Icon>;
+    else if(new Date(a.deadline) < new Date()) return <Icon>timer_off</Icon>;
+    return <Icon>hourglass_empty</Icon>;
+  }
+
+  function generateAssignmentDesc(a) {
+    if(a.submitted) return '已提交';
+    else if(new Date(a.deadline) < new Date()) return '已超时';
+    return '未提交';
+  }
+
   function generatePaymentIcon(status) {
     if(status === 'paid') return <Icon>done</Icon>;
     else if(status === 'closed') return <Icon>close</Icon>;
     return <Icon>hourglass_empty</Icon>;
   }
+
+  const assignmentsCard = (assignments && assignments.length > 0) ? <Card className={cls.card}>
+    <Typography variant="h5" className={cls.listTitle}>学测</Typography>
+    <List>
+      { assignments.map(assignment => <ListItem button component={NavLink} to={`/assignment/${assignment._id}`} key={assignment._id}>
+        <ListItemIcon>
+          { generateAssignmentIcon(assignment) }
+        </ListItemIcon>
+        <ListItemText primary={assignment.title} secondary={generateAssignmentDesc(assignment)} />
+      </ListItem>) }
+    </List>
+  </Card> : null;
 
   const paymentsCard = (payments && payments.length > 0) ? <Card className={cls.card}>
     <Typography variant="h5" className={cls.listTitle}>订单</Typography>
@@ -584,6 +620,7 @@ export default React.memo(() => {
   return <HeaderLayout img={conf ? conf.background : ''} floating={header} pad={70 + 16 * 2 - 4 - 28} height={240}>
     { statCard }
     { progressCard }
+    { assignmentsCard }
     { paymentsCard }
     { inner }
 

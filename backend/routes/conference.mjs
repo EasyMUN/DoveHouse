@@ -4,6 +4,7 @@ import Conference from '../db/conference';
 import User from '../db/user';
 import Committee from '../db/committee';
 import Payment from '../db/payment';
+import Assignment from '../db/assignment';
 
 import Config from '../config';
 
@@ -153,6 +154,16 @@ router.get('/:id/payment/:user', async ctx => {
   }).sort({ creation: -1 }).lean();
 });
 
+router.get('/:id/assignment/:user', async ctx => {
+  const allowed = ctx.user.isAdmin || ctx.params.user === ctx.user._id.toString();
+  if(!allowed) return ctx.status = 403;
+
+  return ctx.body = await Assignment.find({
+    conf: ctx.params.id,
+    assignee: ctx.params.user,
+  }).sort({ creation: -1 }).lean();
+});
+
 router.get('/:id/role/:user', async ctx => {
   const allowed = ctx.user.isAdmin || ctx.params.user === ctx.user._id.toString();
   if(!allowed) return ctx.status = 403;
@@ -265,7 +276,7 @@ router.put('/:id/list/:uid/tags', async ctx => {
   return ctx.status = 201;
 });
 
-router.post('/:id/list/:uid/payment', async ctx => {
+router.post('/:id/payment/:uid', async ctx => {
   const { total, desc, detail, discounts: _dis } = ctx.request.body;
   const discounts = _dis || [];
 
@@ -305,6 +316,45 @@ router.post('/:id/list/:uid/payment', async ctx => {
 
     desc, pricing, detail,
     link: `${Config.frontend}/payment/${_id}`,
+  });
+
+  return ctx.body = { _id };
+});
+
+router.post('/:id/assignment/:uid', async ctx => {
+  const { title, probs, deadline } = ctx.request.body;
+
+  const criteria = {
+    _id: ctx.params.id,
+    'registrants.user': ctx.params.uid,
+  };
+
+  if(!ctx.user.isAdmin)
+    criteria.moderators = ctx.user._id;
+
+  const conf = await Conference.findOne(criteria, { abbr: 1 });
+  if(!conf) return ctx.status = 403;
+
+  const user = await User.findById(ctx.params.uid, { email: 1, realname: 1 });
+
+  const { _id } = await Assignment.create({
+    conf: ctx.params.id,
+    assignee: ctx.params.uid,
+
+    title, probs, deadline,
+
+    ans: null,
+
+    submitted: false,
+    creation: new Date(),
+  });
+
+  await mailer.send(user.email, `新学测: ${title}`, 'assignment', {
+    name: user.realname,
+    conf: conf.abbr,
+
+    title, deadline: new Date(deadline).toLocaleString('zh-Hans'),
+    link: `${Config.frontend}/assignment/${_id}`,
   });
 
   return ctx.body = { _id };
