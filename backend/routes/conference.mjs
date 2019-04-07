@@ -99,6 +99,7 @@ router.put('/:id/registrant/:user', async ctx => {
       stage: 'reg',
       reg: ctx.request.body.reg,
       extra: ctx.request.body.extra,
+      tags: [],
     }},
   }, { fields: {
     webhooks: 1,
@@ -119,6 +120,8 @@ router.put('/:id/registrant/:user', async ctx => {
             user: ctx.params.user,
             reg: ctx.request.body.reg,
             extra: ctx.request.body.extra,
+            tags: [],
+            stage: 'reg',
           },
         }),
       });

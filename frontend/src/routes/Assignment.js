@@ -62,33 +62,20 @@ const styles = makeStyles(theme => ({
   pageTitle: {
     color: 'rgba(0,0,0,.54)',
     marginBottom: 40,
+    marginTop: theme.spacing.unit,
   },
 
   submissionBarSpacer: {
-    height: 70,
+    height: 70 - 60 + 20,
   },
 
-  submissionBarPositioner: {
+  submissionBar: {
     position: 'fixed',
     bottom: 0,
     height: 70,
     left: 0,
     right: 0,
-  },
 
-  submissionBarContainer: {
-    margin: '0 auto',
-    maxWidth: 700,
-    boxSizing: 'border-box',
-    padding: '0 20px',
-    height: '100%',
-  },
-
-  submissionBar: {
-    width: '100%',
-    height: '100%',
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
     display: 'flex',
     alignItems: 'center',
 
@@ -143,6 +130,10 @@ const styles = makeStyles(theme => ({
     '&:last-child': {
       marginBottom: 0,
     },
+  },
+
+  prob: {
+    whiteSpace: 'pre-wrap',
   },
 }));
 
@@ -208,7 +199,7 @@ export default React.memo(() => {
 
     { assignment.probs.map((prob, index) => <Card key={index} className={cls.card}>
       <CardContent>
-        <Typography variant="h5" className={cls.prob} gutterBottom>{ prob }</Typography>
+        <Typography variant={ prob.indexOf('\n') === -1 ? 'h5' : 'body1' } className={cls.prob} gutterBottom>{ prob }</Typography>
         <TextField
           multiline
           fullWidth
@@ -225,44 +216,40 @@ export default React.memo(() => {
 
     <div className={cls.submissionBarSpacer} />
 
-    <div className={cls.submissionBarPositioner}>
-      <div className={cls.submissionBarContainer}>
-        <Card className={cls.submissionBar}>
-          <div className={cls.deadline}>
-            <div className={cls.deadlineHint}>DDL</div>
-            <div className={cls.deadlineContent}>{new Date(assignment.deadline).toLocaleString()}</div>
-          </div>
-
-          <Icon className={clsx(cls.syncIndicator, syncing ? cls.syncIndicatorShown : null)}>sync</Icon>
-          <IconButton className={cls.helpBtn} onClick={openHelp}><Icon>help</Icon></IconButton>
-          <Button
-            variant="contained"
-            color="secondary"
-            disabled={outdated || assignment.submitted}
-            onClick={submit}
-          >
-            { btnText }
-          </Button>
-        </Card>
-
-        <Dialog
-          open={helpOpen}
-          onClose={closeHelp}
-          scroll="paper"
-        >
-          <DialogTitle>关于提交的说明</DialogTitle>
-          <DialogContent>
-            <DialogContentText className={cls.helpText}>所有的更改都是自动保存的，并且无论是否标记为完成或超时，您都可以进行修改。自动保存时，底栏上会闪烁同步标志。</DialogContentText>
-            <DialogContentText className={cls.helpText}>但是默认情况下主办方不会在已完成的学测中看到您的提交，除非您将其标记为已提交，或者超时。</DialogContentText>
-            <DialogContentText className={cls.helpText}>所以虽然您再标记完成后仍能够进行修改，但是我们推荐只有当您确信您的提交无误后，再标记成完成。</DialogContentText>
-            <DialogContentText className={cls.helpText}>此外，如果此学测已经超时，但是您还没有标记为完成，那么此学测将会仍然显示在您的主页上，并且在面试官视角将会显示为 "超时"。因此即使超时，我们推荐您尽快将其完成并标记。</DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button color="primary" onClick={closeHelp}>懂了</Button>
-          </DialogActions>
-        </Dialog>
+    <Paper className={cls.submissionBar}>
+      <div className={cls.deadline}>
+        <div className={cls.deadlineHint}>DDL</div>
+        <div className={cls.deadlineContent}>{new Date(assignment.deadline).toLocaleString()}</div>
       </div>
-    </div>
+
+      <Icon className={clsx(cls.syncIndicator, syncing ? cls.syncIndicatorShown : null)}>sync</Icon>
+      <IconButton className={cls.helpBtn} onClick={openHelp}><Icon>help</Icon></IconButton>
+      <Button
+        variant="contained"
+        color="secondary"
+        disabled={outdated || assignment.submitted}
+        onClick={submit}
+      >
+        { btnText }
+      </Button>
+    </Paper>
+
+    <Dialog
+      open={helpOpen}
+      onClose={closeHelp}
+      scroll="paper"
+    >
+      <DialogTitle>关于提交的说明</DialogTitle>
+      <DialogContent>
+        <DialogContentText className={cls.helpText}>所有的更改都是自动保存的，并且无论是否标记为完成或超时，您都可以进行修改。自动保存时，底栏上会闪烁同步标志。</DialogContentText>
+        <DialogContentText className={cls.helpText}>但是默认情况下主办方不会在已完成的学测中看到您的提交，除非您将其标记为已提交，或者超时。</DialogContentText>
+        <DialogContentText className={cls.helpText}>所以虽然您再标记完成后仍能够进行修改，但是我们推荐只有当您确信您的提交无误后，再标记成完成。</DialogContentText>
+        <DialogContentText className={cls.helpText}>此外，如果此学测已经超时，但是您还没有标记为完成，那么此学测将会仍然显示在您的主页上，并且在面试官视角将会显示为 "超时"。因此即使超时，我们推荐您尽快将其完成并标记。</DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button color="primary" onClick={closeHelp}>懂了</Button>
+      </DialogActions>
+    </Dialog>
   </> : null;
 
   return <BasicLayout>
