@@ -5,6 +5,8 @@ import Conference from '../db/conference';
 import Payment from '../db/payment';
 import Assignment from '../db/assignment';
 
+import fetch from 'node-fetch';
+
 import { generateJWT } from '../util';
 import Config from '../config';
 
@@ -140,19 +142,22 @@ router.post('/:id/idVerify', matcher, async ctx => {
   if(!user) return ctx.status = 404;
   if(user.idNumber) return ctx.status = 400;
 
-  const resp = await request.post('https://api.yonyoucloud.com/apis/dst/matchIdentity/matchIdentity', {
-    json: true,
+  const resp = await fetch('https://api.yonyoucloud.com/apis/dst/matchIdentity/matchIdentity', {
     headers: {
       authorization: 'apicode',
       apicode: Config.apikeys.idverify,
+      'Content-Type': 'application/json',
     },
-    body: {
+    body: JSON.stringify({
       idNumber,
       userName: realname,
-    },
+    }),
+    method: 'POST',
   });
 
-  if(!resp.success) {
+  const payload = await resp.json();
+
+  if(!payload.success) {
     ctx.status = 400;
     return ctx.body = { err: resp.message };
   }
