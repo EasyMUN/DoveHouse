@@ -243,8 +243,8 @@ export default React.memo(() => {
       <DialogContent>
         <DialogContentText className={cls.helpText}>所有的更改都是自动保存的，并且无论是否标记为完成或超时，您都可以进行修改。自动保存时，底栏上会闪烁同步标志。</DialogContentText>
         <DialogContentText className={cls.helpText}>但是默认情况下主办方不会在已完成的学测中看到您的提交，除非您将其标记为已提交，或者超时。</DialogContentText>
-        <DialogContentText className={cls.helpText}>所以虽然您再标记完成后仍能够进行修改，但是我们推荐只有当您确信您的提交无误后，再标记成完成。</DialogContentText>
-        <DialogContentText className={cls.helpText}>此外，如果此学测已经超时，但是您还没有标记为完成，那么此学测将会仍然显示在您的主页上，并且在面试官视角将会显示为 "超时"。因此即使超时，我们推荐您尽快将其完成并标记。</DialogContentText>
+        <DialogContentText className={cls.helpText}>所以虽然您在标记完成后仍能够进行修改，但是我们推荐只有当您确信您的提交无误后，再标记成完成。</DialogContentText>
+        <DialogContentText className={cls.helpText}>此外，如果此学测已经超时，但是您还没有标记为完成，那么此学测将会仍然显示在您的主页上，并且在面试官视角将会显示为 "超时"。因此即使您的学测超时了，我们推荐您尽快将其完成并标记。</DialogContentText>
       </DialogContent>
       <DialogActions>
         <Button color="primary" onClick={closeHelp}>懂了</Button>
