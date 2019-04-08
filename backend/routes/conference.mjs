@@ -246,7 +246,7 @@ router.get('/:id/list', async ctx => {
       'registrants.stage': 1,
       'registrants.tags': 1,
     })
-    .populate('registrants.user', 'email realname')
+    .populate('registrants.user', 'email realname school')
     .lean();
 
   if(!conf) return ctx.status = 404;
