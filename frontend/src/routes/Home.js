@@ -134,11 +134,19 @@ export default React.memo(() => {
   const { enqueueSnackbar } = useSnackbar();
   const dispatch = useDispatch();
   const resend = useCallback(async () => {
-    await dispatch(get(`/user/${user._id}/resend`));
+    try {
+      await dispatch(get(`/user/${user._id}/resend`));
 
-    enqueueSnackbar('发送成功！请检查您的邮箱', {
-      variant: 'success',
-    });
+      enqueueSnackbar('发送成功！请检查您的邮箱', {
+        variant: 'success',
+      });
+    } catch(e) {
+      console.error(e);
+
+      enqueueSnackbar('发送失败！', {
+        variant: 'error',
+      });
+    }
   }, [dispatch, user]);
 
   const assignmentsRegion = assignments ? assignments.map(assignment => <Card className={cls.card} key={assignment._id}>
