@@ -1,4 +1,6 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useMemo, useEffect, useState, useCallback } from 'react';
+
+import clsx from 'clsx';
 
 import { useRouter } from '../Router';
 
@@ -17,6 +19,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Icon from '@material-ui/core/Icon';
 import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
 
 import Loading from '../comps/Loading';
 import UserAvatar from '../comps/UserAvatar';
@@ -25,6 +28,7 @@ import BasicLayout from '../layout/Basic';
 
 import { NavLink } from 'react-router-dom';
 import { get, post, fetchConf, fetchComms } from '../store/actions';
+import { debounceEv } from '../util';
 
 import { RegDetailDialog } from './Conference';
 import { TagEditDialog } from './RegList';
@@ -63,11 +67,32 @@ const styles = makeStyles(theme => ({
     marginBottom: 20,
   },
 
-  name: {
-  },
-
   emptyTags: {
     fontStyle: 'italic',
+  },
+
+  extraContent: {
+    padding: 20,
+    paddingBottom: 20,
+  },
+
+  extraCard: {
+    marginTop: 20,
+  },
+
+  syncInd: {
+    fontSize: 14,
+    color: 'rgba(0,0,0,.38)',
+    width: '100%',
+    marginTop: theme.spacing.unit,
+
+    opacity: 0,
+    transition: 'opacity .2s ease-in',
+  },
+
+  syncIndShown: {
+    opacity: 1,
+    transition: 'opacity .2s ease-out',
   },
 }));
 
@@ -113,6 +138,7 @@ export default () => {
   }, [match.params.id, dispatch]);
 
   const [editing, setEditing] = useState(false);
+  const [syncingExtra, setSyncingExtra] = useState(false);
   const closeTagEdit = useCallback(() => setEditing(false));
 
   const [editTag, setEditTag] = useState(null);
@@ -126,6 +152,12 @@ export default () => {
     await updateReg();
     closeTagEdit();
   }, [editTag, match]);
+
+  const syncExtra = useMemo(() => debounceEv(async ev => {
+    setSyncingExtra(true);
+    await dispatch(post(`/conference/${match.params.id}/list/${match.params.user}/extra`, { extra: ev.target.value }, 'PUT'));
+    setSyncingExtra(false);
+  }, 1000), [setSyncingExtra]);
 
   if(!reg) return <BasicLayout>
     <Loading />
@@ -155,6 +187,15 @@ export default () => {
             <ListItemIcon><Icon>school</Icon></ListItemIcon>
             <ListItemText primary={reg.user.profile.school} />
           </ListItem>
+          <ListItem>
+            <ListItemIcon><Icon>message</Icon></ListItemIcon>
+            <ListItemText primary={reg.user.profile.qq} secondary="QQ" />
+          </ListItem>
+          { reg.user.profile.wechat ?
+              <ListItem>
+                <ListItemIcon><Icon>message</Icon></ListItemIcon>
+                <ListItemText primary={reg.user.profile.wechat} secondary="WeChat" />
+              </ListItem> : null }
           <ListItem button onClick={openTagEdit}>
             <ListItemIcon><Icon>label</Icon></ListItemIcon>
             <ListItemText primary={generateTagNode(reg.tags, cls)} />
@@ -165,6 +206,22 @@ export default () => {
         <Button onClick={openRegDetail}>志愿详情</Button>
       </CardActions>
     </Card>
+
+    <Card className={cls.extraCard}>
+      <CardContent className={cls.extraContent}>
+        <TextField
+          multiline
+          fullWidth
+          variant="outlined"
+          label="备注"
+          className={cls.extra}
+          defaultValue={reg.extra}
+          onChange={syncExtra}
+        />
+      </CardContent>
+    </Card>
+
+    <div className={clsx(cls.syncInd, syncingExtra ? cls.syncIndShown : null)}>同步中...</div>
 
     <RegDetailDialog
       comms={comms || []}

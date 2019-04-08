@@ -241,8 +241,12 @@ router.get('/:id/list', async ctx => {
     criteria.moderators = ctx.user._id;
 
   const conf = await Conference
-    .findOne(criteria, { registrants: 1 })
-    .populate('registrants.user', 'email realname profile phone')
+    .findOne(criteria, {
+      'registrants.user': 1,
+      'registrants.stage': 1,
+      'registrants.tags': 1,
+    })
+    .populate('registrants.user', 'email realname')
     .lean();
 
   if(!conf) return ctx.status = 404;
@@ -307,6 +311,25 @@ router.put('/:id/list/:uid/stage', async ctx => {
 
   const conf = await Conference
     .findOneAndUpdate(criteria, { $set: { 'registrants.$.stage': stage }})
+    .lean();
+
+  if(!conf) return ctx.status = 404;
+  return ctx.status = 201;
+});
+
+router.put('/:id/list/:uid/extra', async ctx => {
+  const criteria = {
+    _id: ctx.params.id,
+    'registrants.user': ctx.params.uid,
+  };
+
+  if(!ctx.user.isAdmin)
+    criteria.moderators = ctx.user._id;
+
+  const { extra } = ctx.request.body;
+
+  const conf = await Conference
+    .findOneAndUpdate(criteria, { $set: { 'registrants.$.extra': extra }})
     .lean();
 
   if(!conf) return ctx.status = 404;
