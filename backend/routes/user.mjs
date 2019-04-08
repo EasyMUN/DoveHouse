@@ -107,6 +107,30 @@ router.get('/verify/:token', matcher, async ctx => {
   return ctx.body = '验证成功，您可以关闭此页面了';
 });
 
+router.get('/:id/resend', matcher, async ctx => {
+  const token = (await randomBytes(24)).toString('hex');
+
+  const user = await User.findOneAndUpdate({
+    _id: ctx.params.id
+  }, {
+    $set: { token }
+  }, {
+    fields: {
+      realname: 1,
+      email: 1,
+    },
+  });
+
+  if(!user) return ctx.status = 404;
+
+  await mailer.send(user.email, '请验证您的注册', 'reg', {
+    name: user.realname,
+    link: `${Config.base}/user/verify/${token}`,
+  });
+
+  return ctx.status = 204;
+});
+
 router.post('/:id/profile', matcher, async ctx => {
   const { profile } = ctx.request.body;
 

@@ -4,7 +4,7 @@ import clsx from 'clsx';
 
 import { makeStyles } from '@material-ui/styles';
 
-import { useMappedState } from 'redux-react-hook';
+import { useDispatch, useMappedState } from 'redux-react-hook';
 
 import Typography from '@material-ui/core/Typography';
 
@@ -21,6 +21,10 @@ import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
 
 import { NavLink } from 'react-router-dom';
+
+import { useSnackbar } from '../Snackbar';
+
+import { get } from '../store/actions';
 
 import BasicLayout from '../layout/Basic';
 
@@ -127,6 +131,16 @@ export default React.memo(() => {
   if(hour <= 4 || hour >= 16) greeting = '晚上'
   else if(hour >= 10) greeting = '中午';
 
+  const { enqueueSnackbar } = useSnackbar();
+  const dispatch = useDispatch();
+  const resend = useCallback(async () => {
+    await dispatch(get(`/user/${user._id}/resend`));
+
+    enqueueSnackbar('发送成功！请检查您的邮箱', {
+      variant: 'success',
+    });
+  }, [dispatch, user]);
+
   const assignmentsRegion = assignments ? assignments.map(assignment => <Card className={cls.card} key={assignment._id}>
     <NavLink to={`/assignment/${assignment._id}`}>
       <CardActionArea>
@@ -216,7 +230,7 @@ export default React.memo(() => {
             <Typography gutterBottom variant="body1" className={cls.desc}>请前往您的邮箱验证账号。在此之前，您只能查看会议的介绍，无法报名会议，并且不会收到任何邮件通知。</Typography>
           </CardContent>
           <CardActions>
-            <Button>重发邮件</Button>
+            <Button onClick={resend}>重发邮件</Button>
           </CardActions>
         </Card>
         : null }
