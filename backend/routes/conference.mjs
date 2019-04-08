@@ -347,13 +347,18 @@ router.post('/:id/payment/:uid', async ctx => {
   const discount = discounts.reduce((acc, e) => acc + e.amount, 0);
   const pricing = discount > 0 ? `${total} - ${discount} = ${total - discount}` : `${total}`;
 
-  await mailer.send(user.email, `新订单: ${desc}`, 'payment', {
-    name: user.realname,
-    conf: conf.abbr,
+  try {
+    await mailer.send(user.email, `新订单: ${desc}`, 'payment', {
+      name: user.realname,
+      conf: conf.abbr,
 
-    desc, pricing, detail,
-    link: `${Config.frontend}/payment/${_id}`,
-  });
+      desc, pricing, detail,
+      link: `${Config.frontend}/payment/${_id}`,
+    });
+  } catch(e) {
+    console.error(e);
+    // Ignores for now
+  }
 
   return ctx.body = { _id };
 });
@@ -386,13 +391,18 @@ router.post('/:id/assignment/:uid', async ctx => {
     creation: new Date(),
   });
 
-  await mailer.send(user.email, `新学测: ${title}`, 'assignment', {
-    name: user.realname,
-    conf: conf.abbr,
+  try {
+    await mailer.send(user.email, `新学测: ${title}`, 'assignment', {
+      name: user.realname,
+      conf: conf.abbr,
 
-    title, deadline: new Date(deadline).toLocaleString('zh-Hans'),
-    link: `${Config.frontend}/assignment/${_id}`,
-  });
+      title, deadline: new Date(deadline).toLocaleString('zh-Hans'),
+      link: `${Config.frontend}/assignment/${_id}`,
+    });
+  } catch(e) {
+    console.error(e);
+    // Ignores for now
+  }
 
   return ctx.body = { _id };
 });
