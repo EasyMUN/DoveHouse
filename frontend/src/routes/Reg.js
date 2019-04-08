@@ -159,7 +159,7 @@ export default () => {
     setSyncingExtra(false);
   }, 1000), [setSyncingExtra]);
 
-  if(!reg) return <BasicLayout>
+  if(!reg || !conf) return <BasicLayout>
     <Loading />
   </BasicLayout>;
 
