@@ -87,6 +87,7 @@ router.put('/:id/registrant/:user', async ctx => {
   let flag = true;
 
   if(!user.profile) flag = false;
+  if(user.status !== 'verified') flag = false;
   if(conf.requiresRealname && !user.idNumber) flag = false;
   if(!flag) return ctx.status = 400;
 

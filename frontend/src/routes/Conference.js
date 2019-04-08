@@ -280,6 +280,11 @@ export default React.memo(() => {
         action: <NavLink to="/profile"><Button size="small">立即填写</Button></NavLink>,
       });
       return;
+    } else if(user.status !== 'verified') {
+      enqueueSnackbar('您还没有验证邮箱，不能报名！', {
+        variant: 'warning',
+      });
+      return;
     } else if(conf && conf.requiresRealname && !user.idNumber) {
       enqueueSnackbar('此会议需要您进行实名认证', {
         variant: 'warning',
