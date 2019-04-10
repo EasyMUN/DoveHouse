@@ -24,6 +24,7 @@ router.get('/ident/:ident/confirm', async ctx => {
 
   const payments = await Payment.find({
     ident: ctx.params.ident,
+    status: 'waiting',
   }).populate('payee', 'realname email').populate('conf', 'abbr');
 
   if(payments.length > 1) return ctx.body = { err: 'Duplicated ident, please confirm manually by ID' };
