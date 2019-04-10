@@ -30,7 +30,7 @@ router.get('/ident/:ident/confirm', async ctx => {
   else if(payments.length === 0) return ctx.body = { err: 'Ident not found' };
 
   const [payment] = payments;
-  payment.satus = 'paid';
+  payment.status = 'paid';
   payment.confirmation = new Date();
 
   await payment.save();
