@@ -1,7 +1,10 @@
 import mongoose from 'mongoose';
 
 const schema = new mongoose.Schema({
-  payee: mongoose.Schema.Types.ObjectId,
+  payee: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
   conf: {
     type: String,
     ref: 'Conference',

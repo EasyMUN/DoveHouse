@@ -4,6 +4,8 @@ import Payment from '../db/payment';
 
 import Config from '../config';
 
+import mailer from '../mailer';
+
 const router = new KoaRouter();
 
 router.get('/:id', async ctx => {
@@ -17,22 +19,32 @@ router.get('/:id', async ctx => {
   return ctx.body = result;
 });
 
-router.post('/:id/status', async ctx => {
-  const payment = await Payment.findById(ctx.params.id).populate('conf', 'moderators').lean();
+router.get('/ident/:ident/confirm', async ctx => {
+  if(!ctx.user.isAdmin) return ctx.status = 403;
 
-  // We never mutate conf of a payment, so this is thread safe
-  if(!payment) return ctx.status = 404;
-  if(!ctx.user.isAdmin && result.conf.moderators.every(e => e.toString() !== ctx.user._id.toString()))
-    return ctx.status = 404;
+  const payments = await Payment.find({
+    ident: ctx.params.ident,
+  }).populate('payee', 'realname email').populate('conf', 'abbr');
 
-  const { status } = ctx.request.body;
+  if(payments.length > 1) return ctx.body = { err: 'Duplicated ident, please confirm manually by ID' };
 
-  payment.status = status;
-  if(status === 'paid')
-    payment.confirmation = new Date();
+  const [payment] = payments;
+  payment.satus = 'paid';
+  payment.confirmation = new Date();
+
   await payment.save();
 
-  return ctx.status = 201;
+  console.log(payment);
+
+  await mailer.send(payment.payee.email, `订单确认: ${payment.desc}`, 'confirm', {
+    name: payment.payee.realname,
+    conf: payment.conf.abbr,
+
+    desc: payment.desc,
+    link: `${Config.frontend}/payment/${payment._id}`,
+  });
+
+  return ctx.body = { err: null };
 });
 
 export default router;
