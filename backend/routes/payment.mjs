@@ -36,8 +36,6 @@ router.get('/ident/:ident/confirm', async ctx => {
 
   await payment.save();
 
-  console.log(payment);
-
   await mailer.send(payment.payee.email, `订单确认: ${payment.desc}`, 'confirm', {
     name: payment.payee.realname,
     conf: payment.conf.abbr,
@@ -47,6 +45,41 @@ router.get('/ident/:ident/confirm', async ctx => {
   });
 
   return ctx.body = { err: null };
+});
+
+router.put('/:id/status', async ctx => {
+  if(!ctx.user.isAdmin) return ctx.status = 403;
+
+  const { status } = ctx.request.body;
+
+  const update = {
+    status,
+  };
+
+  if(status === 'paid')
+    update.confirmation = new Date();
+  else if(status === 'waiting')
+    update.confirmation = null;
+
+  const payment = await Payment.findOneAndUpdate({
+    _id: ctx.params.id,
+    status: { $ne: status },
+  }, { $set: update }, { new: true }).populate('payee', 'realname email').populate('conf', 'abbr');
+
+  if(!payment) return ctx.status = 404;
+
+  if(status === 'paid')
+    await mailer.send(payment.payee.email, `订单确认: ${payment.desc}`, 'confirm', {
+      name: payment.payee.realname,
+      conf: payment.conf.abbr,
+
+      desc: payment.desc,
+      link: `${Config.frontend}/payment/${payment._id}`,
+    });
+
+  // TODO: closed / open mail
+
+  return ctx.status = 204;
 });
 
 export default router;

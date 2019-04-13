@@ -336,7 +336,17 @@ router.put('/:id/list/:uid/extra', async ctx => {
   return ctx.status = 201;
 });
 
+router.get('/:id/payment', async ctx => {
+  if(!ctx.user.isAdmin) return ctx.status = 403;
+
+  ctx.body = await Payment.find({
+    conf: ctx.params.id,
+  }).populate('payee', 'realname email').lean();
+});
+
 router.post('/:id/payment/:uid', async ctx => {
+  if(!ctx.user.isAdmin) return ctx.status = 403;
+
   const { total, desc, detail, discounts: _dis } = ctx.request.body;
   const discounts = _dis || [];
 
@@ -344,9 +354,6 @@ router.post('/:id/payment/:uid', async ctx => {
     _id: ctx.params.id,
     'registrants.user': ctx.params.uid,
   };
-
-  if(!ctx.user.isAdmin)
-    criteria.moderators = ctx.user._id;
 
   const conf = await Conference.findOne(criteria, { abbr: 1 });
   if(!conf) return ctx.status = 403;

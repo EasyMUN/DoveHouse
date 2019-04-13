@@ -10,6 +10,7 @@ import Payment from './Payment';
 import RegList from './RegList';
 import Reg from './Reg';
 import Assignment from './Assignment';
+import PaymentList from './PaymentList';
 
 import { Route } from '../Router';
 import { Switch } from 'react-router-dom';
@@ -46,6 +47,7 @@ export default ({ location }) => <TransitionGroup>
       <Route path="/payment/:id" component={Payment} exact />
       <Route path="/conference/:id/admin/reg" component={RegList} exact />
       <Route path="/conference/:id/admin/reg/:user" component={Reg} exact />
+      <Route path="/conference/:id/admin/payment" component={PaymentList} exact />
       <Route path="/assignment/:id" component={Assignment} exact />
     </Switch>
   </CSSTransition>
