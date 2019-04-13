@@ -55,7 +55,6 @@ const styles = makeStyles(theme => ({
     textAlign: 'center',
     '$done &': {
       textDecoration: 'line-through',
-      textDecorationColor: 'rgba(0,0,0,.3)',
     },
   },
 
@@ -67,11 +66,6 @@ const styles = makeStyles(theme => ({
 
     margin: '40px 0',
     textAlign: 'center',
-
-    '$done &': {
-      textDecoration: 'line-through',
-      textDecorationColor: 'rgba(0,0,0,.3)',
-    },
   },
 
   paidHint: {
@@ -112,7 +106,13 @@ const styles = makeStyles(theme => ({
     '& $ident': {
       display: 'none',
     },
+
+    '& $qrcodes': {
+      display: 'none',
+    },
   },
+
+  qrcodes: {},
 
   qrContainer: {
     padding: 20,
@@ -256,7 +256,7 @@ export default React.memo(() => {
   const inner = payment ? <>
     <Typography variant="h3" className={cls.pageTitle}>订单详情</Typography>
 
-    <Card className={clsx(cls.card, { [cls.done]: payment.status === 'paid' })}>
+    <Card className={clsx(cls.card, { [cls.done]: payment.status === 'paid' || payment.status === 'closed' })}>
       <CardContent className={cls.content}>
         <Typography variant="h4" className={cls.paymentDesc}>{ payment.desc }</Typography>
         <NavLink className={cls.abbrLine} to={`/conference/${payment.conf._id}`}>
@@ -303,28 +303,30 @@ export default React.memo(() => {
         </div>
 
         <Typography variant="h3" className={cls.paymentTotal}>{ total } <small>CNY</small></Typography>
-        <Typography variant="body1" className={cls.paidHint}>已支付</Typography>
+        <Typography variant="body1" className={cls.paidHint}>{ payment.status === 'paid' ? `已支付，确认于 ${new Date(payment.confirmation).toLocaleString()}` : '已关闭' }</Typography>
         { ddl ? <Typography variant="body1" className={cls.ddlHint}>{ new Date(ddl).toLocaleString() } 前</Typography> : null }
 
         <Typography variant="body1" className={cls.ident}>支付时请在备注中填入 <strong>{ payment.ident }</strong><br />并确保金额正确，以便我们确认订单</Typography>
       </CardContent>
-      <Tabs
-        value={tab}
-        onChange={updateTab}
-        indicatorColor="secondary"
-        textColor="secondary"
-        variant="fullWidth"
-      >
-        { (payment.conf.payments || []).map((p, index) => <Tab key={index} label={p.provider} />) }
-      </Tabs>
-      <SwipeableViews
-        index={tab}
-        onChangeIndex={updateTab}
-      >
-        { (payment.conf.payments || []).map((p, index) => <div key={index} className={cls.qrContainer}>
-          <img className={cls.qr} src={p.qr} alt="QR Code" />
-        </div>) }
-      </SwipeableViews>
+      <div className={cls.qrcodes}>
+        <Tabs
+          value={tab}
+          onChange={updateTab}
+          indicatorColor="secondary"
+          textColor="secondary"
+          variant="fullWidth"
+        >
+          { (payment.conf.payments || []).map((p, index) => <Tab key={index} label={p.provider} />) }
+        </Tabs>
+        <SwipeableViews
+          index={tab}
+          onChangeIndex={updateTab}
+        >
+          { (payment.conf.payments || []).map((p, index) => <div key={index} className={cls.qrContainer}>
+            <img className={cls.qr} src={p.qr} alt="QR Code" />
+          </div>) }
+        </SwipeableViews>
+      </div>
     </Card>
   </> : null;
 
