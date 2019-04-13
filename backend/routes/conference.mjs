@@ -13,6 +13,10 @@ import crypto from 'crypto';
 import fetch from 'node-fetch';
 import mailer from '../mailer';
 
+import MarkdownIt from 'markdown-it';
+
+const md = MarkdownIt();
+
 const randomBytes = promisify(crypto.randomBytes);
 
 const router = new KoaRouter();
@@ -189,17 +193,44 @@ router.post('/:id/publish', async ctx => {
   if(!ctx.user.isAdmin)
     criteria.moderators = ctx.user._id;
 
+  const { title, main } = ctx.request.body;
   const conf = await Conference.findOneAndUpdate(criteria, { $push: {
     publishes: {
-      title: ctx.request.body.title,
-      main: ctx.request.body.main,
+      title, main,
 
       date: new Date().toISOString(),
     },
-  }});
+  }}, {
+    fields: {
+      registrants: 1,
+      abbr: 1,
+    },
+  }).populate('registrants.user', 'realname email');
 
-  if(conf) return ctx.status = 201;
-  else return ctx.status = 404;
+  if(!conf) return ctx.status = 404;
+  const compiled = md.render(main);
+
+  const users = conf.registrants.map(({ user }) => user);
+
+  async function sendAll() {
+    for(const user of users) {
+      try {
+        await mailer.send(user.email, `${conf.abbr} 会议公告: ${title}`, 'publish', {
+          name: user.realname,
+          conf: conf.abbr,
+
+          title, compiled
+        });
+      } catch(e) {
+        console.error(e);
+        // Ignores for now
+      }
+    }
+  }
+
+  sendAll();
+
+  return ctx.status = 201;
 });
 
 router.get('/:id/stat', async ctx => {

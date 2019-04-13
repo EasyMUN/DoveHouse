@@ -522,9 +522,12 @@ export default React.memo(() => {
 
   const submitPost = useCallback(async content => {
     await dispatch(post(`/conference/${match.params.id}/publish`, content));
-    await fetchConf();
+    await updateConf();
     closePost();
-  }, [match]);
+    enqueueSnackbar('发布成功！', {
+      variant: 'success',
+    });
+  }, [match, enqueueSnackbar]);
 
   const [webhooksOpen, setWebhooksOpen] = useState(false);
   const toggleWebhooks = useCallback(() => setWebhooksOpen(!webhooksOpen), [webhooksOpen]);

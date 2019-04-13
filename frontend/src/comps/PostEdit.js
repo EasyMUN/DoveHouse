@@ -45,7 +45,7 @@ export default ({
         onChange={changeTitle}
       />
       <TextField
-        label="正文"
+        label="正文 (Markdown) "
         fullWidth
         variant="filled"
         multiline

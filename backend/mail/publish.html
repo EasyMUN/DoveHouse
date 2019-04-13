@@ -1,0 +1,57 @@
+<div class="wrapper">
+  <div class="hint">{{ BRAND }} / {{ conf }}</div>
+  <div class="title">公告: {{ title }}</div>
+
+  <p class="body">尊敬的{{ name }}:</p>
+  <p class="body"> 会议 {{ conf }} 的组织方刚刚在 {{ BRAND }} 平台上发布了一份公告，内容如下:</p>
+
+  <div class="content">{{{ compiled }}}</div>
+
+  <p class="signing">{{BRAND}} 团队 | EasyMUN</p>
+</div>
+
+<style>
+.wrapper {
+  max-width: 400px;
+  margin: 0 auto;
+  border: #DDD 1px solid;
+  padding: 20px;
+}
+.hint {
+  font-size: 14px;
+  color: rgba(0,0,0,.38);
+  line-height: 16px;
+}
+
+.title{
+  font-size: 28px;
+  color: rgba(0,0,0,.87);
+  line-height: 32px;
+}
+
+.body {
+  color: rgba(0,0,0,.7);
+}
+
+.signing {
+  color: rgba(0,0,0,.38);
+  font-size: 14px;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.pass {
+  background: #333;
+  color: white;
+  padding: 10px;
+  text-align: center;
+  display: block;
+  border-radius: 2px;
+  box-shadow: rgba(0,0,0,1) 0 0 6px inset;
+}
+
+.content {
+  padding: 20px;
+  border: #DDD 1px solid;
+}
+</style>

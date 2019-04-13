@@ -8,6 +8,7 @@
     "koa": "^2.7.0",
     "koa-bodyparser": "^4.2.1",
     "koa-jwt": "^3.5.1",
+    "markdown-it": "^8.4.2",
     "mongoose": "^5.4.14",
     "node-fetch": "^2.3.0",
     "nodemailer": "^5.1.1"
