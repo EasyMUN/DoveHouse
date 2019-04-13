@@ -52,6 +52,8 @@ import Chroma from 'chroma-js';
 
 import { calcTotal } from './Payment';
 
+import ReactMarkdown from 'react-markdown';
+
 const styles = makeStyles(theme => ({
   header: {
     paddingBottom: theme.spacing.unit * 4,
@@ -248,6 +250,10 @@ const styles = makeStyles(theme => ({
   },
 }));
 
+const renderers = {
+  paragraph: attrs => <Typography gutterBottom variant="body1" {...attrs}></Typography>,
+};
+
 export default React.memo(() => {
   const cls = styles();
 
@@ -426,7 +432,7 @@ export default React.memo(() => {
     <CardContent>
       <Typography variant="h5">{ pub.title }</Typography>
       <Typography variant="body2">{ new Date(pub.date).toLocaleString() }</Typography>
-      <Typography variant="body1" className={cls.postMain}>{ pub.main }</Typography>
+      <ReactMarkdown className={cls.postMain} renderers={renderers} source={ pub.main } />
     </CardContent>
   </Card>);
 
