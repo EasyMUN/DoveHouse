@@ -190,7 +190,7 @@ export default React.memo(() => {
     return list.filter(e =>
       segs.every(s=> {
         if(s[0] === '@') {
-          if(s[1] === '!') return !e.status !== s.slice(2);
+          if(s[1] === '!') return e.status !== s.slice(2);
           else return e.status === s.slice(1);
         } else {
           if(e.payee.realname.indexOf(s) !== -1) return true;
