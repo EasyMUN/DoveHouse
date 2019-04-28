@@ -282,7 +282,7 @@ export default React.memo(() => {
   const [editInner, setEditInner] = useState(null);
 
   const [mode, setMode] = useState(location.hash ? 'box' : 'list');
-  const [prefix, setPrefix] = useState(location.hash ? location.hash.substr(1) : '');
+  const [prefix, setPrefix] = useState(location.hash ? decodeURIComponent(location.hash.substr(1)) : '');
   const gotoList = useCallback(() => setMode('list'));
   const gotoBox = useCallback(() => setMode('box'));
 
