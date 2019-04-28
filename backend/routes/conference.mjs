@@ -160,7 +160,7 @@ router.get('/:id/payment/:user', async ctx => {
   return ctx.body = await Payment.find({
     conf: ctx.params.id,
     payee: ctx.params.user,
-  }).sort({ creation: -1 }).lean();
+  }).sort({ creation: 1 }).lean();
 });
 
 router.get('/:id/assignment/:user', async ctx => {
@@ -170,7 +170,17 @@ router.get('/:id/assignment/:user', async ctx => {
   return ctx.body = await Assignment.find({
     conf: ctx.params.id,
     assignee: ctx.params.user,
-  }).sort({ creation: -1 }).lean();
+  }).sort({ creation: 1 }).lean();
+});
+
+router.get('/:id/interview/:user', async ctx => {
+  const allowed = ctx.user.isAdmin || ctx.params.user === ctx.user._id.toString();
+  if(!allowed) return ctx.status = 403;
+
+  return ctx.body = await Interview.find({
+    conf: ctx.params.id,
+    interviewee: ctx.params.user,
+  }).sort({ creation: 1 }).populate('interviewer', 'realname email').lean();
 });
 
 router.get('/:id/role/:user', async ctx => {

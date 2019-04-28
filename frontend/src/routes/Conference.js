@@ -17,6 +17,7 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import Card from '@material-ui/core/Card';
 import CardMedia from '@material-ui/core/CardMedia';
@@ -53,6 +54,8 @@ import Chroma from 'chroma-js';
 import { calcTotal } from './Payment';
 
 import ReactMarkdown from 'react-markdown';
+
+import UserAvatar from '../comps/UserAvatar';
 
 const styles = makeStyles(theme => ({
   header: {
@@ -264,6 +267,7 @@ export default React.memo(() => {
   const [reg, setReg] = useState(null);
   const [payments, setPayments] = useState([]);
   const [assignments, setAssignments] = useState([]);
+  const [interviews, setInterviews] = useState([]);
   const [role, setRole] = useState(null);
   const [stat, setStat] = useState(null);
   const [color, setColor] = useState(null);
@@ -351,6 +355,16 @@ export default React.memo(() => {
     }
   };
 
+  async function fetchInterviews() {
+    if(!user) return setInterviews([]);
+    try {
+      setInterviews(await dispatch(get(`/conference/${match.params.id}/interview/${user._id}`)));
+    } catch(e) {
+      if(e.code === 404) return;
+      throw e;
+    }
+  };
+
   async function fetchStat() {
     const stat = await dispatch(get(`/conference/${match.params.id}/stat`));
     setStat(stat);
@@ -376,6 +390,7 @@ export default React.memo(() => {
     fetchReg();
     fetchPayments();
     fetchAssignments();
+    fetchInterviews();
     fetchRole();
   }, [match.params.id, dispatch, user]);
 
@@ -495,6 +510,23 @@ export default React.memo(() => {
     else if(status === 'closed') return <Icon>close</Icon>;
     return <Icon>hourglass_empty</Icon>;
   }
+
+  function generateInterviewDesc(interview) {
+    if(!interview.close) return `开始于 - ${new Date(interview.creation).toLocaleString()}`;
+    else return `结束于 - ${new Date(interview.close).toLocaleString()}`;
+  }
+
+  const interviewsCard = (interviews && interviews.length > 0) ? <Card className={cls.card}>
+    <Typography variant="h5" className={cls.listTitle}>面试</Typography>
+    <List>
+      { interviews.map((interview, i) => <ListItem button component={NavLink} to={`/interview/${interview._id}`} key={interview._id}>
+        <ListItemAvatar>
+          <UserAvatar email={interview.interviewer.email} name={interview.interviewer.realname} />
+        </ListItemAvatar>
+        <ListItemText primary={`第 ${i+1} 轮面试: ${interview.interviewer.realname}`} secondary={generateInterviewDesc(interview)} />
+      </ListItem>) }
+    </List>
+  </Card> : null;
 
   const assignmentsCard = (assignments && assignments.length > 0) ? <Card className={cls.card}>
     <Typography variant="h5" className={cls.listTitle}>学测</Typography>
@@ -645,6 +677,7 @@ export default React.memo(() => {
   return <HeaderLayout img={conf ? conf.background : ''} floating={header} pad={70 + 16 * 2 - 4 - 28} height={240}>
     { statCard }
     { progressCard }
+    { interviewsCard }
     { assignmentsCard }
     { paymentsCard }
     { inner }
