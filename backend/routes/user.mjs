@@ -224,10 +224,10 @@ router.get('/:id/payment', matcher, async ctx => {
 });
 
 router.get('/:id/assignment', matcher, async ctx => {
-  const submitted = ctx.query.submitted === 'true' ? true : { $ne: true };
+  const extra = ctx.query.submitted === 'true' ? {} : { submitted: { $ne: true }, deadline: { $gte: new Date() } };
   ctx.body = await Assignment.find({
     assignee: ctx.params.id,
-    submitted,
+    ...extra,
   }).sort({ creation: -1 }).populate('conf', '_id logo abbr').lean();
 });
 
