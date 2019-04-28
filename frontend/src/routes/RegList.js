@@ -23,6 +23,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
+import Tooltip from '@material-ui/core/Tooltip';
 
 import { VariableSizeList } from 'react-window';
 
@@ -526,24 +527,28 @@ export default React.memo(() => {
 
   const inner = !list ? <Loading /> : <>
     <Card className={cls.search}>
-      <IconButton className={cls.searchIcon} disabled={mode === 'box' || mode === 'stat'} onClick={gotoBox} classes={{
-        disabled: cls.searchIconDisabled,
-      }}>
-        <Icon>view_column</Icon>
-      </IconButton>
+      <Tooltip title="分组模式">
+        <IconButton className={cls.searchIcon} disabled={mode === 'box' || mode === 'stat'} onClick={gotoBox} classes={{
+          disabled: cls.searchIconDisabled,
+        }}>
+          <Icon>view_column</Icon>
+        </IconButton>
+      </Tooltip>
 
       <div className={clsx(cls.boxConfig, mode !== 'list' ? cls.boxConfigShown: null)}>
-        <IconButton
-          className={clsx(cls.statBtn, cls.searchIcon)}
-          disabled={mode === 'list'}
-          onClick={toggleStat}
-          color={mode === 'stat' ? 'secondary' : 'default'}
-          classes={{
-            disabled: cls.searchIconDisabled,
-          }}
-        >
-          <Icon>show_chart</Icon>
-        </IconButton>
+        <Tooltip title={ mode === 'box' ? '打开统计' : '关闭统计' }>
+          <IconButton
+            className={clsx(cls.statBtn, cls.searchIcon)}
+            disabled={mode === 'list'}
+            onClick={toggleStat}
+            color={mode === 'stat' ? 'secondary' : 'default'}
+            classes={{
+              disabled: cls.searchIconDisabled,
+            }}
+          >
+            <Icon>show_chart</Icon>
+          </IconButton>
+        </Tooltip>
         <InputBase
           placeholder="标签前缀"
           className={cls.prefixInput}
@@ -553,11 +558,13 @@ export default React.memo(() => {
       </div>
 
       <div className={clsx(cls.searchSlide, mode !== 'list' ? cls.searchSlideOff : null)}>
-        <IconButton className={cls.searchIcon} disabled={mode === 'list'} onClick={gotoList} classes={{
-          disabled: cls.searchIconDisabled,
-        }}>
-          <Icon>search</Icon>
-        </IconButton>
+        <Tooltip title="列表模式">
+          <IconButton className={cls.searchIcon} disabled={mode === 'list'} onClick={gotoList} classes={{
+            disabled: cls.searchIconDisabled,
+          }}>
+            <Icon>search</Icon>
+          </IconButton>
+        </Tooltip>
 
         <InputBase
           placeholder="标签/姓名/学校 空格分隔"
@@ -565,9 +572,11 @@ export default React.memo(() => {
           onChange={changeSearch}
           defaultValue={search}
         />
-        <div className={cls.searchCounter}>
-          { shownCount } / { list.length }
-        </div>
+          <Tooltip title="显示数 / 总数">
+          <div className={cls.searchCounter}>
+            { shownCount } / { list.length }
+          </div>
+        </Tooltip>
       </div>
     </Card>
 
