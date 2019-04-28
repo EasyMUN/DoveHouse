@@ -268,6 +268,7 @@ export default React.memo(() => {
   const [payments, setPayments] = useState([]);
   const [assignments, setAssignments] = useState([]);
   const [interviews, setInterviews] = useState([]);
+  const [interviewees, setInterviewees] = useState([]);
   const [role, setRole] = useState(null);
   const [stat, setStat] = useState(null);
   const [color, setColor] = useState(null);
@@ -365,6 +366,17 @@ export default React.memo(() => {
     }
   };
 
+  async function fetchInterviewees() {
+    if(!user) return setInterviewees([]);
+    try {
+      const result = await dispatch(get(`/conference/${match.params.id}/interviewee/${user._id}`));
+      setInterviewees(result.filter(e => !e.close));
+    } catch(e) {
+      if(e.code === 404) return;
+      throw e;
+    }
+  };
+
   async function fetchStat() {
     const stat = await dispatch(get(`/conference/${match.params.id}/stat`));
     setStat(stat);
@@ -391,6 +403,7 @@ export default React.memo(() => {
     fetchPayments();
     fetchAssignments();
     fetchInterviews();
+    fetchInterviewees();
     fetchRole();
   }, [match.params.id, dispatch, user]);
 
@@ -524,6 +537,18 @@ export default React.memo(() => {
           <UserAvatar email={interview.interviewer.email} name={interview.interviewer.realname} />
         </ListItemAvatar>
         <ListItemText primary={`第 ${i+1} 轮面试: ${interview.interviewer.realname}`} secondary={generateInterviewDesc(interview)} />
+      </ListItem>) }
+    </List>
+  </Card> : null;
+
+  const intervieweesCard = (interviewees && interviewees.length > 0) ? <Card className={cls.card}>
+    <Typography variant="h5" className={cls.listTitle}>面试列表</Typography>
+    <List>
+      { interviewees.map((interview, i) => <ListItem button component={NavLink} to={`/interview/${interview._id}`} key={interview._id}>
+        <ListItemAvatar>
+          <UserAvatar email={interview.interviewee.email} name={interview.interviewee.realname} />
+        </ListItemAvatar>
+        <ListItemText primary={interview.interviewee.realname} secondary={generateInterviewDesc(interview)} />
       </ListItem>) }
     </List>
   </Card> : null;
@@ -678,6 +703,7 @@ export default React.memo(() => {
     { statCard }
     { progressCard }
     { interviewsCard }
+    { intervieweesCard }
     { assignmentsCard }
     { paymentsCard }
     { inner }

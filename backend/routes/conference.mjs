@@ -183,6 +183,16 @@ router.get('/:id/interview/:user', async ctx => {
   }).sort({ creation: 1 }).populate('interviewer', 'realname email').lean();
 });
 
+router.get('/:id/interviewee/:user', async ctx => {
+  const allowed = ctx.user.isAdmin || ctx.params.user === ctx.user._id.toString();
+  if(!allowed) return ctx.status = 403;
+
+  return ctx.body = await Interview.find({
+    conf: ctx.params.id,
+    interviewer: ctx.params.user,
+  }).sort({ creation: 1 }).populate('interviewee', 'realname email').lean();
+});
+
 router.get('/:id/role/:user', async ctx => {
   const allowed = ctx.user.isAdmin || ctx.params.user === ctx.user._id.toString();
   if(!allowed) return ctx.status = 403;
