@@ -80,6 +80,10 @@ const styles = makeStyles(theme => ({
     marginRight: 8,
   },
 
+  statBtn: {
+    height: 40,
+  },
+
   searchIconDisabled: {
     color: 'rgba(0,0,0,.3) !important',
   },
@@ -99,7 +103,7 @@ const styles = makeStyles(theme => ({
     flex: 1,
   },
 
-  prefixInput: {
+  boxConfig: {
     position: 'absolute',
     left: 56,
     right: 56,
@@ -107,12 +111,18 @@ const styles = makeStyles(theme => ({
     pointerEvents: 'none',
     transition: 'opacity .2s ease, transform .2s ease',
     transform: 'translateX(-8px)',
+    display: 'flex',
+    alignItems: 'center',
   },
 
-  prefixInputShown: {
+  boxConfigShown: {
     opacity: 1,
     pointerEvents: 'all',
     transform: 'translateX(0)',
+  },
+
+  prefixInput: {
+    flex: 1,
   },
 
   regSummary: {
@@ -285,6 +295,7 @@ export default React.memo(() => {
   const [prefix, setPrefix] = useState(location.hash ? decodeURIComponent(location.hash.substr(1)) : '');
   const gotoList = useCallback(() => setMode('list'));
   const gotoBox = useCallback(() => setMode('box'));
+  const toggleStat = useCallback(() => setMode(mode === 'stat' ? 'box' : 'stat'), [mode]);
 
   const [moving, setMoving] = useState(null);
   const [currentBox, setCurrentBox] = useState('');
@@ -368,7 +379,7 @@ export default React.memo(() => {
   const boxes = [];
   const boxContents = {};
   const backlog = [];
-  if(list && mode === 'box' && prefix !== '') {
+  if(list && (mode === 'box' || mode === 'stat') && prefix !== '') {
     // Populate boxes
     for(const user of list) {
       const tag = user.tags.find(tag => tag.indexOf(`${prefix}:`) === 0);
@@ -440,20 +451,41 @@ export default React.memo(() => {
     </List>
   </Card>;
 
+  const statedBoxes = boxes.map(e => ({
+    name: e,
+    size: boxContents[e].length,
+    per: (boxContents[e].length / list.length * 100).toFixed(2) + '%',
+  }));
+
+  statedBoxes.sort((a, b) => b.size - a.size);
+
   const inner = !list ? <Loading /> : <>
     <Card className={cls.search}>
-      <IconButton className={cls.searchIcon} disabled={mode === 'box'} onClick={gotoBox} classes={{
+      <IconButton className={cls.searchIcon} disabled={mode === 'box' || mode === 'stat'} onClick={gotoBox} classes={{
         disabled: cls.searchIconDisabled,
       }}>
         <Icon>view_column</Icon>
       </IconButton>
 
-      <InputBase
-        placeholder="标签前缀"
-        className={clsx(cls.prefixInput, mode === 'box' ? cls.prefixInputShown : null)}
-        onChange={changePrefix}
-        defaultValue={location.hash ? location.hash.substr(1) : ''}
-      />
+      <div className={clsx(cls.boxConfig, mode !== 'list' ? cls.boxConfigShown: null)}>
+        <IconButton
+          className={clsx(cls.statBtn, cls.searchIcon)}
+          disabled={mode === 'list'}
+          onClick={toggleStat}
+          color={mode === 'stat' ? 'secondary' : 'default'}
+          classes={{
+            disabled: cls.searchIconDisabled,
+          }}
+        >
+          <Icon>show_chart</Icon>
+        </IconButton>
+        <InputBase
+          placeholder="标签前缀"
+          className={cls.prefixInput}
+          onChange={changePrefix}
+          defaultValue={location.hash ? decodeURIComponent(location.hash.substr(1)) : ''}
+        />
+      </div>
 
       <div className={clsx(cls.searchSlide, mode !== 'list' ? cls.searchSlideOff : null)}>
         <IconButton className={cls.searchIcon} disabled={mode === 'list'} onClick={gotoList} classes={{
@@ -521,6 +553,29 @@ export default React.memo(() => {
             <div className={cls.boxesOverhang} />
           </div>
         </div> : null }
+    { mode === 'stat' && prefix !== '' ? 
+        <Card>
+          <List>
+            <ListItem>
+              <ListItemIcon>
+                <Icon>apps</Icon>
+              </ListItemIcon>
+              <ListItemText primary={<>总计: <strong>{list.length}</strong></>} secondary={<>分组数: <strong>{boxes.length}</strong></>} />
+            </ListItem>
+            <ListItem>
+              <ListItemIcon>
+                <Icon>bookmark_border</Icon>
+              </ListItemIcon>
+              <ListItemText primary="未分组" secondary={<><strong>{backlog.length}</strong> / {(backlog.length / list.length * 100).toFixed(2)}%</>} />
+            </ListItem>
+            { statedBoxes.map(({name, size, per}) => <ListItem key={name}>
+              <ListItemIcon>
+                <Icon>inbox</Icon>
+              </ListItemIcon>
+              <ListItemText primary={name} secondary={<><strong>{size}</strong> / {per}</>} />
+            </ListItem>) }
+          </List>
+        </Card> : null }
   </>;
 
   return <BasicLayout onScroll={virtualize}>
