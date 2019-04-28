@@ -223,16 +223,33 @@ function generateTagNode(tags, cls) {
 
 const rowHeight = 60;
 
+function decryptHash(hash) {
+  const decoded = decodeURIComponent(hash.substr(1));
+  const parsed = decoded.match(/^([slb]):(.*)$/);
+  if(!parsed) return { mode: 'list', search: '', prefix: '' };
+  console.log(parsed);
+  const [, m, content] = parsed;
+
+  if(m === 'l') return { mode: 'list', search: content, prefix: '' };
+  if(m === 's') return { mode: 'stat', search: '', prefix: content };
+  if(m === 'b') return { mode: 'box', search: '', prefix: content };
+  return { mode: 'list', search: '', prefix: '' };
+}
+
+function saveHash(mode, data) {
+  let designator = '';
+  if(mode === 'list') designator = 'l';
+  else if(mode === 'box') designator = 'b';
+  else if(mode === 'stat') designator = 's';
+
+  window.location.replace('#' + encodeURIComponent(`${designator}:${data}`));
+}
+
 export default React.memo(() => {
   const cls = styles();
 
   const [conf, setConf] = useState(null);
   const [list, setList] = useState(null);
-
-  const [search, setSearch] = useState('');
-  const changeSearch = useCallback(debounceEv(ev => {
-    setSearch(ev.target.value);
-  }, 200));
 
   const { match, location } = useRouter();
   const dispatch = useDispatch();
@@ -291,11 +308,36 @@ export default React.memo(() => {
   const [editTarget, setEditTarget] = useState(null);
   const [editInner, setEditInner] = useState(null);
 
-  const [mode, setMode] = useState(location.hash ? 'box' : 'list');
-  const [prefix, setPrefix] = useState(location.hash ? decodeURIComponent(location.hash.substr(1)) : '');
-  const gotoList = useCallback(() => setMode('list'));
-  const gotoBox = useCallback(() => setMode('box'));
-  const toggleStat = useCallback(() => setMode(mode === 'stat' ? 'box' : 'stat'), [mode]);
+  const initial = decryptHash(window.location.hash);
+  console.log(initial);
+  const [mode, setMode] = useState(initial.mode);
+  const [prefix, setPrefix] = useState(initial.prefix);
+  const [search, setSearch] = useState(initial.search);
+  console.log(search);
+  const gotoList = useCallback(() => {
+    setMode('list');
+    saveHash('list', search);
+  }, [search]);
+  const gotoBox = useCallback(() => {
+    setMode('box');
+    saveHash('box', prefix);
+  }, [prefix]);
+
+  const toggleStat = useCallback(() => {
+    const transfered = mode === 'stat' ? 'box' : 'stat';
+    setMode(transfered);
+    saveHash(transfered, prefix);
+  }, [mode, prefix]);
+
+  const changeSearch = useCallback(debounceEv(ev => {
+    setSearch(ev.target.value);
+    saveHash(mode, ev.target.value);
+  }, 200), [mode]);
+
+  const changePrefix = useCallback(debounceEv(ev => {
+    setPrefix(ev.target.value);
+    saveHash(mode, ev.target.value);
+  }, 200), [mode]);
 
   const [moving, setMoving] = useState(null);
   const [currentBox, setCurrentBox] = useState('');
@@ -330,11 +372,6 @@ export default React.memo(() => {
       window.removeEventListener('keyup', release);
     };
   });
-
-  const changePrefix = useCallback(debounceEv(ev => {
-    setPrefix(ev.target.value);
-    window.location.href = `#${ev.target.value}`;
-  }, 200));
 
   const submitTag = useCallback(async () => {
     await dispatch(post(`/conference/${match.params.id}/list/${editTarget.user._id}/tags`, editInner, 'PUT'));
@@ -483,7 +520,7 @@ export default React.memo(() => {
           placeholder="标签前缀"
           className={cls.prefixInput}
           onChange={changePrefix}
-          defaultValue={location.hash ? decodeURIComponent(location.hash.substr(1)) : ''}
+          defaultValue={prefix}
         />
       </div>
 
@@ -498,6 +535,7 @@ export default React.memo(() => {
           placeholder="标签/姓名/学校 空格分隔"
           className={cls.searchInput}
           onChange={changeSearch}
+          defaultValue={search}
         />
         <div className={cls.searchCounter}>
           { shownCount } / { list.length }
