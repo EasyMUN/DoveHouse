@@ -43,6 +43,8 @@ import { debounceEv } from '../util';
 import Chart from 'chart.js';
 import ReactChartkick, { PieChart, ColumnChart } from 'react-chartkick';
 
+import { saveAs } from 'file-saver';
+
 ReactChartkick.addAdapter(Chart);
 
 const styles = makeStyles(theme => ({
@@ -220,6 +222,15 @@ const styles = makeStyles(theme => ({
   boxContent: {
     flex: 1,
     overflowY: 'auto'
+  },
+
+  spanner: {
+    flex: 1,
+  },
+
+  dwnStatBtn: {
+    padding: 8,
+    margin: 8,
   },
 }));
 
@@ -503,6 +514,16 @@ export default React.memo(() => {
 
   statedBoxes.sort((a, b) => b.size - a.size);
 
+  const dwnStat = () => {
+    const header = [`根据 ${prefix} 分类`, '数量', '占比'];
+    const total = ['共计', `${list.length}`, ''];
+    const uncat = ['未分类', `${backlog.length}`, (backlog.length / list.length * 100).toFixed(2) + '%'];
+
+    const table = [header, total, uncat, ...statedBoxes.map(({ name, size, per }) => [name, size, per])];
+    const file = table.map(e => e.join(',')).join('\n');
+    saveAs(new Blob([file], { type: 'text/csv;charset=utf-8' }), `${conf.title} - ${prefix} - ${new Date().toLocaleString()}.csv`);
+  };
+
   const inner = !list ? <Loading /> : <>
     <Card className={cls.search}>
       <IconButton className={cls.searchIcon} disabled={mode === 'box' || mode === 'stat'} onClick={gotoBox} classes={{
@@ -609,6 +630,10 @@ export default React.memo(() => {
             <Tab label="Table" />
             <Tab label="Bar" />
             <Tab label="Pie" />
+            <div className={cls.spanner} />
+            <IconButton onClick={dwnStat} className={cls.dwnStatBtn}>
+              <Icon>get_app</Icon>
+            </IconButton>
           </Tabs>
           { statTab === 0 ?
               <List>
@@ -617,6 +642,8 @@ export default React.memo(() => {
                     <Icon>apps</Icon>
                   </ListItemIcon>
                   <ListItemText primary={<>总计: <strong>{list.length}</strong></>} secondary={<>分组数: <strong>{boxes.length}</strong></>} />
+                  <ListItemSecondaryAction>
+                  </ListItemSecondaryAction>
                 </ListItem>
                 <ListItem>
                   <ListItemIcon>
