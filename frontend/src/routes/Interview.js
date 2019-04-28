@@ -4,7 +4,7 @@ import clsx from 'clsx';
 
 import { makeStyles } from '@material-ui/styles';
 
-import { useDispatch } from 'redux-react-hook';
+import { useDispatch, useMappedState } from 'redux-react-hook';
 
 import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
@@ -13,6 +13,7 @@ import Avatar from '@material-ui/core/Avatar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Icon from '@material-ui/core/Icon';
+import IconButton from '@material-ui/core/IconButton';
 import Paper from '@material-ui/core/Paper';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -138,6 +139,7 @@ const styles = makeStyles(theme => ({
 
   userInfo: {
     marginLeft: 20,
+    flex: 1,
   },
 
   role: {
@@ -183,6 +185,7 @@ export default React.memo(() => {
 
   const { match } = useRouter();
   const dispatch = useDispatch();
+  const { user } = useMappedState(({ user }) => ({ user }));
 
   async function fetchInterview() {
     const i = await dispatch(get(`/interview/${match.params.id}`));
@@ -204,7 +207,7 @@ export default React.memo(() => {
         </NavLink>
 
         <div className={cls.userGroup}>
-          <UserAvatar className={cls.userAvatar} email={interview.interviewer.email} name={interview.interviewee.realname} size={160} />
+          <UserAvatar className={cls.userAvatar} email={interview.interviewee.email} name={interview.interviewee.realname} size={160} />
           <div className={cls.userInfo}>
             <Typography variant="h6" className={cls.role}>代表</Typography>
             <Typography variant="h4" className={cls.name}>{ interview.interviewee.realname }</Typography>
@@ -215,6 +218,12 @@ export default React.memo(() => {
                 <Typography variant="body1" className={cls.info}><span className={cls.desc}>微信</span>{ interview.interviewee.profile.wechat }</Typography>
                 : null }
           </div>
+          { /*
+          { user._id === interview.interviewer._id ?
+              <IconButton component={NavLink} to={`/conference/${interview.conf._id}/admin/reg/${interview.interviewee._id}`}>
+                <Icon>arrow_forward</Icon>
+              </IconButton> : null }
+              */ }
         </div>
 
         <div className={cls.centerIconWrapper}>
