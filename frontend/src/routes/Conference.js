@@ -563,6 +563,11 @@ export default React.memo(() => {
       <ListItemText primary={stat.assignmentCount} secondary="学测数" />
     </ListItem>
 
+    <ListItem>
+      <ListItemIcon><Icon>assignment_ind</Icon></ListItemIcon>
+      <ListItemText primary={stat.interviewCount} secondary="面试数" />
+    </ListItem>
+
     <ListItem button onClick={toggleWebhooks}>
       <ListItemIcon><Icon>link</Icon></ListItemIcon>
       <ListItemText primary={stat.webhooks.length} secondary="Webhooks" />
@@ -1085,11 +1090,13 @@ export const renderRegDetail = (_comms, value) => {
 export const RegDetailDialog = React.memo(({ comms , value, ...rest }) => {
   const cls = regStyles();
 
+  const inner = renderRegDetail(comms, value || []);
+
   if(!value) return null;
 
   return <Dialog {...rest} scroll="body" classes={{
     paper: cls.dialogRoot,
   }}>
-    { renderRegDetail(comms, value) }
+    { inner }
   </Dialog>;
 });

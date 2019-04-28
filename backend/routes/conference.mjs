@@ -254,12 +254,17 @@ router.get('/:id/stat', async ctx => {
     conf: ctx.params.id,
   });
 
-  const [paymentCount, assignmentCount] = await Promise.all([pcp, acp]);
+  const icp = Interview.count({
+    conf: ctx.params.id,
+  });
+
+  const [paymentCount, assignmentCount, interviewCount] = await Promise.all([pcp, acp, icp]);
 
   return ctx.body = {
     regCount: conf.registrants.length,
     paymentCount,
     assignmentCount,
+    interviewCount,
     webhooks: conf.webhooks,
   };
 });
