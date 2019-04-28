@@ -509,7 +509,7 @@ router.post('/:id/interview/:uid', async ctx => {
   if(!conf) return ctx.status = 403;
 
   const user = await User.findById(ctx.params.uid, { email: 1, realname: 1 });
-  const intUser = await User.findById(ctx.params.interviewer, { email: 1, realname: 1 });
+  const intUser = await User.findById(interviewer, { email: 1, realname: 1 });
 
   const { _id } = await Interview.create({
     conf: ctx.params.id,
@@ -518,11 +518,12 @@ router.post('/:id/interview/:uid', async ctx => {
     creation: new Date(),
   });
 
-  /*
   try {
-    await mailer.send(user.email, `新面试: ${title}`, 'interview', {
+    await mailer.send(user.email, `新面试`, 'interview', {
       name: user.realname,
       conf: conf.abbr,
+
+      interviewer: intUser.realname,
 
       link: `${Config.frontend}/interview/${_id}`,
     });
@@ -532,17 +533,18 @@ router.post('/:id/interview/:uid', async ctx => {
   }
 
   try {
-    await mailer.send(user.email, `新面试分配: ${title}`, 'assignInterview', {
+    await mailer.send(user.email, `新面试分配`, 'interviewee', {
       name: intUser.realname,
       conf: conf.abbr,
 
-      link: `${Config.frontend}/interview/${_id}/moderate`,
+      interviewee: user.realname,
+
+      link: `${Config.frontend}/interview/${_id}`,
     });
   } catch(e) {
     console.error(e);
     // Ignores for now
   }
-  */
 
   return ctx.body = { _id };
 });
