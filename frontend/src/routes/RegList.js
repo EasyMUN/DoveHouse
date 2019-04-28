@@ -21,6 +21,8 @@ import Card from '@material-ui/core/Card';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
 
 import { VariableSizeList } from 'react-window';
 
@@ -37,6 +39,11 @@ import UserAvatar from '../comps/UserAvatar';
 import BasicLayout from '../layout/Basic';
 
 import { debounceEv } from '../util';
+
+import Chart from 'chart.js';
+import ReactChartkick, { PieChart, ColumnChart } from 'react-chartkick';
+
+ReactChartkick.addAdapter(Chart);
 
 const styles = makeStyles(theme => ({
   logo: {
@@ -227,7 +234,6 @@ function decryptHash(hash) {
   const decoded = decodeURIComponent(hash.substr(1));
   const parsed = decoded.match(/^([slb]):(.*)$/);
   if(!parsed) return { mode: 'list', search: '', prefix: '' };
-  console.log(parsed);
   const [, m, content] = parsed;
 
   if(m === 'l') return { mode: 'list', search: content, prefix: '' };
@@ -309,11 +315,9 @@ export default React.memo(() => {
   const [editInner, setEditInner] = useState(null);
 
   const initial = decryptHash(window.location.hash);
-  console.log(initial);
   const [mode, setMode] = useState(initial.mode);
   const [prefix, setPrefix] = useState(initial.prefix);
   const [search, setSearch] = useState(initial.search);
-  console.log(search);
   const gotoList = useCallback(() => {
     setMode('list');
     saveHash('list', search);
@@ -338,6 +342,9 @@ export default React.memo(() => {
     setPrefix(ev.target.value);
     saveHash(mode, ev.target.value);
   }, 200), [mode]);
+
+  const [statTab, setStatTab] = useState(0);
+  const changeStatTab = useCallback((ev, value) => setStatTab(value));
 
   const [moving, setMoving] = useState(null);
   const [currentBox, setCurrentBox] = useState('');
@@ -593,26 +600,45 @@ export default React.memo(() => {
         </div> : null }
     { mode === 'stat' && prefix !== '' ? 
         <Card>
-          <List>
-            <ListItem>
-              <ListItemIcon>
-                <Icon>apps</Icon>
-              </ListItemIcon>
-              <ListItemText primary={<>总计: <strong>{list.length}</strong></>} secondary={<>分组数: <strong>{boxes.length}</strong></>} />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon>
-                <Icon>bookmark_border</Icon>
-              </ListItemIcon>
-              <ListItemText primary="未分组" secondary={<><strong>{backlog.length}</strong> / {(backlog.length / list.length * 100).toFixed(2)}%</>} />
-            </ListItem>
-            { statedBoxes.map(({name, size, per}) => <ListItem key={name}>
-              <ListItemIcon>
-                <Icon>inbox</Icon>
-              </ListItemIcon>
-              <ListItemText primary={name} secondary={<><strong>{size}</strong> / {per}</>} />
-            </ListItem>) }
-          </List>
+          <Tabs
+            value={statTab}
+            onChange={changeStatTab}
+            indicatorColor="secondary"
+            textColor="primary"
+          >
+            <Tab label="Table" />
+            <Tab label="Bar" />
+            <Tab label="Pie" />
+          </Tabs>
+          { statTab === 0 ?
+              <List>
+                <ListItem>
+                  <ListItemIcon>
+                    <Icon>apps</Icon>
+                  </ListItemIcon>
+                  <ListItemText primary={<>总计: <strong>{list.length}</strong></>} secondary={<>分组数: <strong>{boxes.length}</strong></>} />
+                </ListItem>
+                <ListItem>
+                  <ListItemIcon>
+                    <Icon>bookmark_border</Icon>
+                  </ListItemIcon>
+                  <ListItemText primary="未分组" secondary={<><strong>{backlog.length}</strong> / {(backlog.length / list.length * 100).toFixed(2)}%</>} />
+                </ListItem>
+                { statedBoxes.map(({name, size, per}) => <ListItem key={name}>
+                  <ListItemIcon>
+                    <Icon>inbox</Icon>
+                  </ListItemIcon>
+                  <ListItemText primary={name} secondary={<><strong>{size}</strong> / {per}</>} />
+                </ListItem>) }
+              </List> : null }
+          { statTab === 1 ? 
+              <CardContent>
+                <ColumnChart data={[['未分组', backlog.length], ...statedBoxes.map(({ name, size }) => [name, size])]}/>
+              </CardContent>: null }
+          { statTab === 2 ? 
+              <CardContent>
+                <PieChart data={[['未分组', backlog.length], ...statedBoxes.map(({ name, size }) => [name, size])]}/>
+              </CardContent>: null }
         </Card> : null }
   </>;
 
