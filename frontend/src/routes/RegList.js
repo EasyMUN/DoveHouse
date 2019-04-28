@@ -241,6 +241,7 @@ function generateTagNode(tags, cls) {
 }
 
 const rowHeight = 60;
+const groupHeight = 10;
 
 function decryptHash(hash) {
   const decoded = decodeURIComponent(hash.substr(1));
@@ -275,7 +276,7 @@ export default React.memo(() => {
   const [boxHeight, setBoxHeight] = useState(window.innerHeight - 327 - 60 - 68);
 
   const [skipped, setSkipped] = useState(0);
-  const [win, setWin] = useState(Math.ceil(window.innerHeight / rowHeight)+1);
+  const [win, setWin] = useState((Math.ceil(window.innerHeight / rowHeight / groupHeight)+1) * groupHeight);
   const listRef = useRef();
   const virtualize = useCallback(() => {
     const list = listRef.current;
@@ -288,9 +289,9 @@ export default React.memo(() => {
     const { y } = list.getBoundingClientRect();
 
     if(y > 0) setSkipped(0);
-    else setSkipped(Math.floor((-y) / rowHeight));
+    else setSkipped(Math.floor((-y) / rowHeight / groupHeight) * groupHeight);
 
-    setWin(Math.ceil(window.innerHeight / rowHeight) + 1);
+    setWin((Math.ceil(window.innerHeight / rowHeight / groupHeight) + 1) * groupHeight);
   }, [setSkipped, setWin]);
 
   useEffect(() => {
