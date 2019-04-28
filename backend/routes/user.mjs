@@ -4,6 +4,7 @@ import User from '../db/user';
 import Conference from '../db/conference';
 import Payment from '../db/payment';
 import Assignment from '../db/assignment';
+import Interview from '../db/interview';
 
 import fetch from 'node-fetch';
 
@@ -220,7 +221,7 @@ router.get('/:id/payment', matcher, async ctx => {
   ctx.body = await Payment.find({
     payee: ctx.params.id,
     status,
-  }).sort({ creation: -1 }).populate('conf', '_id logo abbr').lean();
+  }).sort({ creation: 1 }).populate('conf', '_id logo abbr').lean();
 });
 
 router.get('/:id/assignment', matcher, async ctx => {
@@ -228,7 +229,14 @@ router.get('/:id/assignment', matcher, async ctx => {
   ctx.body = await Assignment.find({
     assignee: ctx.params.id,
     ...extra,
-  }).sort({ creation: -1 }).populate('conf', '_id logo abbr').lean();
+  }).sort({ creation: 1 }).populate('conf', '_id logo abbr').lean();
+});
+
+router.get('/:id/interview', matcher, async ctx => {
+  ctx.body = await Interview.find({
+    interviewee: ctx.params.id,
+    close: null,
+  }).sort({ creation: 1 }).populate('conf', '_id logo abbr').populate('interviewer', 'realname email').lean();
 });
 
 router.post('/:id/accessKey', matcher, async ctx => {

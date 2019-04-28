@@ -30,6 +30,8 @@ import BasicLayout from '../layout/Basic';
 
 import { calcTotal } from './Payment';
 
+import UserAvatar from '../comps/UserAvatar';
+
 const styles = makeStyles(theme => ({
   greet: {
     color: 'rgba(0,0,0,.87)',
@@ -112,6 +114,18 @@ const styles = makeStyles(theme => ({
       color: 'rgba(0,0,0,.38)',
     },
   },
+
+  interviewRow: {
+    marginTop: theme.spacing.unit,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+
+  interviewAvatar: {
+    boxShadow: 'rgba(0,0,0,.3) 0 2px 6px',
+    marginRight: theme.spacing.unit * 3,
+  },
 }));
 
 function getActiveStage(stage) {
@@ -121,10 +135,10 @@ function getActiveStage(stage) {
 export default React.memo(() => {
   const cls = styles();
 
-  const mapS2P = useCallback(({ user, confs, payments, assignments }) => ({
-    user, confs, payments, assignments
+  const mapS2P = useCallback(({ user, confs, payments, assignments, interviews }) => ({
+    user, confs, payments, assignments, interviews
   }));
-  const { user, confs, payments, assignments } = useMappedState(mapS2P);
+  const { user, confs, payments, assignments, interviews } = useMappedState(mapS2P);
 
   const hour = new Date().getHours();
   let greeting = '早上';
@@ -148,6 +162,28 @@ export default React.memo(() => {
       });
     }
   }, [dispatch, user]);
+
+  const interviewsRegion = interviews ? interviews.map(interview => <Card className={cls.card} key={interview._id}>
+    <NavLink to={`/interview/${interview._id}`}>
+      <CardActionArea>
+        <CardContent className={cls.infoContent}>
+          <div className={cls.abbrLine}>
+            <Avatar src={interview.conf.logo} className={cls.logo}/>
+            <Typography variant="body2" className={cls.type}>{ interview.conf.abbr }</Typography>
+          </div>
+          <Typography gutterBottom variant="h5" className={cls.title}>进行中的面试</Typography>
+
+          <div className={cls.interviewRow}>
+            <UserAvatar email={interview.interviewer.email} name={interview.interviewer.realname} size={80} className={cls.interviewAvatar}/>
+            <div className={cls.interviewInfo}>
+              <Typography variant="body1" className={cls.infoDesc}>面试官</Typography>
+              <Typography variant="h5" gutterTop>{interview.interviewer.realname}</Typography>
+            </div>
+          </div>
+        </CardContent>
+      </CardActionArea>
+    </NavLink>
+  </Card>) : null;
 
   const assignmentsRegion = assignments ? assignments.map(assignment => <Card className={cls.card} key={assignment._id}>
     <NavLink to={`/assignment/${assignment._id}`}>
@@ -243,6 +279,7 @@ export default React.memo(() => {
         </Card>
         : null }
 
+    { interviewsRegion }
     { assignmentsRegion }
     { paymentsRegion }
     <Divider className={cls.divider}/>

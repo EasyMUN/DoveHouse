@@ -37,6 +37,13 @@ function assignments(state = null, action) {
   return state;
 }
 
+function interviews(state = null, action) {
+  if(action.type === 'SET_INTERVIEWS')
+    return action.interviews;
+
+  return state;
+}
+
 function confCache(state = new Map(), { type, conf }) {
   if(type === 'CACHE_CONF')
     return state.set(conf._id, conf);
@@ -64,6 +71,7 @@ export default combineReducers({
   confs,
   payments,
   assignments,
+  interviews,
 
   confCache,
   commsCache,
