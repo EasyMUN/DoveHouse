@@ -1,7 +1,10 @@
 import mongoose from 'mongoose';
 
 const schema = new mongoose.Schema({
-  assignee: mongoose.Schema.Types.ObjectId,
+  assignee: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
   conf: {
     type: String,
     ref: 'Conference',

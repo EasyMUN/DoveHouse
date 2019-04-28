@@ -24,12 +24,15 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Tooltip from '@material-ui/core/Tooltip';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import Divider from '@material-ui/core/Divider';
 
 import { VariableSizeList } from 'react-window';
 
 import CardContent from '../overrides/CardContent';
 
-import { get, post, fetchConf } from '../store/actions';
+import { get, post, fetchConf, fetchComms } from '../store/actions';
 
 import { NavLink } from 'react-router-dom';
 import { useRouter } from '../Router';
@@ -45,6 +48,8 @@ import Chart from 'chart.js';
 import ReactChartkick, { PieChart, ColumnChart } from 'react-chartkick';
 
 import { saveAs } from 'file-saver';
+
+import { renderRegDetail } from './Conference';
 
 ReactChartkick.addAdapter(Chart);
 
@@ -268,7 +273,9 @@ export default React.memo(({ restoreScroll }) => {
   const cls = styles();
 
   const [conf, setConf] = useState(null);
+  const [comms, setComms] = useState(null);
   const [list, setList] = useState(null);
+  const [interviewers, setInterviewers] = useState(null);
 
   const { match, location } = useRouter();
   const dispatch = useDispatch();
@@ -309,14 +316,26 @@ export default React.memo(({ restoreScroll }) => {
     setConf(conf);
   };
 
+  async function updateComms() {
+    const conf = await dispatch(fetchComms(match.params.id, true));
+    setComms(conf);
+  };
+
   async function updateList() {
     const list = await dispatch(get(`/conference/${match.params.id}/list`));
     setList(list);
     virtualize();
   }
 
+  async function updateInterviewers() {
+    const interviewers = await dispatch(get(`/conference/${match.params.id}/interviewer`));
+    interviewers.sort((a, b) => a.assigned - b.assigned);
+    setInterviewers(interviewers);
+  }
+
   useEffect(() => {
     updateConf();
+    updateComms();
     updateList();
   }, [match.params.id, dispatch, virtualize]);
 
@@ -326,6 +345,15 @@ export default React.memo(({ restoreScroll }) => {
 
   const [editTarget, setEditTarget] = useState(null);
   const [editInner, setEditInner] = useState(null);
+
+  const [assigning, setAssigning] = useState(false);
+  const [assigningTarget, setAssigningTarget] = useState(null);
+  const closeAssigning = useCallback(() => setAssigning(false));
+  const assignInterview = useCallback(async interviewer => {
+    const interviewee = assigningTarget.user._id;
+    await dispatch(post(`/conference/${match.params.id}/interview/${interviewee}`, { interviewer }));
+    closeAssigning();
+  }, [assigningTarget, match]);
 
   const initial = decryptHash(window.location.hash);
   const [mode, setMode] = useState(initial.mode);
@@ -372,6 +400,10 @@ export default React.memo(({ restoreScroll }) => {
     await updateList();
     closeMoveTo();
   }, [prefix, moving]);
+
+  const [listMenuAnchor, setListMenuAnchor] = useState(null);
+  const [listMenuTarget, setListMenuTarget] = useState(null);
+  const closeListMenu = useCallback(() => setListMenuAnchor(null));
 
   const [shiftHold, setShiftHold] = useState(false);
   useEffect(() => {
@@ -609,17 +641,37 @@ export default React.memo(({ restoreScroll }) => {
                   }}
                 />
                 <ListItemSecondaryAction>
-                  <IconButton onClick={() => {
-                    openTagEdit();
-                    setEditTarget(reg);
-                    setEditInner(reg.tags);
+                  <IconButton onClick={ev => {
+                    setListMenuAnchor(ev.currentTarget);
+                    setListMenuTarget(reg);
                   }}>
-                  <Icon>label</Icon>
+                  <Icon>more_vert</Icon>
                 </IconButton>
               </ListItemSecondaryAction>
             </ListItem>
             )}
           </List>
+          <Menu id="list-menu" anchorEl={listMenuAnchor} open={!!listMenuAnchor} onClose={closeListMenu}>
+            <MenuItem onClick={() => {
+              openTagEdit();
+              setEditTarget(listMenuTarget);
+              setEditInner(listMenuTarget.tags);
+              closeListMenu();
+            }}>
+              <ListItemIcon><Icon>label</Icon></ListItemIcon>
+              <ListItemText primary="编辑标签" />
+            </MenuItem>
+            <MenuItem onClick={async () => {
+              updateInterviewers();
+              const detail = await dispatch(get(`/conference/${match.params.id}/list/${listMenuTarget.user._id}`));
+              setAssigning(true);
+              setAssigningTarget(detail);
+              closeListMenu();
+            }}>
+              <ListItemIcon><Icon>assignment_ind</Icon></ListItemIcon>
+              <ListItemText primary="创建面试" />
+            </MenuItem>
+          </Menu>
         </div> : null }
     { mode === 'box' && prefix !== '' ?
         <div className={cls.boxesWrapper}>
@@ -710,12 +762,24 @@ export default React.memo(({ restoreScroll }) => {
       current={currentBox}
       onMove={commitMove}
     />
+
+    <AssignInterviewDialog
+      open={assigning}
+      onClose={closeAssigning}
+      fullWidth
+
+      interviewers={interviewers}
+      reg={assigningTarget}
+      comms={comms}
+      onSubmit={assignInterview}
+    />
   </BasicLayout>;
 });
 
 const dialogStyles = makeStyles(theme => ({
   input: {
     padding: '0 16px',
+    width: '100%',
   },
 }));
 
@@ -744,6 +808,7 @@ export const TagEditDialog = React.memo(({ value, onChange, onSubmit, ...rest })
           onChange={changeInput}
           onKeyDown={checkEnter}
           className={cls.input}
+          placeholder="回车添加"
         />
       </ListItem>
       { tags.map((tag, index) => <ListItem key={tag}>
@@ -808,6 +873,24 @@ export const MoveToDialog = React.memo(({ current, boxes, onMove, ...rest }) => 
       >
         <ListItemIcon><Icon>move_to_inbox</Icon></ListItemIcon>
         <ListItemText primary={box} />
+      </ListItem>) }
+    </List>
+  </Dialog>;
+});
+
+export const AssignInterviewDialog = React.memo(({ reg, comms, interviewers, onSubmit, ...rest }) => {
+  const cls = dialogStyles();
+  const detail = renderRegDetail(comms, (reg || {}).reg || []);
+
+  if(!reg) return <Dialog {...rest}></Dialog>;
+
+  return <Dialog {...rest}>
+    { detail }
+    <Divider />
+    <List>
+      { (interviewers || []).map(({ _id, realname, email, assigned }) => <ListItem key={_id} button onClick={() => onSubmit(_id)}>
+        <ListItemAvatar><UserAvatar email={email} name={realname} /></ListItemAvatar>
+        <ListItemText primary={realname} secondary={assigned} />
       </ListItem>) }
     </List>
   </Dialog>;

@@ -1070,22 +1070,26 @@ const RegDialog = React.memo(({ comms: _comms, onSubmit, disabled, ...rest }) =>
 
 // RegDetail
 
-export const RegDetailDialog = React.memo(({ comms: _comms, value, ...rest }) => {
+export const renderRegDetail = (_comms, value) => {
   const cls = regStyles();
-
-  if(!value) return null;
 
   const comms = _comms || [];
   const mapper = comms.reduce((acc, comm) => acc.set(comm.slug, comm), new Map());
-  const inner = value.flatMap(({ committee, payload }, index) => {
+  return value.flatMap(({ committee, payload }, index) => {
     const comm = mapper.get(committee);
     if(!comm) return [];
     return [renderLastStep(comm, index, payload, cls)];
   });
+}
+
+export const RegDetailDialog = React.memo(({ comms , value, ...rest }) => {
+  const cls = regStyles();
+
+  if(!value) return null;
 
   return <Dialog {...rest} scroll="body" classes={{
     paper: cls.dialogRoot,
   }}>
-    { inner }
+    { renderRegDetail(comms, value) }
   </Dialog>;
 });

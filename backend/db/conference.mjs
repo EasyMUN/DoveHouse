@@ -55,6 +55,10 @@ const schema = new mongoose.Schema({
     mongoose.Schema.Types.ObjectId,
   ],
 
+  interviewers: [
+    mongoose.Schema.Types.ObjectId,
+  ],
+
   publishes: [
     {
       title: String,

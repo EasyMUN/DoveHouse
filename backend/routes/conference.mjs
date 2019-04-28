@@ -5,6 +5,7 @@ import User from '../db/user';
 import Committee from '../db/committee';
 import Payment from '../db/payment';
 import Assignment from '../db/assignment';
+import Interview from '../db/interview';
 
 import Config from '../config';
 
@@ -468,6 +469,59 @@ router.post('/:id/assignment/:uid', async ctx => {
   return ctx.body = { _id };
 });
 
+router.post('/:id/interview/:uid', async ctx => {
+  const { interviewer } = ctx.request.body;
+
+  const criteria = {
+    _id: ctx.params.id,
+    'registrants.user': ctx.params.uid,
+  };
+
+  if(!ctx.user.isAdmin)
+    criteria.moderators = ctx.user._id;
+
+  const conf = await Conference.findOne(criteria, { abbr: 1 });
+  if(!conf) return ctx.status = 403;
+
+  const user = await User.findById(ctx.params.uid, { email: 1, realname: 1 });
+  const intUser = await User.findById(ctx.params.interviewer, { email: 1, realname: 1 });
+
+  const { _id } = await Interview.create({
+    conf: ctx.params.id,
+    interviewee: ctx.params.uid,
+    interviewer,
+    creation: new Date(),
+  });
+
+  /*
+  try {
+    await mailer.send(user.email, `新面试: ${title}`, 'interview', {
+      name: user.realname,
+      conf: conf.abbr,
+
+      link: `${Config.frontend}/interview/${_id}`,
+    });
+  } catch(e) {
+    console.error(e);
+    // Ignores for now
+  }
+
+  try {
+    await mailer.send(user.email, `新面试分配: ${title}`, 'assignInterview', {
+      name: intUser.realname,
+      conf: conf.abbr,
+
+      link: `${Config.frontend}/interview/${_id}/moderate`,
+    });
+  } catch(e) {
+    console.error(e);
+    // Ignores for now
+  }
+  */
+
+  return ctx.body = { _id };
+});
+
 router.put('/:id/webhooks', async ctx => {
   const criteria = {
     _id: ctx.params.id,
@@ -482,6 +536,50 @@ router.put('/:id/webhooks', async ctx => {
 
   if(!conf) return ctx.status = 404;
   return ctx.status = 204;
+});
+
+router.get('/:id/interview', async ctx => {
+  ctx.body = await Interview.find({ conf: ctx.params.id }).populate('interviewer', 'name email').populate('interviewee', 'name email');
+});
+
+router.get('/:id/interviewer', async ctx => {
+  const criteria = {
+    _id: ctx.params.id,
+  };
+
+  if(!ctx.user.isAdmin)
+    criteria.moderators = ctx.user._id;
+
+  const interviewers = await Conference.aggregate([
+    { $match: criteria },
+    { $project: { interviewers: 1 }},
+    { $unwind: '$interviewers' },
+    { $lookup: {
+      from: 'interviews',
+      localField: 'interviewers',
+      foreignField: 'interviewer',
+      as: 'interviews',
+    } },
+    { $project: {
+      user: '$interviewers',
+      assigned: { $size: '$interviews' },
+    } },
+    { $lookup: {
+      from: 'users',
+      localField: 'user',
+      foreignField: '_id',
+      as: 'user',
+    } },
+    { $unwind: '$user' },
+    { $project: {
+      _id: '$user._id',
+      realname: '$user.realname',
+      email: '$user.email',
+      assigned: '$assigned',
+    } },
+  ]);
+
+  ctx.body = interviewers;
 });
 
 export default router;
