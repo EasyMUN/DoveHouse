@@ -1,8 +1,12 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 
 import { makeStyles } from '@material-ui/styles';
 
 import clsx from 'clsx';
+
+import { useDispatch } from 'redux-react-hook';
+
+import { persistScroll, fetchScroll } from '../store/actions';
 
 const styles = makeStyles(theme => ({
   wrapper: {
@@ -43,12 +47,22 @@ const styles = makeStyles(theme => ({
   },
 }));
 
-export default React.memo(({ children, onScroll }) => {
+export default React.memo(({ children, onScroll, syncScroll }) => {
   const cls = styles();
 
   const [onTop, setOnTop] = useState(true);
 
   const scrollRef = useRef();
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if(!syncScroll) return;
+    const scroll = dispatch(fetchScroll(syncScroll));
+    if(!scroll) return;
+    if(!scrollRef) return;
+      scrollRef.current.scrollTop = scroll;
+  }, [scrollRef, syncScroll]);
 
   const scrollCB = useCallback(ev => {
     if(ev.target !== scrollRef.current)
@@ -58,7 +72,10 @@ export default React.memo(({ children, onScroll }) => {
     setOnTop(scrollTop === 0);
 
     if(onScroll) onScroll();
-  }, [onScroll, scrollRef]);
+
+    if(syncScroll)
+      dispatch(persistScroll(syncScroll, scrollTop));
+  }, [onScroll, scrollRef, syncScroll]);
 
   return <div className={cls.wrapper} onScroll={scrollCB} ref={scrollRef}>
     <div className={clsx(cls.toolbar, { [cls.toolbarFloating]: !onTop })}></div>

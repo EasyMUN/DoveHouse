@@ -40,6 +40,12 @@ export const cacheComms = (id, comms) => ({
   comms,
 });
 
+export const persistScroll = (route, scroll) => ({
+  type: 'PERSIST_SCROLL',
+  route,
+  scroll,
+});
+
 /* Basic networking */
 export const get = (endpoint, method = 'GET', override = null) => async (dispatch, getStore) => {
   const { token } = getStore();
@@ -101,4 +107,10 @@ export const fetchComms = (id, allowCache = false) => async (dispatch, getStore)
   dispatch(cacheComms(id, conf));
 
   return conf;
+};
+
+/* Thunk-based */
+
+export const fetchScroll = route => (dispatch, getStore) => {
+  return getStore().scroll.get(route);
 };

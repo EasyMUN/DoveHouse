@@ -51,6 +51,13 @@ function commsCache(state = new Map(), { type, id, comms }) {
   return state;
 }
 
+function scroll(state = new Map(), { type, route, scroll }) {
+  if(type === 'PERSIST_SCROLL')
+    return state.set(route, scroll);
+
+  return state;
+}
+
 export default combineReducers({
   token,
   user,
@@ -60,4 +67,5 @@ export default combineReducers({
 
   confCache,
   commsCache,
+  scroll,
 });

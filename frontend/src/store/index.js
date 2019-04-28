@@ -1,11 +1,11 @@
 import thunk from 'redux-thunk';
-import logger from 'redux-logger';
+import { createLogger } from 'redux-logger';
 import { applyMiddleware, createStore } from 'redux';
 import reducers from './reducers';
 
 const mws = applyMiddleware(
   thunk,
-  logger,
+  createLogger({ predicate: (getState, action) => action.type !== 'PERSIST_SCROLL' }),
 );
 
 const store = createStore(

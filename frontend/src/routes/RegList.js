@@ -264,7 +264,7 @@ function saveHash(mode, data) {
   window.location.replace('#' + encodeURIComponent(`${designator}:${data}`));
 }
 
-export default React.memo(() => {
+export default React.memo(({ restoreScroll }) => {
   const cls = styles();
 
   const [conf, setConf] = useState(null);
@@ -679,7 +679,7 @@ export default React.memo(() => {
         </Card> : null }
   </>;
 
-  return <BasicLayout onScroll={virtualize}>
+  return <BasicLayout onScroll={virtualize} syncScroll={list ? 'RegList' : null}>
     <NavLink className={cls.abbrLine} to={`/conference/${match.params.id}`}>
       <Avatar src={conf.logo} className={cls.logo}/>
       <Typography variant="body2" className={cls.abbr}>{ conf.abbr }</Typography>
