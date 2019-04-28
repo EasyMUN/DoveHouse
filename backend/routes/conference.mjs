@@ -557,7 +557,7 @@ router.get('/:id/interviewer', async ctx => {
 
   const interviewers = await Conference.aggregate([
     { $match: criteria },
-    { $project: { interviewers: 1 }},
+    { $project: { interviewers: 1, cid: '$_id' }},
     { $unwind: '$interviewers' },
     { $lookup: {
       from: 'interviews',
@@ -567,6 +567,18 @@ router.get('/:id/interviewer', async ctx => {
     } },
     { $project: {
       user: '$interviewers',
+      interviews: { $filter: {
+        input: '$interviews',
+        as: 'interview',
+        cond: { $and: [
+          { $eq: ['$$interview.close', null] },
+          { $eq: ['$$interview.conf', '$cid'] },
+        ] },
+      }, },
+    } },
+    { $project: {
+      _d: 1,
+      user: '$user',
       assigned: { $size: '$interviews' },
     } },
     { $lookup: {
