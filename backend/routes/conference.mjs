@@ -533,7 +533,7 @@ router.post('/:id/interview/:uid', async ctx => {
   }
 
   try {
-    await mailer.send(user.email, `新面试分配`, 'interviewee', {
+    await mailer.send(intUser.email, `新面试分配`, 'interviewee', {
       name: intUser.realname,
       conf: conf.abbr,
 
