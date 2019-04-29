@@ -746,6 +746,7 @@ export default React.memo(({ restoreScroll }) => {
       open={editing}
       onClose={closeTagEdit}
       fullWidth
+      scroll="body"
 
       value={editInner}
       onChange={setEditInner}
@@ -757,6 +758,7 @@ export default React.memo(({ restoreScroll }) => {
       open={moving !== null}
       onClose={closeMoveTo}
       fullWidth
+      scroll="body"
 
       boxes={boxes}
       current={currentBox}
@@ -767,6 +769,7 @@ export default React.memo(({ restoreScroll }) => {
       open={assigning}
       onClose={closeAssigning}
       fullWidth
+      scroll="body"
 
       interviewers={interviewers}
       reg={assigningTarget}
