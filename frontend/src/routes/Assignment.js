@@ -4,7 +4,7 @@ import clsx from 'clsx';
 
 import { makeStyles } from '@material-ui/styles';
 
-import { useDispatch } from 'redux-react-hook';
+import { useDispatch, useMappedState } from 'redux-react-hook';
 
 import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
@@ -72,6 +72,7 @@ const styles = makeStyles(theme => ({
     alignItems: 'center',
 
     padding: '0 20px',
+    borderRadius: 0,
   },
 
   deadline: {
@@ -139,6 +140,9 @@ export default React.memo(() => {
 
   const { match } = useRouter();
   const dispatch = useDispatch();
+  const { user } = useMappedState(({ user }) => ({ user }));
+
+  const readonly = !assignment || assignment.assignee !== user;
 
   async function fetchAssignment() {
     const a = await dispatch(get(`/assignment/${match.params.id}`));
@@ -147,11 +151,15 @@ export default React.memo(() => {
   }
 
   const syncUp = useMemo(() => debounce(async ans => {
+    if(readonly)
+      return;
+    console.log('sync');
+
     // TODO: cancel ongoing syncs
     setSyncing(true);
     await dispatch(post(`/assignment/${match.params.id}/ans`, { ans }, 'PUT'));
     setSyncing(false);
-  }, 1000), [match, setSyncing]);
+  }, 1000), [match, setSyncing, user, assignment, readonly]);
 
   const submit = useCallback(async () => {
     await dispatch(post(`/assignment/${match.params.id}/submitted`, { submitted: true }, 'PUT'));
@@ -179,6 +187,7 @@ export default React.memo(() => {
   let btnText = '标记为完成';
   if(assignment && assignment.submitted) btnText = '已标记为完成';
   else if(outdated) btnText = '已超时';
+  else if(readonly) btnText = '未完成';
 
   const inner = assignment ? <>
     <NavLink to={`/conference/${assignment.conf._id}`}>
@@ -195,6 +204,7 @@ export default React.memo(() => {
         <TextField
           multiline
           fullWidth
+          disabled={readonly}
           value={ans ? ans[index] : ''}
           onChange={ev => {
             const updated = [...ans];
@@ -219,7 +229,7 @@ export default React.memo(() => {
       <Button
         variant="contained"
         color="secondary"
-        disabled={outdated || assignment.submitted}
+        disabled={readonly || outdated || assignment.submitted}
         onClick={submit}
       >
         { btnText }

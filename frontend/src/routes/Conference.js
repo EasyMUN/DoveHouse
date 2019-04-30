@@ -57,6 +57,29 @@ import ReactMarkdown from 'react-markdown';
 
 import UserAvatar from '../comps/UserAvatar';
 
+export function generateAssignmentIcon(a) {
+  if(a.submitted) return <Icon>done</Icon>;
+  else if(new Date(a.deadline) < new Date()) return <Icon>timer_off</Icon>;
+  return <Icon>hourglass_empty</Icon>;
+}
+
+export function generateAssignmentDesc(a) {
+  if(a.submitted) return '已提交';
+  else if(new Date(a.deadline) < new Date()) return `已超时 - ${new Date(a.deadline).toLocaleString()}`;
+  return `未提交 - DDL @ ${new Date(a.deadline).toLocaleString()}`;
+}
+
+function generatePaymentIcon(status) {
+  if(status === 'paid') return <Icon>done</Icon>;
+  else if(status === 'closed') return <Icon>close</Icon>;
+  return <Icon>hourglass_empty</Icon>;
+}
+
+function generateInterviewDesc(interview) {
+  if(!interview.close) return `开始于 - ${new Date(interview.creation).toLocaleString()}`;
+  else return `结束于 - ${new Date(interview.close).toLocaleString()}`;
+}
+
 const styles = makeStyles(theme => ({
   header: {
     paddingBottom: theme.spacing.unit * 4,
@@ -505,29 +528,6 @@ export default React.memo(() => {
       </Button>
     </CardActions>
   </Card> : null;
-
-  function generateAssignmentIcon(a) {
-    if(a.submitted) return <Icon>done</Icon>;
-    else if(new Date(a.deadline) < new Date()) return <Icon>timer_off</Icon>;
-    return <Icon>hourglass_empty</Icon>;
-  }
-
-  function generateAssignmentDesc(a) {
-    if(a.submitted) return '已提交';
-    else if(new Date(a.deadline) < new Date()) return `已超时 - ${new Date(a.deadline).toLocaleString()}`;
-    return `未提交 - DDL @ ${new Date(a.deadline).toLocaleString()}`;
-  }
-
-  function generatePaymentIcon(status) {
-    if(status === 'paid') return <Icon>done</Icon>;
-    else if(status === 'closed') return <Icon>close</Icon>;
-    return <Icon>hourglass_empty</Icon>;
-  }
-
-  function generateInterviewDesc(interview) {
-    if(!interview.close) return `开始于 - ${new Date(interview.creation).toLocaleString()}`;
-    else return `结束于 - ${new Date(interview.close).toLocaleString()}`;
-  }
 
   const interviewsCard = (interviews && interviews.length > 0) ? <Card className={cls.card}>
     <Typography variant="h5" className={cls.listTitle}>面试</Typography>

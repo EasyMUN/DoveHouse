@@ -18,6 +18,7 @@ import Paper from '@material-ui/core/Paper';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
 import LinearProgress from '@material-ui/core/LinearProgress';
 
 import SwipeableViews from 'react-swipeable-views';
@@ -31,6 +32,11 @@ import { get } from '../store/actions';
 import BasicLayout from '../layout/Basic';
 
 import UserAvatar from '../comps/UserAvatar';
+
+import {
+  generateAssignmentDesc,
+  generateAssignmentIcon,
+} from './Conference';
 
 const styles = makeStyles(theme => ({
   logo: {
@@ -52,6 +58,12 @@ const styles = makeStyles(theme => ({
 
   card: {
     marginTop: 40,
+  },
+
+  infoCard: {
+    '&$card': {
+      marginTop: 20,
+    },
   },
 
   paymentDesc: {
@@ -176,6 +188,12 @@ const styles = makeStyles(theme => ({
     textAlign: 'center',
     color: 'rgba(0,0,0,.38)',
   },
+
+  listTitle: {
+    margin: 16,
+    marginBottom: 10,
+  },
+
 }));
 
 export default React.memo(() => {
@@ -249,6 +267,18 @@ export default React.memo(() => {
       </CardContent>
       <LinearProgress color="secondary" />
     </Card>
+    { interview.assignments && interview.assignments.length > 0 ?
+        <Card className={clsx(cls.card, cls.infoCard)}>
+        <Typography variant="h5" className={cls.listTitle}>学测</Typography>
+          <List>
+            { interview.assignments.map(assignment => <ListItem button component={NavLink} to={`/assignment/${assignment._id}`} key={assignment._id}>
+              <ListItemIcon>
+                { generateAssignmentIcon(assignment) }
+              </ListItemIcon>
+              <ListItemText primary={assignment.title} secondary={generateAssignmentDesc(assignment)} />
+            </ListItem>) }
+          </List>
+        </Card> : null }
   </> : null;
 
   return <BasicLayout>

@@ -1,6 +1,7 @@
 import KoaRouter from '@circuitcoder/koa-router';
 
 import Interview from '../db/interview';
+import Assignment from '../db/assignment';
 
 import Config from '../config';
 
@@ -15,12 +16,23 @@ router.get('/:id', async ctx => {
     .populate('interviewee', 'email realname profile.wechat profile.qq profile.phone')
     .lean();
   if(!result) return ctx.status = 404;
-  if(result.interviewee.toString() !== ctx.user._id.toString()
-    && result.interviewer.toString() !== ctx.user._id.toString()
-    && !ctx.user.isAdmin
-    && result.conf.moderators.every(e => e.toString() !== ctx.user._id.toString())) return ctx.status = 404; // For secrutiy consideration
+
+  const asInterviewer = result.interviewer.toString() === ctx.user._id.toString()
+    || ctx.user.isAdmin
+    || result.conf.moderators.some(e => e.toString() === ctx.user._id.toString());
+
+  if(result.interviewee.toString() !== ctx.user._id.toString() && !asInterviewer) return ctx.status = 404; // For secrutiy consideration
 
   result.conf.moderators = undefined;
+
+  if(asInterviewer)
+    result.assignments = (await Assignment.find({ assignee: result.interviewee }, {
+      _id: 1,
+      title: 1,
+      submitted: 1,
+      deadline: 1,
+    }).lean());
+
   return ctx.body = result;
 });
 
