@@ -30,6 +30,8 @@ import { debounce } from '../util';
 
 import BasicLayout from '../layout/Basic';
 
+import UserAvatar from '../comps/UserAvatar';
+
 const styles = makeStyles(theme => ({
   logo: {
     height: 18,
@@ -94,6 +96,18 @@ const styles = makeStyles(theme => ({
     lineHeight: '24px',
   },
 
+  assignee: {
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+  },
+
+  assigneeName: {
+    fontSize: 20,
+    lineHeight: '24px',
+    marginLeft: 10,
+  },
+
   helpBtn: {
     padding: 8,
     margin: 4,
@@ -142,7 +156,8 @@ export default React.memo(() => {
   const dispatch = useDispatch();
   const { user } = useMappedState(({ user }) => ({ user }));
 
-  const readonly = !assignment || assignment.assignee !== user;
+  const readonly = !assignment
+    || assignment.assignee._id !== user._id;
 
   async function fetchAssignment() {
     const a = await dispatch(get(`/assignment/${match.params.id}`));
@@ -219,10 +234,17 @@ export default React.memo(() => {
     <div className={cls.submissionBarSpacer} />
 
     <Paper className={cls.submissionBar}>
-      <div className={cls.deadline}>
-        <div className={cls.deadlineHint}>DDL</div>
-        <div className={cls.deadlineContent}>{new Date(assignment.deadline).toLocaleString()}</div>
-      </div>
+      { readonly ?
+          <div className={cls.assignee}>
+            <UserAvatar email={assignment.assignee.email} name={assignment.assignee.realname} size={40} />
+            <div className={cls.assigneeName}>{ assignment.assignee.realname }</div>
+          </div>
+          :
+          <div className={cls.deadline}>
+            <div className={cls.deadlineHint}>DDL</div>
+            <div className={cls.deadlineContent}>{new Date(assignment.deadline).toLocaleString()}</div>
+          </div>
+      }
 
       <Icon className={clsx(cls.syncIndicator, syncing ? cls.syncIndicatorShown : null)}>sync</Icon>
       <IconButton className={cls.helpBtn} onClick={openHelp}><Icon>help</Icon></IconButton>
