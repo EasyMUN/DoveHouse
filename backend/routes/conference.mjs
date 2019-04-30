@@ -515,7 +515,9 @@ router.get('/:id/interview', async ctx => {
     criteria.moderators = ctx.user._id;
 
   ctx.body = await Interview.find(criteria)
-    .populate('interviewee', 'realname email').lean();
+    .populate('interviewee', 'realname email')
+    .populate('interviewer', 'realname email')
+    .lean();
 });
 
 router.post('/:id/interview/:uid', async ctx => {
