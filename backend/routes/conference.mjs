@@ -506,6 +506,18 @@ router.post('/:id/assignment/:uid', async ctx => {
   return ctx.body = { _id };
 });
 
+router.get('/:id/interview', async ctx => {
+  const criteria = {
+    conf: ctx.params.id,
+  };
+
+  if(!ctx.user.isAdmin)
+    criteria.moderators = ctx.user._id;
+
+  ctx.body = await Interview.find(criteria)
+    .populate('interviewee', 'realname email').lean();
+});
+
 router.post('/:id/interview/:uid', async ctx => {
   const { interviewer } = ctx.request.body;
 
