@@ -450,6 +450,18 @@ router.post('/:id/payment/:uid', async ctx => {
   return ctx.body = { _id };
 });
 
+router.get('/:id/assignment', async ctx => {
+  const criteria = {
+    conf: ctx.params.id,
+  };
+
+  if(!ctx.user.isAdmin)
+    criteria.moderators = ctx.user._id;
+
+  ctx.body = await Assignment.find(criteria)
+    .populate('assignee', 'realname email').lean();
+});
+
 router.post('/:id/assignment/:uid', async ctx => {
   const { title, probs, deadline } = ctx.request.body;
 

@@ -615,7 +615,7 @@ export default React.memo(() => {
       <ListItemText primary={stat.paymentCount} secondary="订单数" />
     </ListItem>
 
-    <ListItem>
+    <ListItem button component={NavLink} to={`/conference/${match.params.id}/admin/assignment`}>
       <ListItemIcon><Icon>assignment</Icon></ListItemIcon>
       <ListItemText primary={stat.assignmentCount} secondary="学测数" />
     </ListItem>
