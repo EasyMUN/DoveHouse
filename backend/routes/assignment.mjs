@@ -12,7 +12,7 @@ router.get('/:id', async ctx => {
     .populate('assignee', 'realname email')
     .lean();
   if(!result) return ctx.status = 404;
-  if(result.assignee.toString() !== ctx.user._id.toString()
+  if(result.assignee._id.toString() !== ctx.user._id.toString()
     && !ctx.user.isAdmin
     && result.conf.moderators.every(e => e.toString() !== ctx.user._id.toString())) return ctx.status = 404; // For secrutiy consideration
 
