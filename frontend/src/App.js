@@ -276,6 +276,13 @@ const App = () => {
           </ListItemIcon>
           <ListItemText primary="帐号设置" />
         </ListItem>
+        { user && user.isAdmin ?
+            <ListItem button component={NavLink} to="/admin" onClick={closeDrawer}>
+              <ListItemIcon>
+                <Icon>settings</Icon>
+              </ListItemIcon>
+              <ListItemText primary="系统设置" />
+            </ListItem> : null }
         <ListItem button component={NavLink} to="/about" onClick={closeDrawer}>
           <ListItemIcon>
             <Icon>feedback</Icon>

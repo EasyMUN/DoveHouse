@@ -17,6 +17,19 @@ router.post('/', async ctx => {
   return ctx.body = { token };
 });
 
+router.put('/', async ctx => {
+  if(!ctx.user.isAdmin)
+    return ctx.status = 403;
+
+  const target = ctx.request.body._id;
+  const found = (await User.count({ _id: target })) > 0;
+
+  if(!found) return ctx.status = 404;
+
+  const token = await generateJWT(target);
+  return ctx.body = { token };
+});
+
 router.get('/', async ctx => {
   ctx.body = ctx.user;
 });
