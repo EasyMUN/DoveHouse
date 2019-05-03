@@ -8,15 +8,17 @@ const router = new KoaRouter();
 
 router.get('/:id', async ctx => {
   const result = await Assignment.findById(ctx.params.id)
-    .populate('conf', 'logo abbr _id title payments moderators')
+    .populate('conf', 'logo abbr _id title moderators interviewers')
     .populate('assignee', 'realname email')
     .lean();
   if(!result) return ctx.status = 404;
   if(result.assignee._id.toString() !== ctx.user._id.toString()
     && !ctx.user.isAdmin
+    && result.conf.interviewers.every(e => e.toString() !== ctx.user._id.toString())
     && result.conf.moderators.every(e => e.toString() !== ctx.user._id.toString())) return ctx.status = 404; // For secrutiy consideration
 
   result.conf.moderators = undefined;
+  result.conf.interviewers = undefined;
   return ctx.body = result;
 });
 
