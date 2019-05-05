@@ -254,11 +254,13 @@ export default React.memo(() => {
             <Typography variant="h6" className={cls.role}>面试官</Typography>
             <Typography variant="h4" className={cls.name}>{ interview.interviewer.realname }</Typography>
             <Typography variant="body1" className={cls.info}><span className={cls.desc}>邮箱</span>{ interview.interviewer.email }</Typography>
-            <Typography variant="body1" className={cls.info}><span className={cls.desc}>电话</span>{ interview.interviewer.profile.phone }</Typography>
-            <Typography variant="body1" className={cls.info}><span className={cls.desc}>QQ</span>{ interview.interviewer.profile.qq }</Typography>
-            { interview.interviewer.profile.wechat ?
-                <Typography variant="body1" className={cls.info}><span className={cls.desc}>微信</span>{ interview.interviewer.profile.wechat }</Typography>
-                : null }
+            { interview.interviewer.profile ? <>
+                <Typography variant="body1" className={cls.info}><span className={cls.desc}>电话</span>{ interview.interviewer.profile.phone }</Typography>
+                <Typography variant="body1" className={cls.info}><span className={cls.desc}>QQ</span>{ interview.interviewer.profile.qq }</Typography>
+                { interview.interviewer.profile.wechat ?
+                    <Typography variant="body1" className={cls.info}><span className={cls.desc}>微信</span>{ interview.interviewer.profile.wechat }</Typography>
+                    : null }
+              </> : null }
           </div>
         </div>
       </CardContent>
