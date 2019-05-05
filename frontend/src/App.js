@@ -229,7 +229,10 @@ const App = () => {
         open={accountMenu !== null}
         onClose={closeAccountMenu}
       >
-        <MenuItem onClick={logoutCB}>登出</MenuItem>
+        <MenuItem onClick={logoutCB}>
+          <ListItemIcon><Icon>exit_to_app</Icon></ListItemIcon>
+          <ListItemText primary="登出" />
+        </MenuItem>
       </Menu>
     </nav>
 
