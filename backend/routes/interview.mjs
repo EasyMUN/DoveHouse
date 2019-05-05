@@ -17,11 +17,11 @@ router.get('/:id', async ctx => {
     .lean();
   if(!result) return ctx.status = 404;
 
-  const asInterviewer = result.interviewer.toString() === ctx.user._id.toString()
+  const asInterviewer = result.interviewer._id.toString() === ctx.user._id.toString()
     || ctx.user.isAdmin
     || result.conf.moderators.some(e => e.toString() === ctx.user._id.toString());
 
-  if(result.interviewee.toString() !== ctx.user._id.toString() && !asInterviewer) return ctx.status = 404; // For secrutiy consideration
+  if(result.interviewee._id.toString() !== ctx.user._id.toString() && !asInterviewer) return ctx.status = 404; // For secrutiy consideration
 
   result.conf.moderators = undefined;
 
